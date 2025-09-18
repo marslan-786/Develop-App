@@ -3,6 +3,7 @@ import pkg from "pg";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import nodemailer from "nodemailer";
 
 dotenv.config();
 const { Pool } = pkg;
@@ -20,99 +21,73 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-// Temporary OTP store (in-memory)
-const otpStore = {};
+// ✅ Gmail transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
 // ✅ Root → login page
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
-// ✅ Chat page
-app.get("/chat", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "chat.html"));
-});
-
-
-// ==================== AUTH ROUTES ====================
-
-// Step 1: Login (check email)
-app.post("/auth/login", async (req, res) => {
+// ✅ Login API → check email
+app.post("/api/check-email", async (req, res) => {
   try {
     const { email } = req.body;
     const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore[email] = otp;
-
     if (result.rows.length > 0) {
-      res.json({ status: "otp_sent", message: `OTP sent to ${email}`, otp });
+      res.json({ success: true, user: result.rows[0] });
     } else {
-      res.json({ status: "signup_required", message: "Please complete signup." });
+      res.json({ success: false, message: "Email not found" });
     }
   } catch (err) {
-    console.error("Login error:", err);
-    res.status(500).json({ error: "Server error" });
+    console.error("DB error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-// Step 2: Signup
-app.post("/auth/signup", async (req, res) => {
+// ✅ Signup API → create account + send OTP
+app.post("/api/signup", async (req, res) => {
   try {
-    const { email, first_name, last_name, username, dob, profile_pic } = req.body;
+    const { email, first_name, last_name, password } = req.body;
 
-    const exists = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-    if (exists.rows.length > 0) {
-      return res.status(400).json({ error: "User already exists" });
-    }
-
-    await pool.query(
-      "INSERT INTO users (email, first_name, last_name, username, dob, profile_pic) VALUES ($1,$2,$3,$4,$5,$6)",
-      [email, first_name, last_name, username, dob, profile_pic]
+    // User create
+    const result = await pool.query(
+      "INSERT INTO users (email, first_name, last_name, password) VALUES ($1,$2,$3,$4) RETURNING *",
+      [email, first_name, last_name, password || null]
     );
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore[email] = otp;
+    // OTP generate
+    const otp = Math.floor(100000 + Math.random() * 900000);
 
-    res.json({ status: "otp_sent", message: `OTP sent to ${email}`, otp });
+    // Save OTP in DB
+    await pool.query("UPDATE users SET otp=$1 WHERE email=$2", [otp, email]);
+
+    // Send OTP via Gmail
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Your OTP Code",
+      text: `Your OTP code is: ${otp}`
+    });
+
+    res.json({ success: true, message: "Signup successful — OTP sent!" });
+
   } catch (err) {
     console.error("Signup error:", err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ success: false, message: "Signup failed" });
   }
 });
 
-// Step 3: Verify OTP
-app.post("/auth/verify-otp", (req, res) => {
-  const { email, otp } = req.body;
-
-  if (!otpStore[email] || otpStore[email] !== otp) {
-    return res.status(400).json({ error: "Invalid OTP" });
-  }
-
-  delete otpStore[email];
-  res.json({ status: "success", message: "Logged in successfully" });
+// ✅ Chat page
+app.get("/chat", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "chat.html"));
 });
-
-// Step 4: Get user by email (for profile fetching)
-app.get("/user", async (req, res) => {
-  try {
-    const { email } = req.query;
-    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-
-    if (result.rows.length > 0) {
-      res.json({ user: result.rows[0] });
-    } else {
-      res.status(404).json({ error: "User not found" });
-    }
-  } catch (err) {
-    console.error("User fetch error:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-
-// ==================== START SERVER ====================
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
 
 export default app;
