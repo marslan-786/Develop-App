@@ -25,8 +25,8 @@ const pool = new Pool({
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    user: process.env.EMAIL_USER, // .env میں EMAIL_USER=your@gmail.com
+    pass: process.env.EMAIL_PASS  // .env میں EMAIL_PASS=app_password
   }
 });
 
@@ -35,7 +35,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
-// ✅ Login API → check email
+// ✅ 1. Check Email
 app.post("/api/check-email", async (req, res) => {
   try {
     const { email } = req.body;
@@ -52,15 +52,15 @@ app.post("/api/check-email", async (req, res) => {
   }
 });
 
-// ✅ Signup API → create account + send OTP
+// ✅ 2. Signup (Create User + Send OTP)
 app.post("/api/signup", async (req, res) => {
   try {
-    const { email, first_name, last_name, username, dob } = req.body;
+    const { email, first_name, last_name, username, dob, profile_pic } = req.body;
 
-    // User create (⚠️ password remove کر دیا گیا ہے)
+    // User create
     const result = await pool.query(
-      "INSERT INTO users (email, first_name, last_name, username, dob) VALUES ($1,$2,$3,$4,$5) RETURNING *",
-      [email, first_name, last_name, username, dob || null]
+      "INSERT INTO users (email, first_name, last_name, username, dob, profile_pic) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *",
+      [email, first_name, last_name, username, dob, profile_pic]
     );
 
     // OTP generate
@@ -82,6 +82,27 @@ app.post("/api/signup", async (req, res) => {
   } catch (err) {
     console.error("Signup error:", err);
     res.status(500).json({ success: false, message: "Signup failed" });
+  }
+});
+
+// ✅ 3. Login (Verify OTP)
+app.post("/auth/login", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const result = await pool.query("SELECT * FROM users WHERE email=$1 AND otp=$2", [email, otp]);
+
+    if (result.rows.length > 0) {
+      // Clear OTP after success
+      await pool.query("UPDATE users SET otp=NULL WHERE email=$1", [email]);
+
+      res.json({ success: true, message: "Login successful", user: result.rows[0] });
+    } else {
+      res.status(401).json({ success: false, message: "Invalid email or OTP" });
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
