@@ -55,12 +55,12 @@ app.post("/api/check-email", async (req, res) => {
 // ✅ Signup API → create account + send OTP
 app.post("/api/signup", async (req, res) => {
   try {
-    const { email, first_name, last_name, password } = req.body;
+    const { email, first_name, last_name, username, dob } = req.body;
 
-    // User create
+    // User create (⚠️ password remove کر دیا گیا ہے)
     const result = await pool.query(
-      "INSERT INTO users (email, first_name, last_name, password) VALUES ($1,$2,$3,$4) RETURNING *",
-      [email, first_name, last_name, password || null]
+      "INSERT INTO users (email, first_name, last_name, username, dob) VALUES ($1,$2,$3,$4,$5) RETURNING *",
+      [email, first_name, last_name, username, dob || null]
     );
 
     // OTP generate
