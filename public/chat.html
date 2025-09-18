@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chat</title>
+  <style>
+    body{margin:0;font-family:Arial, sans-serif; background:#f5f5f5; height:100vh; display:flex; flex-direction:column;}
+    header{background:#0088cc;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:12px 15px;font-size:18px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+    header .menu, header .search{cursor:pointer;font-size:24px;}
+    .chat-list{flex:1;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:16px;}
+    .plus-btn{position:fixed;bottom:20px;right:20px;width:55px;height:55px;background:#0088cc;color:white;font-size:30px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 8px rgba(0,0,0,0.3);}
+    .side-menu{position:fixed;top:0;left:-280px;width:270px;height:100%;background:#fff;box-shadow:2px 0 10px rgba(0,0,0,0.2);transition:left 0.3s ease;display:flex;flex-direction:column;justify-content:space-between;z-index:1000;}
+    .side-menu.active{left:0;}
+    .profile{background:#0088cc;color:white;padding:20px;text-align:center;}
+    .profile img, .profile .avatar{width:70px;height:70px;border-radius:50%;margin-bottom:10px;display:inline-flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;background:#005f8d;color:#fff;}
+    .profile h3{margin:5px 0;font-size:18px;} .profile p{margin:0;font-size:14px;opacity:0.9;}
+    .menu-items{flex-grow:1;padding:10px 0;}
+    .menu-items button{display:block;width:100%;padding:12px 20px;border:none;background:none;text-align:left;font-size:15px;color:#333;cursor:pointer;transition:0.2s;}
+    .menu-items button:hover{background:#f0f0f0;}
+    .logout{padding:15px;}
+    .logout button{width:100%;padding:10px;background:#0088cc;color:#fff;border:none;border-radius:6px;font-size:14px;cursor:pointer;}
+    .overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);display:none;z-index:500;}
+    .overlay.active{display:block;}
+    .popup{position:fixed;bottom:80px;right:20px;background:white;padding:15px;border-radius:10px;box-shadow:0 4px 8px rgba(0,0,0,0.2);display:none;flex-direction:column;gap:10px;z-index:1100;}
+    .popup button{padding:10px;border:none;border-radius:5px;background:#0088cc;color:white;cursor:pointer;}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="menu" onclick="toggleMenu()">☰</div>
+    <div class="title">Develop App</div>
+    <div class="search">🔍</div>
+  </header>
+
+  <div class="chat-list">No chats yet. Click ➕ to start.</div>
+
+  <button class="plus-btn" onclick="togglePopup()">+</button>
+
+  <div class="popup" id="popup">
+    <button>💬 Chat with User</button>
+    <button>👥 Create Group</button>
+    <button>📢 Create Channel</button>
+  </div>
+
+  <div class="side-menu" id="sideMenu">
+    <div>
+      <div class="profile">
+        <div id="profilePicContainer"></div>
+        <h3 id="profileName">User Name</h3>
+        <p id="profileUsername">@username</p>
+      </div>
+      <div class="menu-items">
+        <button>➕ Add Account</button>
+        <button>📇 Contacts</button>
+        <button>👥 Groups</button>
+        <button>📢 Channels</button>
+        <button>🤖 Bots</button>
+        <button>⚙️ Settings</button>
+      </div>
+    </div>
+    <div class="logout"><button onclick="logout()">🚪 Logout</button></div>
+  </div>
+
+  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<script>
+function toggleMenu(){
+  const menu = document.getElementById('sideMenu');
+  const overlay = document.getElementById('overlay');
+  menu.classList.toggle('active');
+  overlay.classList.toggle('active');
+}
+function togglePopup(){
+  const popup = document.getElementById('popup');
+  popup.style.display = popup.style.display === 'flex' ? 'none' : 'flex';
+}
+
+// Load user from localStorage keys set by login
+const name = localStorage.getItem('user_name') || 'Guest User';
+const username = localStorage.getItem('user_username') || 'guest';
+const picture = localStorage.getItem('user_picture') || '';
+
+document.getElementById('profileName').innerText = name;
+document.getElementById('profileUsername').innerText = '@' + username;
+
+const picContainer = document.getElementById('profilePicContainer');
+if (picture && picture.startsWith('data:')) {
+  picContainer.innerHTML = `<img src="${picture}" alt="Profile" />`;
+} else {
+  const firstLetter = name.charAt(0).toUpperCase();
+  picContainer.innerHTML = `<div class="avatar">${firstLetter}</div>`;
+}
+
+function logout(){
+  localStorage.removeItem('user_name');
+  localStorage.removeItem('user_username');
+  localStorage.removeItem('user_picture');
+  window.location.href = '/';
+}
+</script>
+</body>
+  </html>
