@@ -13,18 +13,44 @@
       margin: 0;
       display:flex;align-items:center;justify-content:center;height:100vh;
     }
-    @keyframes gradientBG {0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    .card {
-      width: 100%; max-width: 420px; background:#fff; padding:24px; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.15);
+    @keyframes gradientBG {
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
     }
-    .brand { text-align:center; font-size:22px; font-weight:700; color:#333; margin-bottom:12px; display:flex;align-items:center;justify-content:center;gap:10px; }
-    .brand .dot { width:12px;height:12px;border-radius:50%; background:#e74c3c; animation: pulse 2s infinite;}
-    @keyframes pulse {0%{transform:scale(1)}50%{transform:scale(1.4)}100%{transform:scale(1)}}
-    input, button { width:100%; padding:12px; margin-top:10px; border-radius:8px; border:1px solid #ddd; font-size:15px; }
-    button { background:#0088cc; color:#fff; border:0; cursor:pointer; font-weight:700; }
+    .card {
+      width: 100%; max-width: 420px;
+      background:#fff; padding:24px;
+      border-radius:14px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.15);
+    }
+    .brand {
+      text-align:center; font-size:22px; font-weight:700;
+      color:#333; margin-bottom:12px;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+    }
+    .brand .dot {
+      width:12px;height:12px;border-radius:50%;
+      background:#e74c3c; animation:pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%{transform:scale(1)}
+      50%{transform:scale(1.4)}
+      100%{transform:scale(1)}
+    }
+    input, button {
+      width:100%; padding:12px; margin-top:10px;
+      border-radius:8px; border:1px solid #ddd;
+      font-size:15px; box-sizing:border-box;
+    }
+    button {
+      background:#0088cc; color:#fff; border:0; cursor:pointer;
+      font-weight:700; transition:0.3s;
+    }
+    button:hover { background:#0074aa; }
     .hidden{display:none;}
-    .message{ margin-top:10px; text-align:center; color:green; }
-    .error{ margin-top:10px; text-align:center; color:red; }
+    .message{ margin-top:10px; text-align:center; color:green; font-weight:600; }
+    .error{ margin-top:10px; text-align:center; color:red; font-size:14px; }
     label.file-label { display:block; margin-top:8px; font-size:13px; color:#555; }
   </style>
 </head>
@@ -32,12 +58,14 @@
   <div class="card">
     <div class="brand"><span class="dot"></span> Develop App</div>
 
+    <!-- Step 1: Email -->
     <div id="step-email">
       <input id="email" type="email" placeholder="Enter your email" />
       <button onclick="startLogin()">Next</button>
       <div id="email-msg" class="error"></div>
     </div>
 
+    <!-- Step 2: Signup -->
     <div id="step-signup" class="hidden">
       <input id="first_name" placeholder="First name" />
       <input id="last_name" placeholder="Last name" />
@@ -45,10 +73,11 @@
       <label class="file-label">Profile picture (optional)</label>
       <input id="profile_pic" type="file" accept="image/*" />
       <input id="dob" type="date" placeholder="Date of birth" />
-      <button onclick="doSignup()">Create account & Send OTP</button>
+      <button onclick="doSignup()">Create Account & Send OTP</button>
       <div id="signup-msg" class="error"></div>
     </div>
 
+    <!-- Step 3: OTP -->
     <div id="step-otp" class="hidden">
       <input id="otp" placeholder="Enter OTP" />
       <button onclick="verifyOtp()">Verify & Enter</button>
@@ -59,46 +88,39 @@
   </div>
 
 <script>
-const API_BASE = '/auth'; // relative
-
+const API_BASE = '/auth'; // backend route base
 let currentEmail = '';
-let pendingProfile = { first_name:'', last_name:'', username:'', profile_pic: '', dob:'' };
 
 async function startLogin(){
   const email = document.getElementById('email').value.trim();
   document.getElementById('email-msg').innerText = '';
-  if(!email) { document.getElementById('email-msg').innerText = 'Enter email'; return; }
+  if(!email){
+    document.getElementById('email-msg').innerText = '⚠️ Please enter your email';
+    return;
+  }
   currentEmail = email;
 
-  const res = await fetch(API_BASE + '/login', {
-    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email })
-  });
-  const data = await res.json();
+  try {
+    const res = await fetch(API_BASE + '/login', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
 
-  if(data.status === 'otp_sent'){
-    // existing user — fetch profile from server to store for chat header
-    try {
-      const r2 = await fetch('/user?email=' + encodeURIComponent(email));
-      if(r2.ok){
-        const j = await r2.json();
-        const u = j.user;
-        localStorage.setItem('user_name', u.first_name + ' ' + u.last_name);
-        localStorage.setItem('user_username', u.username);
-        localStorage.setItem('user_picture', u.profile_pic || '');
-      }
-    } catch(e){ console.warn('failed to fetch user profile', e); }
-    showStep('step-otp');
-  } else if(data.status === 'signup_required'){
-    showStep('step-signup');
-  } else {
-    document.getElementById('email-msg').innerText = data.message || 'Server error';
+    if(data.status === 'otp_sent'){
+      // existing user
+      await fetchUserProfile(email);
+      showStep('step-otp');
+    } else if(data.status === 'signup_required'){
+      showStep('step-signup');
+    } else {
+      document.getElementById('email-msg').innerText = data.message || '❌ Server error';
+    }
+  } catch(err){
+    document.getElementById('email-msg').innerText = '❌ Network error';
+    console.error(err);
   }
-}
-
-function showStep(id){
-  ['step-email','step-signup','step-otp'].forEach(s=>document.getElementById(s).classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
-  document.getElementById('ok-msg').innerText = '';
 }
 
 async function doSignup(){
@@ -107,47 +129,85 @@ async function doSignup(){
   const username = document.getElementById('username').value.trim();
   const dob = document.getElementById('dob').value;
   document.getElementById('signup-msg').innerText = '';
-  if(!first_name||!last_name||!username||!dob){ document.getElementById('signup-msg').innerText='Fill all fields'; return; }
 
-  // read image as base64
-  const file = document.getElementById('profile_pic').files[0];
-  let profile_pic = '';
-  if(file){
-    profile_pic = await toBase64(file);
+  if(!first_name||!last_name||!username||!dob){
+    document.getElementById('signup-msg').innerText='⚠️ Fill all required fields';
+    return;
   }
 
-  // save pending profile to localStorage AFTER signup success
-  const payload = { email: currentEmail, first_name, last_name, username, dob, profile_pic };
-  const res = await fetch(API_BASE + '/signup', {
-    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
-  });
-  const data = await res.json();
+  let profile_pic = '';
+  const file = document.getElementById('profile_pic').files[0];
+  if(file) profile_pic = await toBase64(file);
 
-  if(data.status === 'otp_sent'){
-    // store in localStorage for chat header
-    localStorage.setItem('user_name', first_name + ' ' + last_name);
-    localStorage.setItem('user_username', username);
-    localStorage.setItem('user_picture', profile_pic || '');
-    showStep('step-otp');
-    document.getElementById('ok-msg').innerText = 'Signup done — OTP sent to email';
-  } else {
-    document.getElementById('signup-msg').innerText = data.message || 'Signup failed';
+  try {
+    const payload = { email: currentEmail, first_name, last_name, username, dob, profile_pic };
+    const res = await fetch(API_BASE + '/signup', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    if(data.status === 'otp_sent'){
+      localStorage.setItem('user_name', first_name + ' ' + last_name);
+      localStorage.setItem('user_username', username);
+      localStorage.setItem('user_picture', profile_pic || '');
+      showStep('step-otp');
+      document.getElementById('ok-msg').innerText = '✅ Signup successful — OTP sent!';
+    } else {
+      document.getElementById('signup-msg').innerText = data.message || '❌ Signup failed';
+    }
+  } catch(err){
+    document.getElementById('signup-msg').innerText='❌ Network error';
+    console.error(err);
   }
 }
 
 async function verifyOtp(){
   const otp = document.getElementById('otp').value.trim();
-  if(!otp){ document.getElementById('otp-msg').innerText='Enter OTP'; return; }
-  const res = await fetch(API_BASE + '/verify-otp', {
-    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: currentEmail, otp })
-  });
-  const data = await res.json();
-  if(data.status === 'success' || data.message === 'Logged in') {
-    document.getElementById('ok-msg').innerText = 'Login successful — redirecting...';
-    setTimeout(()=>{ window.location.href = '/chat'; }, 900);
-  } else {
-    document.getElementById('otp-msg').innerText = data.message || 'Invalid OTP';
+  if(!otp){ document.getElementById('otp-msg').innerText='⚠️ Enter OTP'; return; }
+
+  try {
+    const res = await fetch(API_BASE + '/verify-otp', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email: currentEmail, otp })
+    });
+    const data = await res.json();
+
+    if(data.status === 'success' || data.message === 'Logged in'){
+      document.getElementById('ok-msg').innerText = '🎉 Login successful — redirecting...';
+      setTimeout(()=>{ window.location.href = '/chat'; }, 1000);
+    } else {
+      document.getElementById('otp-msg').innerText = data.message || '❌ Invalid OTP';
+    }
+  } catch(err){
+    document.getElementById('otp-msg').innerText='❌ Network error';
+    console.error(err);
   }
+}
+
+async function fetchUserProfile(email){
+  try {
+    const r = await fetch('/user?email=' + encodeURIComponent(email));
+    if(r.ok){
+      const j = await r.json();
+      const u = j.user;
+      if(u){
+        localStorage.setItem('user_name', (u.first_name||'') + ' ' + (u.last_name||''));
+        localStorage.setItem('user_username', u.username || '');
+        localStorage.setItem('user_picture', u.profile_pic || '');
+      }
+    }
+  } catch(e){
+    console.warn('Failed to fetch user profile', e);
+  }
+}
+
+function showStep(id){
+  ['step-email','step-signup','step-otp'].forEach(s=>{
+    document.getElementById(s).classList.add('hidden');
+  });
+  document.getElementById(id).classList.remove('hidden');
+  document.getElementById('ok-msg').innerText = '';
 }
 
 function toBase64(file){
@@ -160,4 +220,4 @@ function toBase64(file){
 }
 </script>
 </body>
-  </html>
+</html>
