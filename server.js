@@ -1,20 +1,25 @@
 import express from "express";
-import bodyParser from "body-parser";
-import cors from "cors";
-import authRoutes from "./routes/auth.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(bodyParser.json());
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Static files (login.html, chat.html)
-app.use(express.static("public"));
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use("/api/auth", authRoutes);
+// Static files
+app.use(express.static(path.join(__dirname, "public")));
+
+// Default route → login.html
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "login.html"));
+});
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
