@@ -1,34 +1,23 @@
 import express from "express";
-import { Pool } from "pg";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(express.json());
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-});
+// static folder serve کرو
+app.use(express.static(path.join(__dirname, "public")));
 
-// ✅ Login route
-app.post("/login", async (req, res) => {
-  try {
-    const { email } = req.body;
-    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-
-    if (result.rows.length > 0) {
-      res.json({ success: true, user: result.rows[0] });
-    } else {
-      res.status(404).json({ success: false, message: "User not found" });
-    }
-  } catch (err) {
-    console.error("DB Error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-// ✅ Health check
+// ✅ root پر login.html show کرو
 app.get("/", (req, res) => {
-  res.send("Server is running 🚀");
+  res.sendFile(path.join(__dirname, "public", "login.html"));
+});
+
+// ✅ chat route
+app.get("/chat", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "chat.html"));
 });
 
 export default app;
