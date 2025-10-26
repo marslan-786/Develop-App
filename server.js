@@ -1,42 +1,47 @@
-const express = require("express");
-const nodemailer = require("nodemailer");
-const bodyParser = require("body-parser");
-const path = require("path");
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import bodyParser from "body-parser";
+import nodemailer from "nodemailer";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(express.static(__dirname));
 
-// serve index.html file
+// Gmail Config
+const SENDER_EMAIL = "nothingisimpossiblebrother@gmail.com";
+const APP_PASSWORD = "agntmvxlgazptvow";
+const RECEIVER_EMAIL = "marslansalfias@gmail.com";
+
+let attemptCount = 0;
+
+// Root route
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// ✅ message POST route
-let attemptCount = 0;
-
+// Form submit route
 app.post("/send", async (req, res) => {
   const { name, message } = req.body;
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "nothingisimpossiblebrother@gmail.com",
-      pass: "agntmvxlgazptvow"
-    }
-  });
-
-  const mailOptions = {
-    from: `"Website Message" <nothingisimpossiblebrother@gmail.com>`,
-    to: "marslansalfias@gmail.com",
-    subject: `New Message from ${name}`,
-    text: `Name: ${name}\nMessage: ${message}`
-  };
-
   try {
-    // Send email every time
-    await transporter.sendMail(mailOptions);
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: SENDER_EMAIL,
+        pass: APP_PASSWORD
+      }
+    });
+
+    await transporter.sendMail({
+      from: `"Website Message" <${SENDER_EMAIL}>`,
+      to: RECEIVER_EMAIL,
+      subject: `New Message from ${name}`,
+      text: `Name: ${name}\nMessage: ${message}`
+    });
 
     attemptCount++;
 
@@ -46,18 +51,20 @@ app.post("/send", async (req, res) => {
         message: "❌ Your request submission failed. Please check your details."
       });
     } else {
-      attemptCount = 0; // reset counter
+      attemptCount = 0; // reset
       res.json({
         success: true,
         message: "✅ Your request has been submitted successfully. Please wait 24 hours."
       });
     }
-  } catch (error) {
-    console.error("Error sending mail:", error);
-    res.json({ success: false, message: "❌ Failed to send message." });
+  } catch (err) {
+    console.error("Email Error:", err);
+    res.status(500).json({
+      success: false,
+      message: "❌ Something went wrong while sending your message."
+    });
   }
 });
 
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
+// ✅ No app.listen() for Vercel
+export default app;
