@@ -1,22 +1,8 @@
 {
-  "name": "develop-app",
+  "name": "contact-website",
   "version": "1.0.0",
-  "main": "server.js",
   "type": "module",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
-  },
   "dependencies": {
-    "@neondatabase/serverless": "^0.7.2",
-    "express": "^4.18.2",
-    "dotenv": "^16.3.1",
-    "body-parser": "^1.20.2",
-    "cors": "^2.8.5",
-    "pg": "^8.11.3",
-    "nodemailer": "^6.9.8"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemailer": "^6.9.14"
   }
 }
