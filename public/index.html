@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TeraBaap Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1 class="title">TeraBaap Web Portal</h1>
+    <h2 class="subtitle">Send Us Your Message</h2>
+  </header>
+
+  <main>
+    <div class="card">
+      <form id="contactForm">
+        <label>Your Name</label>
+        <input type="text" name="name" required />
+
+        <label>Your Message</label>
+        <textarea name="message" rows="5" required></textarea>
+
+        <button type="submit">Send</button>
+      </form>
+      <p id="result"></p>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 All Rights Reserved | Privacy Policy | Terms of Use</p>
+  </footer>
+
+  <script>
+    const form = document.getElementById("contactForm");
+    const result = document.getElementById("result");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form));
+      result.textContent = "⏳ Sending...";
+
+      const res = await fetch("/api/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const json = await res.json();
+      result.textContent = json.success ? "✅ Message sent!" : "❌ Failed to send!";
+      if (json.success) form.reset();
+    });
+  </script>
+</body>
+</html>
