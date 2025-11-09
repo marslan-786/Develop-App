@@ -1,14 +1,14 @@
 import { head } from '@vercel/blob';
 import Image from 'next/image';
 import Link from 'next/link';
-import WhatsAppButton from './WhatsAppButton.js'; // ہمارا کلائنٹ کمپوننٹ
+import WhatsAppButton from './WhatsAppButton.js'; 
 
 export const dynamic = 'force-dynamic'; 
 
-// --- سرور پر ڈیٹا لانے والا فنکشن (ویسا ہی) ---
+// --- سرور پر ڈیٹا لانے والا فنکشن (no-store کے ساتھ) ---
 async function getPageData(productId) {
   let product = null;
-  let whatsappNumber = "923001234567"; 
+  let whatsappNumber = "923001234567"; // ڈیفالٹ فال بیک نمبر
 
   try {
     // 1. پروڈکٹ حاصل کریں
@@ -43,7 +43,8 @@ async function getPageData(productId) {
   return { product, whatsappNumber };
 }
 
-// --- بیک (Back) آئیکن (ویسا ہی) ---
+// --- بیک (Back) آئیکن ---
+function IconArrowLeft() { /* ... (پہلے جیسا کوڈ) ... */ }
 function IconArrowLeft() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -52,32 +53,24 @@ function IconArrowLeft() {
   );
 }
 
-// --- یوٹیوب ویڈیو ایمبیڈ (Embed) کمپوننٹ (اپ ڈیٹ شدہ) ---
+// --- یوٹیوب ویڈیو ایمبیڈ (Embed) کمپوننٹ ---
+function YouTubeEmbed({ videoLink }) { /* ... (پہلے جیسا کوڈ) ... */ }
 function YouTubeEmbed({ videoLink }) {
   if (!videoLink) return null;
-
-  let videoId = null;
-  let isShort = false;
-
   try {
     const url = new URL(videoLink);
-    
-    // --- یہ ہے حل 3: یوٹیوب شارٹس کا پتا لگانا ---
+    let videoId = null;
+    let isShort = false;
     if (url.pathname.includes('/shorts/')) {
       isShort = true;
       videoId = url.pathname.split('/shorts/').pop();
     } else if (url.searchParams.get('v')) {
-      videoId = url.searchParams.get('v'); // عام ویڈیو
+      videoId = url.searchParams.get('v'); 
     } else {
-      videoId = url.pathname.split('/').pop(); // youtu.be/...
+      videoId = url.pathname.split('/').pop();
     }
-    // --- حل ختم ---
-
     if (!videoId) return <p className="text-red-500">Invalid YouTube URL</p>;
-
-    // شارٹ ویڈیو کے لیے 9:16 اور عام کے لیے 16:9 اسپیکٹ ریشو
     const aspectRatioClass = isShort ? "aspect-[9/16] max-w-xs mx-auto" : "aspect-[16/9]";
-
     return (
       <div className={`${aspectRatioClass} w-full overflow-hidden rounded-lg border`}>
         <iframe
@@ -102,7 +95,7 @@ export default async function ProductDetailPage({ params }) {
   const { product, whatsappNumber } = await getPageData(productId);
 
   if (!product) {
-    // ... (ایرر پیج ویسا ہی) ...
+    // ... (ایرر پیج) ...
     return (
       <div className="p-4 min-h-screen bg-gray-50">
         <header className="flex items-center gap-4 mb-6">
@@ -118,7 +111,7 @@ export default async function ProductDetailPage({ params }) {
 
   return (
     <main className="bg-white">
-      {/* ہیڈر (ویسا ہی) */}
+      {/* ہیڈر */}
       <header className="sticky top-0 z-10 flex items-center gap-4 p-4 bg-white shadow-md">
         <Link href="/" className="p-2 rounded-full hover:bg-gray-100">
           <IconArrowLeft />
@@ -128,8 +121,7 @@ export default async function ProductDetailPage({ params }) {
 
       {/* پروڈکٹ کی تفصیلات */}
       <div className="p-4 space-y-4">
-        {/* --- یہ ہے حل 4: تصویر کو بڑا کرنا --- */}
-        {/* 'h-64' کو 'h-80' (80% viewport height) سے بدل دیا گیا ہے */}
+        {/* تصویر */}
         <div className="w-full h-80 relative rounded-lg overflow-hidden border">
           <Image
             src={`${product.imageUrl}?v=${new Date().getTime()}`}
@@ -141,10 +133,10 @@ export default async function ProductDetailPage({ params }) {
           />
         </div>
 
-        {/* یوٹیوب ویڈیو (یہ اب خود ایڈجسٹ ہو گا) */}
+        {/* یوٹیوب ویڈیو */}
         <YouTubeEmbed videoLink={product.videoLink} />
 
-        {/* تفصیلات (ویسی ہی) */}
+        {/* تفصیلات */}
         <div className="space-y-2">
           <h2 className="text-2xl font-bold">{product.name}</h2>
           <p className="text-2xl font-bold text-blue-600">PKR {product.price}</p>
@@ -157,7 +149,7 @@ export default async function ProductDetailPage({ params }) {
           </p>
         </div>
 
-        {/* واٹس ایپ بٹن (ویسا ہی) */}
+        {/* واٹس ایپ بٹن */}
         <div className="pt-4">
           <WhatsAppButton product={product} whatsappNumber={whatsappNumber} />
         </div>
