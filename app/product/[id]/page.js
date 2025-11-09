@@ -1,11 +1,11 @@
 import { head } from '@vercel/blob';
 import Image from 'next/image';
 import Link from 'next/link';
-import WhatsAppButton from './WhatsAppButton.js'; 
+import WhatsAppButton from './WhatsAppButton.js'; // ہمارا کلائنٹ کمپوننٹ
 
 export const dynamic = 'force-dynamic'; 
 
-// --- سرور پر ڈیٹا لانے والا فنکشن (no-store کے ساتھ) ---
+// --- سرور پر ڈیٹا لانے والا فنکشن ---
 async function getPageData(productId) {
   let product = null;
   let whatsappNumber = "923001234567"; // ڈیفالٹ فال بیک نمبر
@@ -31,7 +31,7 @@ async function getPageData(productId) {
       if(settingsText) {
         const settings = JSON.parse(settingsText);
         if (settings.whatsappNumber) {
-          whatsappNumber = settings.whatsappNumber; 
+          whatsappNumber = settings.whatsappNumber; // <-- نمبر کو اپ ڈیٹ کریں
         }
       }
     }
@@ -43,8 +43,7 @@ async function getPageData(productId) {
   return { product, whatsappNumber };
 }
 
-// --- بیک (Back) آئیکن ---
-function IconArrowLeft() { /* ... (پہلے جیسا کوڈ) ... */ }
+// --- بیک (Back) آئیکن (صرف ایک بار) ---
 function IconArrowLeft() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -53,8 +52,7 @@ function IconArrowLeft() {
   );
 }
 
-// --- یوٹیوب ویڈیو ایمبیڈ (Embed) کمپوننٹ ---
-function YouTubeEmbed({ videoLink }) { /* ... (پہلے جیسا کوڈ) ... */ }
+// --- یوٹیوب ویڈیو ایمبیڈ (Embed) کمپوننٹ (صرف ایک بار) ---
 function YouTubeEmbed({ videoLink }) {
   if (!videoLink) return null;
   try {
@@ -94,8 +92,8 @@ export default async function ProductDetailPage({ params }) {
   const productId = params.id;
   const { product, whatsappNumber } = await getPageData(productId);
 
+  // اگر پروڈکٹ نہ ملے تو ایرر دکھائیں
   if (!product) {
-    // ... (ایرر پیج) ...
     return (
       <div className="p-4 min-h-screen bg-gray-50">
         <header className="flex items-center gap-4 mb-6">
@@ -109,6 +107,7 @@ export default async function ProductDetailPage({ params }) {
     );
   }
 
+  // اگر پروڈکٹ مل جائے تو ڈیٹیلز دکھائیں
   return (
     <main className="bg-white">
       {/* ہیڈر */}
