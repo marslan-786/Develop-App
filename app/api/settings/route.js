@@ -1,19 +1,17 @@
 import { put, head } from '@vercel/blob';
 import { NextResponse } from 'next/server';
-import { isValidPassword } from '../../../lib/auth.js'; // ہمارے auth فنکشن کو امپورٹ کریں
+import { isValidPassword } from '../../../lib/auth.js'; // پاتھ چیک کریں
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
   const { searchParams } = new URL(request.url);
-  const password = searchParams.get('password'); // پاس ورڈ کو URL سے پڑھیں
+  const password = searchParams.get('password');
 
-  // 1. سیکیورٹی چیک
   if (!(await isValidPassword(password))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // 2. نئی سیٹنگز کو JSON باڈی سے پڑھیں
   const { websiteTitle, newPassword } = await request.json();
 
   try {
@@ -21,19 +19,17 @@ export async function POST(request) {
     if (websiteTitle) {
       let settings = {};
       try {
-        // پرانی سیٹنگز پڑھیں (اگر موجود ہیں)
         const settingsBlob = await head('settings.json');
         const settingsRes = await fetch(settingsBlob.url);
         if (settingsRes.ok) settings = await settingsRes.json();
       } catch (e) { /* اگر فائل نہیں ہے تو کوئی بات نہیں */ }
       
-      // ٹائٹل کو اپ ڈیٹ کریں
       settings.websiteTitle = websiteTitle;
       
-      // نئی settings.json فائل کو Blob پر اوور رائٹ کریں
       await put('settings.json', JSON.stringify(settings), {
         access: 'public',
         contentType: 'application/json',
+        addRandomSuffix: false, // <-- یہ ہے حل 1
       });
     }
 
@@ -41,10 +37,10 @@ export async function POST(request) {
     if (newPassword) {
       const passwordData = { password: newPassword };
       
-      // نئی password.json فائل کو Blob پر اوور رائٹ کریں
       await put('password.json', JSON.stringify(passwordData), {
         access: 'public',
         contentType: 'application/json',
+        addRandomSuffix: false, // <-- یہ ہے حل 2
       });
     }
 
