@@ -13,12 +13,11 @@ export async function POST(request) {
   }
 
   try {
-    // --- یہ ہے حل 1: 'whatsappNumber' کو یہاں حاصل کریں ---
     const { websiteTitle, newPassword, whatsappNumber } = await request.json();
 
     let settings = {};
     try {
-      // پرانی سیٹنگز پڑھیں (اگر موجود ہیں)
+      // پرانی سیٹنگز پڑھیں
       const settingsBlob = await head('settings.json', { cache: 'no-store' });
       const settingsRes = await fetch(settingsBlob.url, { cache: 'no-store' });
       if (settingsRes.ok) {
@@ -27,24 +26,30 @@ export async function POST(request) {
       }
     } catch (e) { /* اگر فائل نہیں ہے تو کوئی بات نہیں */ }
     
-    // 3. ویب سائٹ کا ٹائٹل اپ ڈیٹ کریں
+    // سیٹنگز کو اپ ڈیٹ کریں
     if (websiteTitle) {
       settings.websiteTitle = websiteTitle;
     }
-    
-    // --- یہ ہے حل 2: واٹس ایپ نمبر کو اپ ڈیٹ کریں ---
     if (whatsappNumber) {
       settings.whatsappNumber = whatsappNumber;
     }
 
-    // اپ ڈیٹ شدہ 'settings' آبجیکٹ کو Blob پر اوور رائٹ کریں
-    await put('settings.json', JSON.stringify(settings, null, 2), {
+    // --- یہ ہے حل! ---
+    // 1. اپ ڈیٹ شدہ 'settings' آبجیکٹ سے اسٹرنگ بنائیں
+    const settingsString = JSON.stringify(settings, null, 2);
+    
+    // 2. اس اسٹرنگ سے ایک Blob آبجیکٹ بنائیں (بالکل ویسے ہی جیسے products API کرتی ہے)
+    const settingsBlobData = new Blob([settingsString], { type: 'application/json' });
+
+    // 3. 'put' کمانڈ کو اسٹرنگ کے بجائے Blob آبجیکٹ بھیجیں
+    await put('settings.json', settingsBlobData, {
       access: 'public',
-      contentType: 'application/json',
+      // contentType کی ضرورت نہیں، کیونکہ Blob میں پہلے سے موجود ہے
       addRandomSuffix: false,
     });
+    // --- حل ختم ---
     
-    // 4. نیا ایڈمن پاس ورڈ اپ ڈیٹ کریں (یہ الگ فائل ہے)
+    // 4. نیا ایڈمن پاس ورڈ اپ ڈیٹ کریں (یہ پہلے سے ٹھیک تھا)
     if (newPassword) {
       const passwordData = { password: newPassword };
       const dataBlob = new Blob([JSON.stringify(passwordData)], { type: 'application/json' });
