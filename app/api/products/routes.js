@@ -18,7 +18,7 @@ export async function POST(request) {
     const newProduct = await request.json();
 
     // 3. پرانی پروڈکٹس کی لسٹ 'data.json' سے حاصل کریں
-    let products = []; // ڈیفالٹ کے طور پر خالی لسٹ
+    let products = [];
     try {
       const dataBlob = await head('data.json', { cache: 'no-store' });
       const dataRes = await fetch(dataBlob.url, { cache: 'no-store' });
@@ -30,7 +30,6 @@ export async function POST(request) {
         }
       }
     } catch (e) {
-      // اگر 'data.json' ڈیلیٹ ہو چکی ہے تو یہ چلے گا
       console.log("data.json not found, creating a new one.");
     }
 
@@ -38,12 +37,22 @@ export async function POST(request) {
     newProduct.id = `prod_${new Date().getTime()}`;
     products.push(newProduct);
 
+    // --- یہ ہے حل! ---
     // 5. اپ ڈیٹ شدہ لسٹ کو 'data.json' میں واپس سیو کریں
-    await put('data.json', JSON.stringify(products, null, 2), {
+    
+    // پہلے، اسٹرنگ بنائیں
+    const jsonString = JSON.stringify(products, null, 2);
+    
+    // پھر، اس اسٹرنگ سے ایک Blob آبجیکٹ بنائیں
+    const dataBlob = new Blob([jsonString], { type: 'application/json' });
+
+    // اب 'put' کمانڈ کو اسٹرنگ کے بجائے Blob آبجیکٹ بھیجیں
+    await put('data.json', dataBlob, {
       access: 'public',
-      // contentType: 'application/json', // <-- اس لائن کو ہٹا دیا گیا ہے
+      // contentType کی ضرورت نہیں، کیونکہ Blob میں پہلے سے موجود ہے
       addRandomSuffix: false, 
     });
+    // --- حل ختم ---
 
     return NextResponse.json({ success: true, message: 'Product added!', newProduct });
 
