@@ -1,19 +1,19 @@
-import { head } from '@vercel/blob';
-import HomePageClient from './HomePageClient';
+// ... (export const dynamic = 'force-dynamic'; اور import HomePageClient ویسے ہی رہیں گے) ...
 
-// Vercel کو بتاتا ہے کہ اس پیج کو کیش نہ کرے
-export const dynamic = 'force-dynamic'; 
-
-// --- ڈیٹا Fetch کرنے کا فنکشن (صاف کیا ہوا ورژن) ---
+// --- ڈیٹا Fetch کرنے کا فنکشن (نیا، ہارڈ کوڈڈ لوگو URL کے ساتھ) ---
 async function getBlobData() {
   const defaultSettings = {
     websiteTitle: "Ilyas Mobile Mall",
   };
   let settings = defaultSettings;
   let products = [];
-  let logoUrl = "/placeholder-logo.png"; // ڈیفالٹ فال بیک
+  
+  // --- یہ ہے حل! ---
+  // لوگو URL کو براہ راست (hardcode) سیٹ کر دیں
+  const logoUrl = "https://hnt5qthrn2hkqfn9.public.blob.vercel-storage.com/logo.png";
+  // --- حل ختم ---
 
-  // 1. سیٹنگز Fetch کریں
+  // 1. سیٹنگز Fetch کریں (no-store کے ساتھ)
   try {
     const settingsBlob = await head('settings.json', { cache: 'no-store' });
     const settingsResponse = await fetch(settingsBlob.url, { cache: 'no-store' });
@@ -28,15 +28,9 @@ async function getBlobData() {
     console.warn("Could not fetch 'settings.json'. Using default title.", error.message);
   }
 
-  // 2. لوگو Fetch کریں
-  try {
-    const logoBlob = await head('logo.png', { cache: 'no-store' });
-    logoUrl = logoBlob.url;
-  } catch (error) {
-    console.warn("Could not fetch 'logo.png'. Using placeholder.", error.message);
-  }
+  // 2. لوگو Fetch کرنے کی اب ضرورت نہیں!
 
-  // 3. پروڈکٹس Fetch کریں
+  // 3. پروڈکٹس Fetch کریں (no-store کے ساتھ)
   try {
     const dataBlob = await head('data.json', { cache: 'no-store' });
     const dataResponse = await fetch(dataBlob.url, { cache: 'no-store' });
@@ -50,22 +44,8 @@ async function getBlobData() {
     console.warn("Could not fetch 'data.json'. Showing no products.", error.message);
   }
 
+  // فنکشن سے ڈیٹا اور ہارڈ کوڈڈ لوگو URL واپس بھیجیں
   return { settings, products, logoUrl };
 }
 
-
-// --- مین ہوم پیج (Server Component) ---
-export default async function HomePage() {
-  
-  // 1. سرور پر تازہ ڈیٹا fetch کریں
-  const { settings, products, logoUrl } = await getBlobData();
-
-  // 2. سارا ڈیٹا کلائنٹ کمپوننٹ کو پاس کریں
-  return (
-    <HomePageClient 
-      initialProducts={products} 
-      settings={settings} 
-      logoUrl={logoUrl} 
-    />
-  );
-}
+// ... (باقی فائل 'export default async function HomePage()...' ویسی ہی رہے گی) ...
