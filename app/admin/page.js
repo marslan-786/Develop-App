@@ -1,6 +1,6 @@
 import { head } from '@vercel/blob';
 import { isValidPassword } from '../../lib/auth.js'; // 2 فولڈر باہر
-import AdminDashboardClient from './AdminDashboardClient.js'; // ہمارا کلائنٹ کمپوننٹ
+import AdminDashboardClient from './AdminDashboardClient.js'; 
 import Link from 'next/link';
 
 // Vercel کو بتاتا ہے کہ اس پیج کو کیش نہ کرے
@@ -43,27 +43,23 @@ export default async function AdminPage({ searchParams }) {
   
   const passwordQuery = searchParams.password;
   
-  // 1. پاس ورڈ چیک کریں
   if (await isValidPassword(passwordQuery)) {
-    
     // --- پاس ورڈ ٹھیک ہے: ڈیش بورڈ دکھائیں ---
     
-    // 2. لوگو URL حاصل کریں (کیش بسٹر کے ساتھ)
+    // 2. لوگو URL حاصل کریں (no-store کے ساتھ)
     let logoUrl = "https://hnt5qthrn2hkqfn9.public.blob.vercel-storage.com/logo.png";
     try {
       const logoBlob = await head('logo.png', { cache: 'no-store' });
       logoUrl = logoBlob.url; 
     } catch (error) {
-      console.warn("Admin Panel: Could not fetch 'logo.png'. Using hardcoded fallback.");
+      console.warn("Admin Panel: Could not fetch 'logo.png'.");
     }
 
-    // 3. پروڈکٹس کی لسٹ حاصل کریں
+    // 3. پروڈکٹس کی لسٹ حاصل کریں (no-store کے ساتھ)
     let products = [];
     try {
-      // --- یہ ہے حل: کیش کو بائی پاس کریں ---
       const dataBlob = await head('data.json', { cache: 'no-store' });
       const dataResponse = await fetch(dataBlob.url, { cache: 'no-store' });
-      // --- حل ختم ---
       
       if (dataResponse.ok) {
         const textData = await dataResponse.text();
