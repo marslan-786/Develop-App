@@ -1,6 +1,9 @@
-/* ... (موجودہ @tailwind base; وغیرہ کو نہ چھیڑیں) ... */
+/* --- یہ 3 لائنیں ہمیشہ سب سے اوپر ہونی چاہئیں --- */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* --- یہ نیا کوڈ نیچے شامل کریں --- */
+/* --- ہمارا نیا اینیمیشن کوڈ ان کے بعد آئے گا --- */
 
 /* 1. اینیمیشن کی "لہر" (Keyframes) */
 @keyframes animated-gradient {
