@@ -1,29 +1,48 @@
 import { head } from '@vercel/blob';
 import Image from 'next/image';
 import Link from 'next/link';
+// --- "use client" اور useState کو اوپر سے ہٹا دیں ---
 
-// Vercel کو بتاتا ہے کہ اس پیج کو کیش نہ کرے
 export const dynamic = 'force-dynamic'; 
 
 // --- سرور پر ڈیٹا لانے والا فنکشن ---
-async function getProductById(productId) {
+async function getPageData(productId) {
+  let product = null;
+  // --- یہ ہے حل 8: فال بیک نمبر ---
+  let whatsappNumber = "923001234567"; // ڈیفالٹ فال بیک نمبر
+
   try {
+    // 1. پروڈکٹ حاصل کریں
     const dataBlob = await head('data.json', { cache: 'no-store' });
     const dataResponse = await fetch(dataBlob.url, { cache: 'no-store' });
-    if (!dataResponse.ok) throw new Error('Could not fetch data.json');
-    
-    const textData = await dataResponse.text();
-    if (!textData) throw new Error('data.json is empty');
-    
-    const products = JSON.parse(textData);
-    const product = products.find(p => p.id === productId); 
+    if (dataResponse.ok) {
+      const textData = await dataResponse.text();
+      if (textData) {
+        const products = JSON.parse(textData);
+        product = products.find(p => p.id === productId); 
+      }
+    }
     if (!product) throw new Error('Product not found');
     
-    return product;
+    // 2. سیٹنگز (واٹس ایپ نمبر کے لیے) حاصل کریں
+    const settingsBlob = await head('settings.json', { cache: 'no-store' });
+    const settingsResponse = await fetch(settingsBlob.url, { cache: 'no-store' });
+    if (settingsResponse.ok) {
+      const settingsText = await settingsResponse.text();
+      if(settingsText) {
+        const settings = JSON.parse(settingsText);
+        if (settings.whatsappNumber) {
+          whatsappNumber = settings.whatsappNumber; // <-- نمبر کو اپ ڈیٹ کریں
+        }
+      }
+    }
   } catch (error) {
-    console.error("Failed to get product:", error);
-    return null;
+    console.error("Failed to get page data:", error);
+    // اگر پروڈکٹ مل گئی لیکن سیٹنگز نہیں، تو بھی جاری رکھیں
+    if (!product) return { product: null, whatsappNumber: null };
   }
+  
+  return { product, whatsappNumber };
 }
 
 // --- بیک (Back) آئیکن ---
@@ -38,16 +57,11 @@ function IconArrowLeft() {
 // --- یوٹیوب ویڈیو ایمبیڈ (Embed) کمپوننٹ ---
 function YouTubeEmbed({ videoLink }) {
   if (!videoLink) return null;
-
   try {
     const url = new URL(videoLink);
-    let videoId = url.searchParams.get('v'); // https://www.youtube.com/watch?v=...
-    if (!videoId) {
-      videoId = url.pathname.split('/').pop(); // https://youtu.be/...
-    }
-
+    let videoId = url.searchParams.get('v');
+    if (!videoId) videoId = url.pathname.split('/').pop();
     if (!videoId) return <p className="text-red-500">Invalid YouTube URL</p>;
-
     return (
       <div className="aspect-w-16 aspect-h-9 w-full overflow-hidden rounded-lg border">
         <iframe
@@ -68,17 +82,13 @@ function YouTubeEmbed({ videoLink }) {
 // --- واٹس ایپ بٹن (کلائنٹ کمپوننٹ) ---
 // اس کے لیے ہمیں ایک چھوٹی کلائنٹ فائل بنانی ہوگی
 "use client";
-import { useState } from 'react'; // صرف اس حصے کے لیے "use client"
+import { useState } from 'react'; // "use client" صرف اس کمپوننٹ کے لیے ہے
 
-function WhatsAppButton({ product }) {
-  // --- یہاں اپنا واٹس ایپ نمبر سیٹ کریں ---
-  const WHATSAPP_NUMBER = "923001234567"; // مثال: 923001234567 (کنٹری کوڈ کے ساتھ)
-
+function WhatsAppButton({ product, whatsappNumber }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = () => {
     setIsLoading(true);
-    // واٹس ایپ میسج تیار کریں
     const message = `
 Hello, I am interested in this mobile phone:
 *Model:* ${product.name}
@@ -87,17 +97,16 @@ Hello, I am interested in this mobile phone:
 *Link:* ${window.location.href}
     `;
     
-    // واٹس ایپ لنک بنائیں
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    // --- یہ ہے حل 9: ڈائنامک نمبر استعمال کریں ---
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     
-    // صارف کو واٹس ایپ پر بھیجیں
     window.location.href = whatsappUrl;
   };
 
   return (
     <button
       onClick={handleClick}
-      disabled={isLoading}
+      disabled={isLoading || !whatsappNumber} // اگر نمبر سیٹ نہ ہو تو بٹن ڈس ایبل کریں
       className="w-full py-3 bg-green-500 text-white text-lg font-bold rounded-lg shadow-md hover:bg-green-600 transition-colors disabled:bg-gray-400"
     >
       {isLoading ? 'Redirecting...' : 'Buy on WhatsApp'}
@@ -110,7 +119,8 @@ Hello, I am interested in this mobile phone:
 // --- مین پروڈکٹ ڈیٹیل پیج (سرور کمپوننٹ) ---
 export default async function ProductDetailPage({ params }) {
   const productId = params.id;
-  const product = await getProductById(productId);
+  // --- یہ ہے حل 10: دونوں چیزیں ایک ساتھ حاصل کریں ---
+  const { product, whatsappNumber } = await getPageData(productId);
 
   // اگر پروڈکٹ نہ ملے تو ایرر دکھائیں
   if (!product) {
@@ -135,7 +145,6 @@ export default async function ProductDetailPage({ params }) {
         <Link href="/" className="p-2 rounded-full hover:bg-gray-100">
           <IconArrowLeft />
         </Link>
-        {/* کٹا ہوا ٹیکسٹ ٹھیک کرنے کے لیے 'truncate' کی جگہ 'break-words' */}
         <h1 className="text-xl font-bold break-words">{product.name}</h1>
       </header>
 
@@ -163,7 +172,6 @@ export default async function ProductDetailPage({ params }) {
           <p className="text-md text-gray-700">
             <strong>Condition:</strong> {product.condition || 'N/A'}
           </p>
-          {/* 'whitespace-pre-wrap' تاکہ لائن بریکس کام کریں */}
           <p className="text-md text-gray-700 whitespace-pre-wrap">
             <strong>Details:</strong><br />
             {product.detail || 'No details available.'}
@@ -172,7 +180,8 @@ export default async function ProductDetailPage({ params }) {
 
         {/* واٹس ایپ بٹن */}
         <div className="pt-4">
-          <WhatsAppButton product={product} />
+          {/* --- یہ ہے حل 11: نمبر کو prop کے طور پر پاس کریں --- */}
+          <WhatsAppButton product={product} whatsappNumber={whatsappNumber} />
         </div>
       </div>
     </main>
