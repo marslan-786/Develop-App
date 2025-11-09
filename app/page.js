@@ -1,47 +1,71 @@
-// ... (export const dynamic = 'force-dynamic'; اور import HomePageClient ویسے ہی رہیں گے) ...
+import { head } from '@vercel/blob';
+import HomePageClient from './HomePageClient';
 
-// --- ڈیٹا Fetch کرنے کا فنکشن (نیا، ایگریسو 'no-cache' ورژن) ---
+// Vercel کو بتاتا ہے کہ اس پیج کو کیش نہ کرے
+export const dynamic = 'force-dynamic'; 
+
+// --- ڈیٹا Fetch کرنے کا فنکشن (صاف کیا ہوا ورژن) ---
 async function getBlobData() {
   const defaultSettings = {
     websiteTitle: "Ilyas Mobile Mall",
   };
   let settings = defaultSettings;
   let products = [];
-  let logoUrl = "/placeholder-logo.png"; 
+  let logoUrl = "/placeholder-logo.png"; // ڈیفالٹ فال بیک
 
+  // 1. سیٹنگز Fetch کریں
   try {
-    // --- حل 1: سیٹنگز کے لیے 'no-store' ---
     const settingsBlob = await head('settings.json', { cache: 'no-store' });
     const settingsResponse = await fetch(settingsBlob.url, { cache: 'no-store' });
     
-    if (!settingsResponse.ok) throw new Error('Failed to fetch settings');
-    const fetchedSettings = await settingsResponse.json();
-    settings.websiteTitle = fetchedSettings.websiteTitle || defaultSettings.websiteTitle;
+    if (settingsResponse.ok) {
+      const fetchedSettings = await settingsResponse.json();
+      settings.websiteTitle = fetchedSettings.websiteTitle || defaultSettings.websiteTitle;
+    } else {
+      throw new Error('Failed to fetch settings');
+    }
   } catch (error) {
-    console.warn("Could not fetch 'settings.json'.", error.message);
+    console.warn("Could not fetch 'settings.json'. Using default title.", error.message);
   }
 
+  // 2. لوگو Fetch کریں
   try {
-    // --- حل 2: لوگو کے لیے 'no-store' ---
     const logoBlob = await head('logo.png', { cache: 'no-store' });
     logoUrl = logoBlob.url;
   } catch (error) {
-    console.warn("Could not fetch 'logo.png'.", error.message);
+    console.warn("Could not fetch 'logo.png'. Using placeholder.", error.message);
   }
 
+  // 3. پروڈکٹس Fetch کریں
   try {
-    // --- حل 3: پروڈکٹس کے لیے 'no-store' ---
     const dataBlob = await head('data.json', { cache: 'no-store' });
     const dataResponse = await fetch(dataBlob.url, { cache: 'no-store' });
-    
-    if (!dataResponse.ok) throw new Error('Failed to fetch product data');
-    products = await dataResponse.json();
-  } catch (error)
- {
-    console.warn("Could not fetch 'data.json'.", error.message);
+
+    if (dataResponse.ok) {
+      products = await dataResponse.json();
+    } else {
+      throw new Error('Failed to fetch product data');
+    }
+  } catch (error) {
+    console.warn("Could not fetch 'data.json'. Showing no products.", error.message);
   }
 
   return { settings, products, logoUrl };
 }
 
-// ... (باقی فائل 'export default async function HomePage()...' ویسی ہی رہے گی) ...
+
+// --- مین ہوم پیج (Server Component) ---
+export default async function HomePage() {
+  
+  // 1. سرور پر تازہ ڈیٹا fetch کریں
+  const { settings, products, logoUrl } = await getBlobData();
+
+  // 2. سارا ڈیٹا کلائنٹ کمپوننٹ کو پاس کریں
+  return (
+    <HomePageClient 
+      initialProducts={products} 
+      settings={settings} 
+      logoUrl={logoUrl} 
+    />
+  );
+}
