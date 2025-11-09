@@ -1,5 +1,11 @@
 import { head } from '@vercel/blob';
-import HomePageClient from './HomePageClient'; // ہمارے نئے کلائنٹ کمپوننٹ کو امپورٹ کریں
+import HomePageClient from './HomePageClient'; // ہمارے کلائنٹ کمپوننٹ کو امپورٹ کریں
+
+// --- یہ ہے حل! ---
+// Vercel کو بتاتا ہے کہ اس پیج کو کیش نہ کرے اور ہمیشہ تازہ ڈیٹا لائے
+export const dynamic = 'force-dynamic'; 
+// --- حل ختم ---
+
 
 // --- ڈیٹا Fetch کرنے کا فنکشن (یہ بالکل پہلے جیسا ہی ہے) ---
 async function getBlobData() {
@@ -42,11 +48,10 @@ async function getBlobData() {
 // --- مین ہوم پیج (Server Component) ---
 export default async function HomePage() {
   
-  // 1. سرور پر ڈیٹا fetch کریں
+  // 1. سرور پر تازہ ڈیٹا fetch کریں
   const { settings, products, logoUrl } = await getBlobData();
 
   // 2. سارا ڈیٹا کلائنٹ کمپوننٹ کو پاس کریں
-  // نوٹ: یہاں کوئی ایڈمن لنک نہیں ہے
   return (
     <HomePageClient 
       initialProducts={products} 
