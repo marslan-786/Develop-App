@@ -1,6 +1,6 @@
 import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
-import { isValidPassword } from '@/lib/auth'; // ہمارے نئے فنکشن کو امپورٹ کریں
+import { isValidPassword } from '../../../lib/auth.js'; // ہمارے نئے فنکشن کو امپورٹ کریں
 
 export const dynamic = 'force-dynamic';
 
