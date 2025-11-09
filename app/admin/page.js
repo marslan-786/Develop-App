@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { head } from '@vercel/blob';
 import { isValidPassword } from '../../lib/auth.js'; // اپ ڈیٹ شدہ پاتھ
 
-// --- یہ ہے حل 1: کیشنگ کو غیر فعال کریں ---
+// Vercel کو بتاتا ہے کہ اس پیج کو کیش نہ کرے
 export const dynamic = 'force-dynamic';
 
 // --- Icon Components (ویسے ہی) ---
@@ -63,9 +63,14 @@ function LoginPage() {
   );
 }
 
-// --- 2. ایڈمن ڈیش بورڈ (ویسے ہی) ---
+// --- 2. ایڈمن ڈیش بورڈ (اپ ڈیٹ شدہ) ---
 function AdminDashboard({ logoUrl, passwordQuery }) {
   const sessionQuery = `?password=${passwordQuery}`;
+
+  // --- یہ ہے حل! ---
+  // ایڈمن پیج کے لیے بھی کیش بسٹر
+  const cacheBustedLogoSrc = `${logoUrl}?v=${new Date().getTime()}`;
+  // --- حل ختم ---
 
   return (
     <div className="relative min-h-screen bg-gray-50 pb-20">
@@ -76,11 +81,27 @@ function AdminDashboard({ logoUrl, passwordQuery }) {
         </Link>
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200">
-            <Image src={logoUrl} alt="Logo" width={40} height={40} className="object-cover" priority />
+            <Image 
+              src={cacheBustedLogoSrc} // نیا متغیر (variable) یہاں استعمال کریں
+              alt="Logo" 
+              width={40} 
+              height={40} 
+              className="object-cover" 
+              priority 
+              unoptimized // Next.js کی اپنی کیشنگ کو بھی بائی پاس کریں
+            />
           </div>
           <h1 className="text-xl font-bold whitespace-nowrap">Admin Panel</h1>
           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200">
-            <Image src={logoUrl} alt="Logo" width={40} height={40} className="object-cover" priority />
+            <Image 
+              src={cacheBustedLogoSrc} // نیا متغیر (variable) یہاں بھی استعمال کریں
+              alt="Logo" 
+              width={40} 
+              height={40} 
+              className="object-cover" 
+              priority 
+              unoptimized // Next.js کی اپنی کیشنگ کو بھی بائی پاس کریں
+            />
           </div>
         </div>
         <button className="p-2 rounded-full hover:bg-gray-100">
@@ -108,36 +129,29 @@ function AdminDashboard({ logoUrl, passwordQuery }) {
   );
 }
 
-// (isValidPassword فنکشن کو یہاں سے ہٹا دیا گیا ہے کیونکہ وہ lib/auth.js میں ہے)
-
 
 // --- مین پیج (جو فیصلہ کرتا ہے کہ کیا دکھانا ہے) ---
 export default async function AdminPage({ searchParams }) {
   
-  // URL سے پاس ورڈ پڑھیں
   const passwordQuery = searchParams.password;
   
-  // ہمارے ہائبرڈ فنکشن سے چیک کریں
   if (await isValidPassword(passwordQuery)) {
     
     // --- پاس ورڈ ٹھیک ہے: ڈیش بورڈ دکھائیں ---
     
-    // لوگو URL حاصل کریں (ہوم پیج کی طرح)
-    let logoUrl = "https://hnt5qthrn2hkqfn9.public.blob.vercel-storage.com/logo.png"; // ہارڈ کوڈڈ لنک
+    // لوگو URL حاصل کریں
+    // (یہ ہارڈ کوڈڈ لنک صرف فال بیک کے طور پر استعمال ہو گا)
+    let logoUrl = "https://hnt5qthrn2hkqfn9.public.blob.vercel-storage.com/logo.png";
     
     try {
-      // --- یہ ہے حل 2: کیش کو بائی پاس کریں ---
-      // ہم تازہ ترین URL حاصل کرنے کے لیے 'head' کو 'no-store' کے ساتھ کال کرتے رہیں گے
-      // تاکہ اگر کبھی لنک بدلے تو یہ ٹوٹے نہیں
+      // ہم تازہ ترین URL حاصل کرنے کے لیے 'head' کو 'no-store' کے ساتھ کال کرتے ہیں
       const logoBlob = await head('logo.png', { cache: 'no-store' });
       logoUrl = logoBlob.url; 
       
     } catch (error) {
       console.warn("Admin Panel: Could not fetch 'logo.png'. Using hardcoded fallback.");
-      // اگر 'head' ناکام ہو، تو ہمارا ہارڈ کوڈڈ لنک استعمال کریں
     }
 
-    // پاس ورڈ کو URL میں رکھیں تاکہ سیشن قائم رہے
     return <AdminDashboard logoUrl={logoUrl} passwordQuery={passwordQuery} />;
     
   } else {
