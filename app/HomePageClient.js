@@ -2,9 +2,13 @@
 
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
-import Link from 'next/link'; // <-- Link کو امپورٹ کریں
+import Link from 'next/link';
 
-// --- Icon Components (صرف ایک بار ڈیفائن کیے گئے) ---
+// --- Icon Components (ویسے ہی) ---
+function IconMenu() { /* ... */ }
+function IconSearch() { /* ... */ }
+function IconClose() { /* ... */ }
+// (یہاں آئیکنز کا مکمل کوڈ ہے تاکہ کوئی غلطی نہ ہو)
 function IconMenu() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -29,7 +33,7 @@ function IconClose() {
 // --- (آئیکنز ختم) ---
 
 
-// --- Header Component (ویسا ہی) ---
+// --- Header Component (اپ ڈیٹ شدہ) ---
 function AppHeader({ title, logoSrc, onMenuClick, onSearchClick }) {
   const cacheBustedLogoSrc = `${logoSrc}?v=${new Date().getTime()}`;
   return (
@@ -41,7 +45,13 @@ function AppHeader({ title, logoSrc, onMenuClick, onSearchClick }) {
         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
           <Image src={cacheBustedLogoSrc} alt="Logo" width={40} height={40} className="object-cover" priority unoptimized />
         </div>
-        <h1 className="text-xl font-bold whitespace-nowrap">{title}</h1>
+        
+        {/* --- یہ ہے حل 1: اینیمیٹڈ ٹائٹل --- */}
+        <h1 className="text-xl font-bold whitespace-nowrap animated-gradient-text">
+          {title}
+        </h1>
+        {/* --- حل ختم --- */}
+
         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
           <Image src={cacheBustedLogoSrc} alt="Logo" width={40} height={40} className="object-cover" priority unoptimized />
         </div>
@@ -58,7 +68,6 @@ function ProductCard({ product }) {
   const cacheBustedImageUrl = `${product.imageUrl || "/placeholder-image.png"}?v=${new Date().getTime()}`;
 
   return (
-    // --- اینیمیشن ---
     <div className="border rounded-lg overflow-hidden shadow-sm bg-white flex flex-col transition-transform duration-200 hover:scale-105 hover:shadow-lg">
       <div className="w-full h-40 relative">
         <Image 
@@ -70,22 +79,24 @@ function ProductCard({ product }) {
         />
       </div>
       <div className="p-3 flex-grow flex flex-col">
-        {/* --- کٹا ہوا ٹیکسٹ --- */}
         <h3 className="text-lg font-semibold break-words min-h-[4rem]">{product.name}</h3>
         <p className="text-sm text-gray-600 truncate mt-1">{product.detail}</p>
         <p className="text-lg font-bold text-blue-600 mt-2">PKR {product.price}</p>
         
-        {/* --- "View Details" بٹن --- */}
+        {/* --- یہ ہے حل 2: اینیمیٹڈ بٹن --- */}
         <Link 
           href={`/product/${product.id}`}
-          className="mt-3 w-full text-center bg-blue-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+          className="mt-3 w-full text-center text-white py-2 rounded-lg text-sm font-medium transition-all duration-300 animated-gradient-button"
         >
           View Details
         </Link>
+        {/* --- حل ختم --- */}
       </div>
     </div>
   );
 }
+
+// ... (باقی تمام کوڈ 'Sidebar', 'SearchBar', 'HomePageClient' ویسا ہی رہے گا) ...
 
 // --- Sidebar Component (ویسا ہی) ---
 function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
