@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { head } from '@vercel/blob';
-import { isValidPassword } from '../../lib/auth.js'; // اپ ڈیٹ شدہ پاتھ
+import { isValidPassword } from '@/lib/auth.js';
 
 // Vercel کو بتاتا ہے کہ اس پیج کو کیش نہ کرے
 export const dynamic = 'force-dynamic';
