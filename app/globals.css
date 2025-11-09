@@ -1,3 +1,44 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* ... (موجودہ @tailwind base; وغیرہ کو نہ چھیڑیں) ... */
+
+/* --- یہ نیا کوڈ نیچے شامل کریں --- */
+
+/* 1. اینیمیشن کی "لہر" (Keyframes) */
+@keyframes animated-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 2. ہیڈر ٹائٹل کے لیے کلاس */
+.animated-gradient-text {
+  background: linear-gradient(
+    -45deg,
+    #4a90e2, /* نیلا */
+    #50e3c2, /* سبز */
+    #f5a623, /* اورنج */
+    #d0021b  /* سرخ */
+  );
+  background-size: 300% 300%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: animated-gradient 10s ease infinite;
+}
+
+/* 3. بٹن کے لیے کلاس */
+.animated-gradient-button {
+  background: linear-gradient(
+    -45deg,
+    #4a90e2, /* نیلا */
+    #34e89e, /* سبز */
+    #4a90e2  /* واپس نیلا */
+  );
+  background-size: 300% 300%;
+  animation: animated-gradient 6s ease infinite;
+}
