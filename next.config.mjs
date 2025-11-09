@@ -1,11 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Vercel Blob سے تصاویر لوڈ کرنے کی اجازت دینے کے لیے
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'v*.public.blob.vercel-storage.com',
+        // --- یہ ہے حل! ---
+        // 'v*.public.blob.vercel-storage.com' کو اس سے بدل دیں:
+        hostname: 'public.blob.vercel-storage.com',
+        // --- حل ختم ---
         port: '',
         pathname: '/**',
       },
