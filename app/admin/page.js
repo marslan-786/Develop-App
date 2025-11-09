@@ -2,11 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { head } from '@vercel/blob';
 
-// --- Icon Components (کوئی تبدیلی نہیں) ---
-function IconSettings() { /* ... (پہلے جیسا کوڈ) ... */ }
-function IconSearch() { /* ... (پہلے جیسا کوڈ) ... */ }
-function IconPlus() { /* ... (پہلے جیسا کوڈ) ... */ }
-// (اگر آپ چاہیں تو میں آئیکنز کا کوڈ دوبارہ دے سکتا ہوں، لیکن وہ پچھلے جواب میں موجود ہے)
+// --- Icon Components (صرف ایک بار ڈیفائن کیے گئے) ---
 function IconSettings() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -31,7 +27,7 @@ function IconPlus() {
 // --- (آئیکنز ختم) ---
 
 
-// --- 1. لاگ ان پیج (کوئی تبدیلی نہیں) ---
+// --- 1. لاگ ان پیج ---
 function LoginPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
@@ -63,7 +59,7 @@ function LoginPage() {
   );
 }
 
-// --- 2. ایڈمن ڈیش بورڈ (کوئی تبدیلی نہیں) ---
+// --- 2. ایڈمن ڈیش بورڈ ---
 function AdminDashboard({ logoUrl, passwordQuery }) {
   const sessionQuery = `?password=${passwordQuery}`;
 
@@ -108,7 +104,7 @@ function AdminDashboard({ logoUrl, passwordQuery }) {
   );
 }
 
-// --- 3. نیا ہائبرڈ پاس ورڈ چیکر فنکشن ---
+// --- 3. ہائبرڈ پاس ورڈ چیکر فنکشن ---
 async function isValidPassword(enteredPassword) {
   if (!enteredPassword) {
     return false;
@@ -171,5 +167,4 @@ export default async function AdminPage({ searchParams }) {
     // --- پاس ورڈ غلط ہے: لاگ ان پیج دکھائیں ---
     return <LoginPage />;
   }
-    }
-    
+}
