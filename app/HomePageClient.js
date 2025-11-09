@@ -1,9 +1,13 @@
-"use client"; // <-- یہ سب سے اہم لائن ہے
+"use client"; 
 
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
 
-// --- Icon Components ---
+// --- Icon Components (ویسے ہی) ---
+function IconMenu() { /* ... */ }
+function IconSearch() { /* ... */ }
+function IconClose() { /* ... */ }
+// (یہاں آئیکنز کا مکمل کوڈ ہے تاکہ کوئی غلطی نہ ہو)
 function IconMenu() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -11,7 +15,6 @@ function IconMenu() {
     </svg>
   );
 }
-
 function IconSearch() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -19,8 +22,6 @@ function IconSearch() {
     </svg>
   );
 }
-
-// سائیڈ مینیو اور سرچ بار کے لیے نیا 'Close' آئیکن
 function IconClose() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -28,10 +29,18 @@ function IconClose() {
     </svg>
   );
 }
+// --- (آئیکنز ختم) ---
 
-// --- Header Component ---
-// اب یہ کلک ایونٹس کو ہینڈل کرے گا
+
+// --- Header Component (اپ ڈیٹ شدہ) ---
 function AppHeader({ title, logoSrc, onMenuClick, onSearchClick }) {
+  
+  // --- یہ ہے حل! ---
+  // ہم URL میں ایک رینڈم ٹائم اسٹیمپ جوڑ رہے ہیں
+  // تاکہ براؤزر ہر بار نئی تصویر لوڈ کرے
+  const cacheBustedLogoSrc = `${logoSrc}?v=${new Date().getTime()}`;
+  // --- حل ختم ---
+
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between p-4 bg-white shadow-md">
       <button onClick={onMenuClick} className="p-2 rounded-full hover:bg-gray-100">
@@ -40,11 +49,27 @@ function AppHeader({ title, logoSrc, onMenuClick, onSearchClick }) {
 
       <div className="flex items-center gap-2">
         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
-          <Image src={logoSrc} alt="Logo" width={40} height={40} className="object-cover" priority />
+          <Image 
+            src={cacheBustedLogoSrc} // نیا متغیر (variable) یہاں استعمال کریں
+            alt="Logo" 
+            width={40} 
+            height={40} 
+            className="object-cover" 
+            priority 
+            unoptimized // Next.js کی اپنی کیشنگ کو بھی بائی پاس کریں
+          />
         </div>
         <h1 className="text-xl font-bold whitespace-nowrap">{title}</h1>
         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
-          <Image src={logoSrc} alt="Logo" width={40} height={40} className="object-cover" priority />
+          <Image 
+            src={cacheBustedLogoSrc} // نیا متغیر (variable) یہاں بھی استعمال کریں
+            alt="Logo" 
+            width={40} 
+            height={40} 
+            className="object-cover" 
+            priority 
+            unoptimized // Next.js کی اپنی کیشنگ کو بھی بائی پاس کریں
+          />
         </div>
       </div>
 
@@ -55,12 +80,21 @@ function AppHeader({ title, logoSrc, onMenuClick, onSearchClick }) {
   );
 }
 
-// --- Product Card Component (کوئی تبدیلی نہیں) ---
+// --- Product Card Component (اس میں بھی یہی حل لاگو کریں) ---
 function ProductCard({ product }) {
+  // پروڈکٹ امیج کے لیے بھی کیش بسٹر
+  const cacheBustedImageUrl = `${product.imageUrl || "/placeholder-image.png"}?v=${new Date().getTime()}`;
+
   return (
     <div className="border rounded-lg overflow-hidden shadow-sm bg-white flex flex-col">
       <div className="w-full h-40 relative">
-        <Image src={product.imageUrl || "/placeholder-image.png"} alt={product.name} layout="fill" className="object-cover" />
+        <Image 
+          src={cacheBustedImageUrl} 
+          alt={product.name} 
+          layout="fill" 
+          className="object-cover" 
+          unoptimized 
+        />
       </div>
       <div className="p-3 flex-grow flex flex-col">
         <h3 className="text-lg font-semibold truncate">{product.name}</h3>
@@ -74,14 +108,12 @@ function ProductCard({ product }) {
   );
 }
 
-// --- نیا: Sidebar Component (برانڈ فلٹر کے لیے) ---
+// --- Sidebar Component (ویسا ہی) ---
 function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
+  // ... (پہلے جیسا کوڈ) ...
   return (
     <>
-      {/* Overlay */}
       {isOpen && <div className="fixed inset-0 z-30 bg-black/50" onClick={onClose}></div>}
-      
-      {/* Sidebar */}
       <div className={`fixed top-0 left-0 z-40 w-64 h-full bg-white shadow-lg transition-transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="font-bold text-lg">Filter by Brand</h2>
@@ -91,7 +123,6 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
         </div>
         <nav className="p-4">
           <ul>
-            {/* 'All Brands' بٹن */}
             <li key="all-brands">
               <button 
                 onClick={() => onSelectBrand(null)} 
@@ -100,7 +131,6 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
                 All Brands
               </button>
             </li>
-            {/* باقی برانڈز */}
             {brands.map((brand) => (
               <li key={brand}>
                 <button 
@@ -118,11 +148,10 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
   );
 }
 
-// --- نیا: SearchBar Component ---
+// --- SearchBar Component (ویسا ہی) ---
 function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
+  // ... (پہلے جیسا کوڈ) ...
   if (!isSearchOpen) return null;
-
-  // ہیڈر کے بالکل نیچے چپک جائے گا
   return (
     <div className="sticky top-[73px] z-10 p-4 bg-gray-50 border-b">
       <div className="relative">
@@ -132,7 +161,7 @@ function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           className="w-full p-2 pr-10 border rounded-lg shadow-sm"
-          autoFocus // آتے ہی کی بورڈ کھل جائے
+          autoFocus
         />
         <button onClick={onClose} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-700">
           <IconClose />
@@ -143,41 +172,33 @@ function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
 }
 
 
-// --- مین کلائنٹ کمپوننٹ ---
+// --- مین کلائنٹ کمپوننٹ (ویسا ہی) ---
 export default function HomePageClient({ initialProducts, settings, logoUrl }) {
-  // تمام States یہاں ہیں
+  // ... (پہلے جیسا کوڈ) ...
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState(null);
 
-  // 1. تمام پروڈکٹس سے منفرد (unique) برانڈز کی لسٹ بنائیں
   const uniqueBrands = useMemo(() => {
     if (!initialProducts) return [];
-    // 'p.brand' کا استعمال کریں (یہ ہمیں ایڈمن پینل میں شامل کرنا ہوگا)
     const brands = initialProducts.map(p => p.brand); 
-    return [...new Set(brands.filter(b => b))]; // صرف منفرد اور غیر خالی برانڈز
+    return [...new Set(brands.filter(b => b))]; 
   }, [initialProducts]);
 
-  // 2. پروڈکٹس کو سرچ اور فلٹر کریں
   const filteredProducts = useMemo(() => {
     if (!initialProducts) return [];
     
     return initialProducts.filter(product => {
-      // برانڈ فلٹر
       const matchesBrand = selectedBrand ? product.brand === selectedBrand : true;
-      
-      // سرچ فلٹر (نام یا برانڈ میں تلاش کریں)
       const matchesSearch = searchTerm
         ? (product.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
            product.brand?.toLowerCase().includes(searchTerm.toLowerCase()))
         : true;
-        
       return matchesBrand && matchesSearch;
     });
   }, [initialProducts, searchTerm, selectedBrand]);
 
-  // --- JSX (HTML) ---
   return (
     <main>
       <AppHeader 
@@ -185,11 +206,11 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
         logoSrc={logoUrl} 
         onMenuClick={() => {
           setIsMenuOpen(true);
-          setIsSearchOpen(false); // سرچ کو بند کریں
+          setIsSearchOpen(false);
         }}
         onSearchClick={() => {
-          setIsSearchOpen(prev => !prev); // سرچ کو ٹوگل کریں
-          setIsMenuOpen(false); // مینیو کو بند کریں
+          setIsSearchOpen(prev => !prev);
+          setIsMenuOpen(false);
         }}
       />
       
@@ -200,7 +221,7 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
         selectedBrand={selectedBrand}
         onSelectBrand={(brand) => {
           setSelectedBrand(brand);
-          setIsMenuOpen(false); // برانڈ منتخب کرنے پر مینیو بند کریں
+          setIsMenuOpen(false);
         }}
       />
 
@@ -211,16 +232,14 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
         onSearchChange={setSearchTerm}
       />
 
-      {/* پروڈکٹ گرڈ */}
       <div className="p-4">
         {filteredProducts && filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 gap-4">
             {filteredProducts.map((product) => (
-              <ProductCard key={product.id || product.name} product={product} /> // .id کو ترجیح دیں
+              <ProductCard key={product.id || product.name} product={product} />
             ))}
           </div>
         ) : (
-          // اگر فلٹر کے بعد کوئی پروڈکٹ نہ بچے
           <div className="text-center text-gray-500 mt-20">
             <p>No products found.</p>
             {initialProducts?.length > 0 && (
@@ -229,9 +248,6 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
           </div>
         )}
       </div>
-      
-      {/* ایڈمن پینل کا لنک اب یہاں نہیں ہے */}
-      
     </main>
   );
 }
