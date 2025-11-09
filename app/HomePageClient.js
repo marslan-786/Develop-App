@@ -3,11 +3,7 @@
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
 
-// --- Icon Components (ویسے ہی) ---
-function IconMenu() { /* ... */ }
-function IconSearch() { /* ... */ }
-function IconClose() { /* ... */ }
-// (یہاں آئیکنز کا مکمل کوڈ ہے تاکہ کوئی غلطی نہ ہو)
+// --- Icon Components (صرف ایک بار ڈیفائن کیے گئے) ---
 function IconMenu() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -35,11 +31,8 @@ function IconClose() {
 // --- Header Component (اپ ڈیٹ شدہ) ---
 function AppHeader({ title, logoSrc, onMenuClick, onSearchClick }) {
   
-  // --- یہ ہے حل! ---
-  // ہم URL میں ایک رینڈم ٹائم اسٹیمپ جوڑ رہے ہیں
-  // تاکہ براؤزر ہر بار نئی تصویر لوڈ کرے
+  // کیش بسٹر (cache-buster)
   const cacheBustedLogoSrc = `${logoSrc}?v=${new Date().getTime()}`;
-  // --- حل ختم ---
 
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between p-4 bg-white shadow-md">
@@ -80,9 +73,8 @@ function AppHeader({ title, logoSrc, onMenuClick, onSearchClick }) {
   );
 }
 
-// --- Product Card Component (اس میں بھی یہی حل لاگو کریں) ---
+// --- Product Card Component (کیش بسٹر کے ساتھ) ---
 function ProductCard({ product }) {
-  // پروڈکٹ امیج کے لیے بھی کیش بسٹر
   const cacheBustedImageUrl = `${product.imageUrl || "/placeholder-image.png"}?v=${new Date().getTime()}`;
 
   return (
@@ -110,7 +102,6 @@ function ProductCard({ product }) {
 
 // --- Sidebar Component (ویسا ہی) ---
 function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
-  // ... (پہلے جیسا کوڈ) ...
   return (
     <>
       {isOpen && <div className="fixed inset-0 z-30 bg-black/50" onClick={onClose}></div>}
@@ -150,7 +141,6 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
 
 // --- SearchBar Component (ویسا ہی) ---
 function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
-  // ... (پہلے جیسا کوڈ) ...
   if (!isSearchOpen) return null;
   return (
     <div className="sticky top-[73px] z-10 p-4 bg-gray-50 border-b">
@@ -174,7 +164,6 @@ function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
 
 // --- مین کلائنٹ کمپوننٹ (ویسا ہی) ---
 export default function HomePageClient({ initialProducts, settings, logoUrl }) {
-  // ... (پہلے جیسا کوڈ) ...
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
