@@ -1,6 +1,6 @@
 import { put, head } from '@vercel/blob';
 import { NextResponse } from 'next/server';
-import { isValidPassword } from '../../../lib/auth.js';
+import { isValidPassword } from '../../../lib/auth.js'; // یہ پاتھ بالکل ٹھیک ہے
 
 export const dynamic = 'force-dynamic';
 
@@ -24,37 +24,30 @@ export async function POST(request) {
       const dataRes = await fetch(dataBlob.url, { cache: 'no-store' });
       
       if (dataRes.ok) {
-        // --- یہ ہے حل! ---
-        // فائل کو پہلے ٹیکسٹ کے طور پر پڑھیں
         const textData = await dataRes.text();
-        
-        // اگر فائل خالی نہیں ہے، تب ہی اسے پارس کریں
         if (textData) { 
           products = JSON.parse(textData);
         }
-        // اگر فائل خالی ہے، تو 'products' خالی لسٹ ہی رہے گا
-        // --- حل ختم ---
       }
     } catch (e) {
-      // یہ اس وقت چلے گا جب 'data.json' فائل موجود ہی نہ ہو
+      // اگر 'data.json' ڈیلیٹ ہو چکی ہے تو یہ چلے گا
       console.log("data.json not found, creating a new one.");
     }
 
     // 4. نئی پروڈکٹ کو لسٹ میں شامل کریں
     newProduct.id = `prod_${new Date().getTime()}`;
-    products.push(newProduct); // اب یہ خالی لسٹ میں push کرے گا اگر فائل خالی تھی
+    products.push(newProduct);
 
     // 5. اپ ڈیٹ شدہ لسٹ کو 'data.json' میں واپس سیو کریں
     await put('data.json', JSON.stringify(products, null, 2), {
       access: 'public',
-      contentType: 'application/json',
+      // contentType: 'application/json', // <-- اس لائن کو ہٹا دیا گیا ہے
       addRandomSuffix: false, 
     });
 
     return NextResponse.json({ success: true, message: 'Product added!', newProduct });
 
   } catch (error) {
-    // یہ اب صرف انتہائی سنگین مسائل (جیسے 'put' فیل ہونا) پر چلے گا
     console.error('Error adding product:', error);
     return NextResponse.json(
       { error: 'Failed to add product.', message: error.message },
