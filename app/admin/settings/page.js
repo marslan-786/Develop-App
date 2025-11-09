@@ -41,7 +41,7 @@ export default function SettingsPage() {
           `/api/upload?filename=logo.png&password=${passwordQuery}`,
           {
             method: 'POST',
-            body: logoFile,
+            body: logoFile, // باڈی میں JPG, PNG, یا کوئی بھی فائل ہو سکتی ہے
           }
         );
         if (!uploadRes.ok) throw new Error('Logo upload failed');
@@ -65,6 +65,7 @@ export default function SettingsPage() {
       setWebsiteTitle('');
       setNewPassword('');
       setLogoFile(null);
+      e.target.reset(); // فارم کو ری سیٹ کریں (فائل ان پٹ کو خالی کرنے کے لیے)
       
       // Vercel کو مجبور کریں کہ وہ پرانا ڈیٹا ریفریش کرے
       router.refresh(); 
@@ -98,11 +99,16 @@ export default function SettingsPage() {
           </label>
           <input
             type="file"
-            accept="image/png"
+            // --- یہ ہے حل! ---
+            // 'image/png' کو 'image/*' سے بدل دیا گیا ہے
+            accept="image/*"
+            // --- حل ختم ---
             onChange={(e) => setLogoFile(e.target.files[0])}
             className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           />
-          <p className="text-xs text-gray-500 mt-1">Must be a .png file. Uploading will replace 'logo.png'.</p>
+          <p className="text-xs text-gray-500 mt-1">
+            Accepts JPG, PNG, GIF, WebP, etc. Uploading will replace 'logo.png'.
+          </p>
         </div>
 
         {/* 2. چینج ٹائٹل */}
@@ -156,5 +162,4 @@ export default function SettingsPage() {
       </form>
     </div>
   );
-  }
-            
+}
