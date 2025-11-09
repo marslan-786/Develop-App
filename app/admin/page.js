@@ -1,6 +1,6 @@
 import { head } from '@vercel/blob';
-import { isValidPassword } from '../../lib/auth.js'; // پاتھ چیک کریں
-import AdminDashboardClient from './AdminDashboardClient.js'; // ہمارا نیا کلائنٹ کمپوننٹ
+import { isValidPassword } from '../../lib/auth.js'; // 2 فولڈر باہر
+import AdminDashboardClient from './AdminDashboardClient.js'; // ہمارا کلائنٹ کمپوننٹ
 import Link from 'next/link';
 
 // Vercel کو بتاتا ہے کہ اس پیج کو کیش نہ کرے
@@ -60,8 +60,11 @@ export default async function AdminPage({ searchParams }) {
     // 3. پروڈکٹس کی لسٹ حاصل کریں
     let products = [];
     try {
+      // --- یہ ہے حل: کیش کو بائی پاس کریں ---
       const dataBlob = await head('data.json', { cache: 'no-store' });
       const dataResponse = await fetch(dataBlob.url, { cache: 'no-store' });
+      // --- حل ختم ---
+      
       if (dataResponse.ok) {
         const textData = await dataResponse.text();
         if (textData) products = JSON.parse(textData);
@@ -70,7 +73,7 @@ export default async function AdminPage({ searchParams }) {
       console.warn("Admin Panel: Could not fetch products.", error.message);
     }
     
-    // 4. تمام ڈیٹا کلائنٹ کمپوننٹ کو پاس کریں
+    // 4. تمام (تازہ ترین) ڈیٹا کلائنٹ کمپوننٹ کو پاس کریں
     return (
       <AdminDashboardClient 
         initialProducts={products} 
