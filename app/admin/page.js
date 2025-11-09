@@ -1,8 +1,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { head } from '@vercel/blob';
+import { isValidPassword } from '../../lib/auth.js'; // اپ ڈیٹ شدہ پاتھ
 
-// --- Icon Components (صرف ایک بار ڈیفائن کیے گئے) ---
+// --- یہ ہے حل 1: کیشنگ کو غیر فعال کریں ---
+export const dynamic = 'force-dynamic';
+
+// --- Icon Components (ویسے ہی) ---
 function IconSettings() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -27,7 +31,7 @@ function IconPlus() {
 // --- (آئیکنز ختم) ---
 
 
-// --- 1. لاگ ان پیج ---
+// --- 1. لاگ ان پیج (ویسے ہی) ---
 function LoginPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
@@ -59,7 +63,7 @@ function LoginPage() {
   );
 }
 
-// --- 2. ایڈمن ڈیش بورڈ ---
+// --- 2. ایڈمن ڈیش بورڈ (ویسے ہی) ---
 function AdminDashboard({ logoUrl, passwordQuery }) {
   const sessionQuery = `?password=${passwordQuery}`;
 
@@ -72,11 +76,11 @@ function AdminDashboard({ logoUrl, passwordQuery }) {
         </Link>
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200">
-            <Image src={logoUrl} alt="Logo" width={40} height={40} className="object-cover" />
+            <Image src={logoUrl} alt="Logo" width={40} height={40} className="object-cover" priority />
           </div>
           <h1 className="text-xl font-bold whitespace-nowrap">Admin Panel</h1>
           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200">
-            <Image src={logoUrl} alt="Logo" width={40} height={40} className="object-cover" />
+            <Image src={logoUrl} alt="Logo" width={40} height={40} className="object-cover" priority />
           </div>
         </div>
         <button className="p-2 rounded-full hover:bg-gray-100">
@@ -104,40 +108,8 @@ function AdminDashboard({ logoUrl, passwordQuery }) {
   );
 }
 
-// --- 3. ہائبرڈ پاس ورڈ چیکر فنکشن ---
-async function isValidPassword(enteredPassword) {
-  if (!enteredPassword) {
-    return false;
-  }
+// (isValidPassword فنکشن کو یہاں سے ہٹا دیا گیا ہے کیونکہ وہ lib/auth.js میں ہے)
 
-  // 1. ماسٹر پاس ورڈ (Vercel Environment سے) چیک کریں
-  const masterPassword = process.env.ADMIN_PASSWORD;
-  if (enteredPassword === masterPassword) {
-    return true; // لاگ ان کامیاب
-  }
-
-  // 2. لاگ ان پاس ورڈ (Vercel Blob سے) چیک کریں
-  try {
-    const blob = await head('password.json');
-    const response = await fetch(blob.url);
-    if (!response.ok) {
-      throw new Error('Blob password not found or unreadable');
-    }
-    
-    const data = await response.json();
-    const blobPassword = data.password; // { "password": "..." }
-
-    if (enteredPassword === blobPassword) {
-      return true; // لاگ ان کامیاب
-    }
-  } catch (error) {
-    // اگر password.json موجود نہیں ہے تو یہ ایرر آئے گا، جو ٹھیک ہے
-    console.warn("Could not check blob password:", error.message);
-  }
-
-  // 3. اگر دونوں پاس ورڈ میچ نہیں ہوئے
-  return false;
-}
 
 // --- مین پیج (جو فیصلہ کرتا ہے کہ کیا دکھانا ہے) ---
 export default async function AdminPage({ searchParams }) {
@@ -145,18 +117,24 @@ export default async function AdminPage({ searchParams }) {
   // URL سے پاس ورڈ پڑھیں
   const passwordQuery = searchParams.password;
   
-  // ہمارے نئے ہائبرڈ فنکشن سے چیک کریں
+  // ہمارے ہائبرڈ فنکشن سے چیک کریں
   if (await isValidPassword(passwordQuery)) {
     
     // --- پاس ورڈ ٹھیک ہے: ڈیش بورڈ دکھائیں ---
     
     // لوگو URL حاصل کریں (ہوم پیج کی طرح)
-    let logoUrl = "/placeholder-logo.png"; // فال بیک
+    let logoUrl = "https://hnt5qthrn2hkqfn9.public.blob.vercel-storage.com/logo.png"; // ہارڈ کوڈڈ لنک
+    
     try {
-      const logoBlob = await head('logo.png');
-      logoUrl = logoBlob.url;
+      // --- یہ ہے حل 2: کیش کو بائی پاس کریں ---
+      // ہم تازہ ترین URL حاصل کرنے کے لیے 'head' کو 'no-store' کے ساتھ کال کرتے رہیں گے
+      // تاکہ اگر کبھی لنک بدلے تو یہ ٹوٹے نہیں
+      const logoBlob = await head('logo.png', { cache: 'no-store' });
+      logoUrl = logoBlob.url; 
+      
     } catch (error) {
-      console.warn("Admin Panel: Could not fetch 'logo.png'.");
+      console.warn("Admin Panel: Could not fetch 'logo.png'. Using hardcoded fallback.");
+      // اگر 'head' ناکام ہو، تو ہمارا ہارڈ کوڈڈ لنک استعمال کریں
     }
 
     // پاس ورڈ کو URL میں رکھیں تاکہ سیشن قائم رہے
