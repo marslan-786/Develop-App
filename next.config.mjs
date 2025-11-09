@@ -5,8 +5,8 @@ const nextConfig = {
       {
         protocol: 'https',
         // --- یہ ہے حل! ---
-        // 'v*.public.blob.vercel-storage.com' کو اس سے بدل دیں:
-        hostname: 'public.blob.vercel-storage.com',
+        // 'public.blob.vercel-storage.com' کو اس سے بدل دیں:
+        hostname: 'hnt5qthrn2hkqfn9.public.blob.vercel-storage.com',
         // --- حل ختم ---
         port: '',
         pathname: '/**',
