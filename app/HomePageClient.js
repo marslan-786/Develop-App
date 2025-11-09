@@ -4,11 +4,7 @@ import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link'; // <-- Link کو امپورٹ کریں
 
-// --- Icon Components (ویسے ہی) ---
-function IconMenu() { /* ... */ }
-function IconSearch() { /* ... */ }
-function IconClose() { /* ... */ }
-// (یہاں آئیکنز کا مکمل کوڈ ہے تاکہ کوئی غلطی نہ ہو)
+// --- Icon Components (صرف ایک بار ڈیفائن کیے گئے) ---
 function IconMenu() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -62,8 +58,7 @@ function ProductCard({ product }) {
   const cacheBustedImageUrl = `${product.imageUrl || "/placeholder-image.png"}?v=${new Date().getTime()}`;
 
   return (
-    // --- حل 2: اینیمیشن ---
-    // 'transition-transform' اور 'hover:scale-105' کلاسز شامل کی ہیں
+    // --- اینیمیشن ---
     <div className="border rounded-lg overflow-hidden shadow-sm bg-white flex flex-col transition-transform duration-200 hover:scale-105 hover:shadow-lg">
       <div className="w-full h-40 relative">
         <Image 
@@ -75,17 +70,12 @@ function ProductCard({ product }) {
         />
       </div>
       <div className="p-3 flex-grow flex flex-col">
-        {/* --- حل 1: کٹا ہوا ٹیکسٹ ---
-            'truncate' (جو ٹیکسٹ کو کاٹتا ہے) کو 'break-words' سے بدل دیا ہے
-            اور 'min-h-[4rem]' شامل کیا ہے تاکہ نام کو دو لائنوں کی جگہ مل سکے
-        --- */}
+        {/* --- کٹا ہوا ٹیکسٹ --- */}
         <h3 className="text-lg font-semibold break-words min-h-[4rem]">{product.name}</h3>
         <p className="text-sm text-gray-600 truncate mt-1">{product.detail}</p>
         <p className="text-lg font-bold text-blue-600 mt-2">PKR {product.price}</p>
         
-        {/* --- حل 3: "View Details" بٹن ---
-            یہ اب ایک '<Link>' ہے جو صحیح پروڈکٹ پیج پر جائے گا
-        --- */}
+        {/* --- "View Details" بٹن --- */}
         <Link 
           href={`/product/${product.id}`}
           className="mt-3 w-full text-center bg-blue-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
@@ -99,7 +89,6 @@ function ProductCard({ product }) {
 
 // --- Sidebar Component (ویسا ہی) ---
 function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
-  // ... (پہلے جیسا کوڈ) ...
   return (
     <>
       {isOpen && <div className="fixed inset-0 z-30 bg-black/50" onClick={onClose}></div>}
@@ -139,7 +128,6 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
 
 // --- SearchBar Component (ویسا ہی) ---
 function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
-  // ... (پہلے جیسا کوڈ) ...
   if (!isSearchOpen) return null;
   return (
     <div className="sticky top-[73px] z-10 p-4 bg-gray-50 border-b">
@@ -148,7 +136,7 @@ function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
           type="text"
           placeholder="Search products by name or brand..."
           value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full p-2 pr-10 border rounded-lg shadow-sm"
           autoFocus
         />
@@ -163,7 +151,6 @@ function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
 
 // --- مین کلائنٹ کمپوننٹ (ویسا ہی) ---
 export default function HomePageClient({ initialProducts, settings, logoUrl }) {
-  // ... (پہلے جیسا کوڈ) ...
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
