@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { head } from '@vercel/blob'; // Vercel Blob سے 'head' کو import کریں
+import { head } from '@vercel/blob';
 
 // --- ڈیٹا Fetch کرنے کا فنکشن (یہ سرور پر چلے گا) ---
 async function getBlobData() {
@@ -10,37 +10,34 @@ async function getBlobData() {
   
   let settings = defaultSettings;
   let products = [];
-  let logoUrl = "/placeholder-logo.png"; // ڈیفالٹ فال بیک لوگو
+  // ڈیفالٹ فال بیک لوگو (اگر logo.png نہ ملے)
+  let logoUrl = "/placeholder-logo.png"; 
 
   try {
-    // 1. settings.json کو fetch کریں (صرف ٹائٹل کے لیے)
+    // 1. settings.json کو fetch کریں
     const settingsBlob = await head('settings.json');
     const settingsResponse = await fetch(settingsBlob.url);
     if (!settingsResponse.ok) {
       throw new Error('Failed to fetch settings');
     }
     const fetchedSettings = await settingsResponse.json();
-    // اگر Blob میں ٹائٹل موجود ہے تو وہ استعمال کریں، ورنہ ڈیفالٹ
     settings.websiteTitle = fetchedSettings.websiteTitle || defaultSettings.websiteTitle;
 
   } catch (error) {
-    // اگر 'settings.json' نہیں ملتی تو کنسول پر وارننگ دیں
     console.warn("Could not fetch 'settings.json'. Using default title.", error.message);
   }
 
   try {
     // 2. 'logo.png' پاتھ سے براہ راست URL حاصل کریں
-    // یہ ہمیشہ Blob سے تازہ ترین لوگو کا URL اٹھائے گا
     const logoBlob = await head('logo.png');
-    logoUrl = logoBlob.url; 
+    logoUrl = logoBlob.url; // یہ تازہ ترین URL ہوگا
 
   } catch (error) {
-    // اگر 'logo.png' نہیں ملتی تو کنسول پر وارننگ دیں
     console.warn("Could not fetch 'logo.png'. Using placeholder.", error.message);
   }
 
   try {
-    // 3. data.json کو fetch کریں (پروڈکٹس کے لیے)
+    // 3. data.json کو fetch کریں
     const dataBlob = await head('data.json');
     const dataResponse = await fetch(dataBlob.url);
     if (!dataResponse.ok) {
@@ -49,15 +46,13 @@ async function getBlobData() {
     products = await dataResponse.json();
 
   } catch (error) {
-    // اگر 'data.json' نہیں ملتی تو کنسول پر وارننگ دیں
     console.warn("Could not fetch 'data.json'. Showing no products.", error.message);
   }
 
-  // آبجیکٹ میں سارا ڈیٹا واپس بھیجیں
   return { settings, products, logoUrl };
 }
 
-// --- Icon Components (ان میں کوئی تبدیلی نہیں) ---
+// --- Icon Components ---
 function IconMenu() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -90,8 +85,8 @@ function AppHeader({ title, logoSrc }) {
             width={40}
             height={40}
             className="object-cover"
-            priority // لوگو کو جلدی لوڈ کریں
-            onError={(e) => { e.currentTarget.src = "/placeholder-logo.png"; e.currentTarget.onerror = null; }}
+            priority 
+            // onError والی لائن یہاں سے ہٹا دی گئی ہے
           />
         </div>
         
@@ -105,7 +100,7 @@ function AppHeader({ title, logoSrc }) {
             height={40}
             className="object-cover"
             priority
-            onError={(e) => { e.currentTarget.src = "/placeholder-logo.png"; e.currentTarget.onerror = null; }}
+            // onError والی لائن یہاں سے ہٹا دی گئی ہے
           />
         </div>
       </div>
@@ -123,18 +118,18 @@ function ProductCard({ product }) {
     <div className="border rounded-lg overflow-hidden shadow-sm bg-white flex flex-col">
       <div className="w-full h-40 relative">
         <Image
-          src={product.imageUrl || "/placeholder-image.png"}
+          // اگر imageUrl نہ ہو تو placeholder استعمال ہوگا
+          src={product.imageUrl || "/placeholder-image.png"} 
           alt={product.name}
           layout="fill"
           className="object-cover"
-          onError={(e) => { e.currentTarget.src = "/placeholder-image.png"; e.currentTarget.onerror = null; }}
+          // onError والی لائن یہاں سے ہٹا دی گئی ہے
         />
       </div>
       <div className="p-3 flex-grow flex flex-col">
         <h3 className="text-lg font-semibold truncate">{product.name}</h3>
         <p className="text-sm text-gray-600 truncate mt-1">{product.detail}</p>
         <p className="text-lg font-bold text-blue-600 mt-2">PKR {product.price}</p>
-        {/* بعد میں ہم اسے <Link href={`/product/${product.id}`}> میں تبدیل کریں گے */}
         <button className="mt-3 w-full bg-blue-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors">
           View Details
         </button>
@@ -146,7 +141,6 @@ function ProductCard({ product }) {
 // --- Main Home Page (Async Component) ---
 export default async function HomePage() {
   
-  // سرور پر ڈیٹا fetch کریں
   const { settings, products, logoUrl } = await getBlobData();
 
   return (
@@ -162,7 +156,6 @@ export default async function HomePage() {
             ))}
           </div>
         ) : (
-          // اگر کوئی پروڈکٹ نہیں ہے تو یہ پیغام دکھائیں
           <div className="text-center text-gray-500 mt-20">
             <p>No products found.</p>
             <p className="text-sm mt-2">Check back later or visit our admin panel to add products.</p>
