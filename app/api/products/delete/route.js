@@ -1,6 +1,6 @@
 import { put, head } from '@vercel/blob';
 import { NextResponse } from 'next/server';
-import { isValidPassword } from '../../../../lib/auth.js'; // ہمارا auth فنکشن
+import { isValidPassword } from '../../../../lib/auth.js'; // 4 فولڈر باہر
 
 export const dynamic = 'force-dynamic';
 
@@ -31,10 +31,11 @@ export async function POST(request) {
         if (textData) { 
           products = JSON.parse(textData);
         }
+      } else {
+         throw new Error('data.json not found or empty.');
       }
     } catch (e) {
-      // اگر فائل موجود نہیں ہے تو ایرر دیں
-      return NextResponse.json({ error: 'data.json not found.' }, { status: 404 });
+      return NextResponse.json({ error: 'data.json not found or is empty.' }, { status: 404 });
     }
 
     // 4. پروڈکٹ کو لسٹ سے فلٹر (remove) کریں
