@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import FileUploader from './FileUploader.js'; // <-- نیا امپورٹ
+import FileUploader from '../FileUploader.js'; // <-- یہ صحیح ہے (../) // <-- نیا امپورٹ
 
 // بیک (Back) آئیکن
 function IconArrowLeft() {
