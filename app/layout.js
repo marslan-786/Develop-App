@@ -1,6 +1,3 @@
-// --- app/layout.js ---
-// Fixed: permanent zoom-out, WhatsApp + search visible, hamburger bug fix
-
 import "./globals.css";
 import { Inter } from "next/font/google";
 import Script from "next/script";
@@ -42,14 +39,14 @@ export async function generateMetadata() {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" dir="ltr">
+    <html lang="en">
       <head>
+        {/* Force Desktop Zoom-Out */}
         <meta
           name="viewport"
-          content="width=1200, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+          content="width=1200, initial-scale=0.75, maximum-scale=0.75, user-scalable=no"
         />
 
-        {/* Google Ads */}
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1963262096178695"
@@ -60,27 +57,24 @@ export default function RootLayout({ children }) {
 
       <body className={`${inter.className} bg-gray-900`}>
         <div className="max-w-full mx-auto bg-gray-800 min-h-screen overflow-x-hidden relative">
-          {/* children */}
           {children}
 
-          {/* ✅ Permanent zoom-out enforcement */}
+          {/* --- Force zoom-out on reload --- */}
           <script
             dangerouslySetInnerHTML={{
               __html: `
-                (function() {
-                  function applyZoom() {
-                    document.documentElement.style.zoom = '0.8';
-                    document.body.style.width = '1200px';
-                    document.body.style.overflowX = 'hidden';
-                  }
-                  window.addEventListener('load', applyZoom);
-                  window.addEventListener('pageshow', applyZoom);
-                })();
+                function enforceZoom() {
+                  document.documentElement.style.zoom = '0.8';
+                  document.body.style.zoom = '0.8';
+                  document.body.style.width = '1200px';
+                }
+                window.addEventListener('load', enforceZoom);
+                window.addEventListener('pageshow', enforceZoom);
               `,
             }}
           />
 
-          {/* ✅ WhatsApp floating button */}
+          {/* ✅ WhatsApp floating button (bottom-right) */}
           <a
             href="https://wa.me/923001234567"
             target="_blank"
