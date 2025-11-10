@@ -3,12 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* --- ہمارا نیا اینیمیشن کوڈ ان کے بعد آئے گا --- */
-
-/* 1. اینیمیشن کی "لہر" (Keyframes) */
-/* ... (موجودہ @tailwind base; وغیرہ کو نہ چھیڑیں) ... */
-
-/* --- یہ نیا کوڈ نیچے شامل کریں --- */
+/* --- ہمارا اینیمیشن کوڈ --- */
 
 /* 1. اینیمیشن کی "لہر" (Keyframes) */
 @keyframes animated-gradient {
