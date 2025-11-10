@@ -1,4 +1,4 @@
-// --- 1. app/layout.js (مکمل فکس شدہ) ---
+// --- 1. app/layout.js (مکمل فکس شدہ - Responsive) ---
 
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -36,6 +36,14 @@ export async function generateMetadata() {
       icon: logoUrl,
       apple: logoUrl,
     },
+    
+    // --- فکس 1: یہاں ڈیفالٹ Responsive Viewport سیٹ کیا گیا ہے ---
+    // (یہ باقی پیجز جیسے '/admin' کے لیے ضروری ہے)
+    viewport: {
+      width: "device-width",
+      initialScale: 1,
+    },
+    // --- فکس ختم ---
   };
 }
 
@@ -43,10 +51,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        {/* --- فکس 1: Viewport کو 1200px پر لاک کر دیا گیا ہے --- */}
-        <meta name="viewport" content="width=1200" />
-        {/* --- فکس ختم --- */}
-
+        {/* یہاں سے پچھلا دستی <meta name="viewport"...> ٹیگ ہٹا دیا گیا ہے */}
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1963262096178695"
@@ -56,9 +61,8 @@ export default function RootLayout({ children }) {
       </head>
 
       <body className={`${inter.className} bg-gray-900`}>
-        {/* --- فکس 2: 'max-w-full', 'overflow-x-hidden' اور 'relative' ہٹا دیا گیا ہے --- */}
-        {/* 'max-w-[1200px]' اور 'mx-auto' کو یہاں سیٹ کیا گیا ہے */}
-        <div className="max-w-[1200px] mx-auto bg-gray-800 min-h-screen">
+        {/* --- فکس 2: اسے 'max-w-full' (Responsive) پر واپس سیٹ کیا گیا ہے --- */}
+        <div className="max-w-full mx-auto bg-gray-800 min-h-screen">
           {children}
         </div>
         {/* --- فکس ختم --- */}
