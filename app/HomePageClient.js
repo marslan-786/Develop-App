@@ -4,11 +4,7 @@ import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-// --- Icon Components (ویسے ہی) ---
-function IconMenu() { /* ... */ }
-function IconSearch() { /* ... */ }
-function IconClose() { /* ... */ }
-// (یہاں آئیکنز کا مکمل کوڈ ہے تاکہ کوئی غلطی نہ ہو)
+// --- Icon Components (صرف ایک بار ڈیفائن کیے گئے) ---
 function IconMenu() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -33,7 +29,7 @@ function IconClose() {
 // --- (آئیکنز ختم) ---
 
 
-// --- Header Component (اپ ڈیٹ شدہ) ---
+// --- Header Component (اینیمیشن کے ساتھ) ---
 function AppHeader({ title, logoSrc, onMenuClick, onSearchClick }) {
   const cacheBustedLogoSrc = `${logoSrc}?v=${new Date().getTime()}`;
   return (
@@ -46,11 +42,10 @@ function AppHeader({ title, logoSrc, onMenuClick, onSearchClick }) {
           <Image src={cacheBustedLogoSrc} alt="Logo" width={40} height={40} className="object-cover" priority unoptimized />
         </div>
         
-        {/* --- یہ ہے حل 1: اینیمیٹڈ ٹائٹل --- */}
+        {/* اینیمیٹڈ ٹائٹل */}
         <h1 className="text-xl font-bold whitespace-nowrap animated-gradient-text">
           {title}
         </h1>
-        {/* --- حل ختم --- */}
 
         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
           <Image src={cacheBustedLogoSrc} alt="Logo" width={40} height={40} className="object-cover" priority unoptimized />
@@ -63,13 +58,11 @@ function AppHeader({ title, logoSrc, onMenuClick, onSearchClick }) {
   );
 }
 
-// --- Product Card Component (اپ ڈیٹ شدہ) ---
+// --- Product Card Component (اینیمیشن اور ٹیکسٹ فکس کے ساتھ) ---
 function ProductCard({ product }) {
   const cacheBustedImageUrl = `${product.imageUrl || "/placeholder-image.png"}?v=${new Date().getTime()}`;
 
   return (
-    // --- یہ ہے حل 2: اینیمیشن ---
-    // 'transition-transform' اور 'hover:scale-105' کلاسز شامل کی ہیں
     <div className="border rounded-lg overflow-hidden shadow-sm bg-white flex flex-col transition-transform duration-200 hover:scale-105 hover:shadow-lg">
       <div className="w-full h-40 relative">
         <Image 
@@ -81,28 +74,22 @@ function ProductCard({ product }) {
         />
       </div>
       <div className="p-3 flex-grow flex flex-col">
-        {/* --- یہ ہے حل 1: کٹا ہوا ٹیکسٹ ---
-            'truncate' (جو ٹیکسٹ کو کاٹتا ہے) کو 'break-words' سے بدل دیا ہے
-            اور 'min-h-[4rem]' شامل کیا ہے تاکہ نام کو دو لائنوں کی جگہ مل سکے
-        --- */}
+        {/* کٹا ہوا ٹیکسٹ فکس */}
         <h3 className="text-lg font-semibold break-words min-h-[4rem]">{product.name}</h3>
         <p className="text-sm text-gray-600 truncate mt-1">{product.detail}</p>
         <p className="text-lg font-bold text-blue-600 mt-2">PKR {product.price}</p>
         
-        {/* --- یہ ہے حل 2: اینیمیٹڈ بٹن --- */}
+        {/* اینیمیٹڈ بٹن */}
         <Link 
           href={`/product/${product.id}`}
           className="mt-3 w-full text-center text-white py-2 rounded-lg text-sm font-medium transition-all duration-300 animated-gradient-button"
         >
           View Details
         </Link>
-        {/* --- حل ختم --- */}
       </div>
     </div>
   );
 }
-
-// ... (باقی تمام کوڈ 'Sidebar', 'SearchBar', 'HomePageClient' ویسا ہی رہے گا) ...
 
 // --- Sidebar Component (ویسا ہی) ---
 function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
@@ -168,7 +155,7 @@ function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
 
 // --- مین کلائنٹ کمپوننٹ (ویسا ہی) ---
 export default function HomePageClient({ initialProducts, settings, logoUrl }) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] =useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState(null);
