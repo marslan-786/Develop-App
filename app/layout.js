@@ -1,82 +1,70 @@
-// --- 2. app/page.js ---
-// (یہ فائل viewport اور max-width سیٹ کرے گی)
+// --- app/layout.js ---
+// (یہ فائل اب ہمیشہ desktop view رکھے گی اور responsive نہیں رہے گی)
 
-import { head } from '@vercel/blob';
-import HomePageClient from './HomePageClient';
+import "./globals.css";
+import { Inter } from "next/font/google";
+import Script from "next/script";
+import { head } from "@vercel/blob";
 
-// --- حل 1: ہوم پیج کا Viewport 1200px ---
-export const metadata = {
-  viewport: {
-    width: 1200,
-  },
-};
-// --- حل ختم ---
+const inter = Inter({ subsets: ["latin"] });
 
-
-export const dynamic = 'force-dynamic'; 
-
-async function getBlobData() {
-  const defaultSettings = { websiteTitle: "Ilyas Mobile Mall" };
-  let settings = defaultSettings;
-  let products = [];
-  
-  let logoUrl = "/placeholder-logo.png"; 
-  try {
-    const logoBlob = await head('logo.png', { cache: 'no-store' });
-    logoUrl = logoBlob.url;
-  } catch (error) {
-    console.warn("page.js: Could not fetch 'logo.png'.");
-  }
-  
-  let bannerUrl = "";
-  try {
-    const bannerBlob = await head('background.png', { cache: 'no-store' });
-    bannerUrl = bannerBlob.url;
-  } catch (error) {
-    console.warn("page.js: Could not fetch 'background.png'.", error.message);
-  }
+export async function generateMetadata() {
+  let settings = { websiteTitle: "Ilyas Mobile Mall" };
+  let logoUrl = "/placeholder-logo.png";
 
   try {
-    const settingsBlob = await head('settings.json', { cache: 'no-store' });
-    const settingsResponse = await fetch(settingsBlob.url, { cache: 'no-store' });
+    const settingsBlob = await head("settings.json", { cache: "no-store" });
+    const settingsResponse = await fetch(settingsBlob.url, { cache: "no-store" });
     if (settingsResponse.ok) {
       const textData = await settingsResponse.text();
       if (textData) settings = JSON.parse(textData);
     }
-  } catch (error) {
-    console.warn("page.js: Could not fetch 'settings.json'.", error.message);
+  } catch (e) {
+    console.warn("layout.js: Could not fetch 'settings.json'.");
   }
 
   try {
-    const dataBlob = await head('data.json', { cache: 'no-store' });
-    const dataResponse = await fetch(dataBlob.url, { cache: 'no-store' });
-    if (dataResponse.ok) {
-      const textData = await dataResponse.text();
-      if (textData) products = JSON.parse(textData);
-    }
-  } catch (error) {
-    console.warn("page.js: Could not fetch 'data.json'.", error.message);
+    const logoBlob = await head("logo.png", { cache: "no-store" });
+    logoUrl = logoBlob.url;
+  } catch (e) {
+    console.warn("layout.js: Could not fetch 'logo.png'.");
   }
 
-  return { settings, products, logoUrl, bannerUrl };
+  return {
+    title: settings.websiteTitle || "Ilyas Mobile Mall",
+    description: "Your one-stop mobile shop.",
+    icons: {
+      icon: logoUrl,
+      apple: logoUrl,
+    },
+  };
 }
 
-
-// --- مین ہوم پیج ---
-export default async function HomePage() {
-  const { settings, products, logoUrl, bannerUrl } = await getBlobData();
-  
-  // --- حل 2: 'max-w-6xl' کنٹینر کو یہاں واپس لائیں ---
+export default function RootLayout({ children }) {
   return (
-    <div className="max-w-6xl mx-auto"> 
-      {/* یہ کلاس صرف ہوم پیج پر لاگو ہو گی */}
-      <HomePageClient 
-        initialProducts={products} 
-        settings={settings} 
-        logoUrl={logoUrl}
-        bannerUrl={bannerUrl}
-      />
-    </div>
+    <html lang="en" dir="ltr">
+      <head>
+        {/* ✅ یہ لائن بہت اہم ہے: یہ viewport fix کر دیتی ہے */}
+        <meta
+          name="viewport"
+          content="width=1200, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
+
+        {/* ✅ Google Ads Script */}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1963262096178695"
+          crossOrigin="anonymous"
+          strategy="lazyOnload"
+        />
+      </head>
+
+      <body className={`${inter.className} bg-gray-900`}>
+        {/* ✅ پورا صفحہ desktop width پر fix */}
+        <div className="max-w-full mx-auto bg-gray-800 min-h-screen overflow-x-hidden">
+          {children}
+        </div>
+      </body>
+    </html>
   );
-  // --- حل ختم ---
 }
