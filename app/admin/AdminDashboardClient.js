@@ -42,8 +42,8 @@ export default function AdminDashboardClient({ logoUrl, passwordQuery, children 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   // 'searchTerm' اور 'handleDelete' وغیرہ کو ProductList کمپوننٹ میں منتقل کر دیا گیا ہے
   
-  const cacheBustedLogoSrc = `${logoUrl}?v=${new Date().getTime()}`;
-
+  // ✅ صحیح کوڈ (کیشنگ کے لیے)
+  const cacheBustedLogoSrc = logoUrl;
   return (
     <div className="relative min-h-screen bg-gray-50 pb-20">
       {/* --- ہیڈر (یہ فوراً لوڈ ہو گا) --- */}
