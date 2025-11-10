@@ -26,15 +26,15 @@ export default function RootLayout({ children }) {
         />
       </head>
       
-      {/* --- یہ ہے حل: ڈارک موڈ ---
-          'bg-gray-100' کو 'bg-gray-900' سے بدل دیا ہے (باہر کا بیک گراؤنڈ)
-      --- */}
+      {/* --- یہ ہے حل: ڈیسک ٹاپ لے آؤٹ --- */}
+      {/* 1. باہر کا بیک گراؤنڈ گہرا گرے ہے */}
       <body className={`${inter.className} bg-gray-900`}>
-        {/* 'bg-white' کو 'bg-gray-800' سے بدل دیا ہے (اندر کا بیک گراؤنڈ) */}
-        <div className="max-w-md mx-auto bg-gray-800 min-h-screen shadow-lg">
+        {/* 2. 'max-w-md' (موبائل) کو 'max-w-6xl' (ڈیسک ٹاپ) سے بدل دیا ہے */}
+        <div className="max-w-6xl mx-auto bg-gray-800 min-h-screen shadow-lg">
           {children}
         </div>
       </body>
+      {/* --- حل ختم --- */}
     </html>
   );
 }
