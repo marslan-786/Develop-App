@@ -37,50 +37,31 @@ function IconClose() {
 // --- (آئیکنز ختم) ---
 
 
-// --- Header Component (ڈارک موڈ کے لیے اپ ڈیٹ شدہ) ---
+// --- Header Component (ویسا ہی) ---
 function AppHeader({ title, logoSrc, onMenuClick, onSearchClick }) {
   const cacheBustedLogoSrc = `${logoSrc}?v=${new Date().getTime()}`;
   return (
-    // 'bg-white' کو 'bg-gray-900' سے بدل دیا
-    <header className="sticky top-0 z-20 flex items-center justify-between p-4 bg-gray-900 shadow-md">
-      {/* آئیکن کے رنگ کو ڈارک موڈ کے لیے اپ ڈیٹ کیا */}
-      <button onClick={onMenuClick} className="p-2 rounded-full text-gray-300 hover:bg-gray-700">
+    <header className="sticky top-0 z-20 flex items-center justify-between p-4 bg-white shadow-md">
+      <button onClick={onMenuClick} className="p-2 rounded-full hover:bg-gray-100">
         <IconMenu />
       </button>
       <div className="flex items-center gap-2">
-        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-600 flex-shrink-0">
+        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
           <Image src={cacheBustedLogoSrc} alt="Logo" width={40} height={40} className="object-cover" priority unoptimized />
         </div>
         <h1 className="text-xl font-bold whitespace-nowrap animated-gradient-text">{title}</h1>
-        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-600 flex-shrink-0">
+        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
           <Image src={cacheBustedLogoSrc} alt="Logo" width={40} height={40} className="object-cover" priority unoptimized />
         </div>
       </div>
-      <button onClick={onSearchClick} className="p-2 rounded-full text-gray-300 hover:bg-gray-700">
+      <button onClick={onSearchClick} className="p-2 rounded-full hover:bg-gray-100">
         <IconSearch />
       </button>
     </header>
   );
 }
 
-// --- نیا: ہیرو بینر (Hero Banner) ---
-function HeroBanner() {
-  // بعد میں آپ اسے ایڈمن پینل سے بھی کنٹرول کر سکتے ہیں
-  return (
-    <div className="w-full h-40 bg-gray-700 relative flex items-center justify-center">
-      {/* آپ یہاں 'next/image' استعمال کر سکتے ہیں جب آپ کے پاس بینر ہو */}
-      {/* <Image src="/path-to-your-banner.jpg" layout="fill" objectFit="cover" alt="Banner" /> */}
-      <h2 className="text-3xl font-bold text-white z-10">
-        EVOLVE YOUR TECH
-      </h2>
-      <div className="absolute inset-0 bg-black/30"></div> {/* اوورلے */}
-    </div>
-  );
-}
-// --- (بینر ختم) ---
-
-
-// --- فلٹر ببلز (ڈارک موڈ کے لیے اپ ڈیٹ شدہ) ---
+// --- فلٹر ببلز (Bubbles) کمپوننٹ (ویسا ہی) ---
 const filters = [
   { id: 'all', label: 'All' },
   { id: 'low-range', label: 'Low Range (< 20k)' },
@@ -91,8 +72,7 @@ const filters = [
 
 function FilterBubbles({ activeFilter, onFilterChange }) {
   return (
-    // 'bg-white/80' کو 'bg-gray-900/80' سے بدل دیا
-    <div className="sticky top-[73px] z-10 p-4 bg-gray-900/80 backdrop-blur-sm border-b border-gray-700">
+    <div className="sticky top-[73px] z-10 p-4 bg-white/80 backdrop-blur-sm border-b">
       <div className="flex items-center gap-2 overflow-x-auto">
         {filters.map(filter => (
           <button
@@ -101,7 +81,7 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
             className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors
               ${activeFilter === filter.id 
                 ? 'bg-blue-600 text-white' 
-                : 'bg-gray-700 text-gray-200 hover:bg-gray-600' // ڈارک موڈ اسٹائل
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }
             `}
           >
@@ -110,7 +90,7 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
         ))}
         <button 
           onClick={() => alert('Advanced Filter (Price Range) coming soon!')}
-          className="p-2 rounded-full bg-gray-700 text-gray-200 hover:bg-gray-600"
+          className="p-2 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200"
         >
           <IconFilter />
         </button>
@@ -129,8 +109,8 @@ function ProductCard({ product, index, style }) { // <-- 'style' prop لیں
   const animationVariants = {
     hidden: { 
       opacity: 0, 
-      // آئٹم 0 (لیفٹ) رائٹ سے (+100) آئے گا
-      // آئٹم 1 (رائٹ) لیفٹ سے (-100) آئے گا
+      // جو لیفٹ (index 0) پر ہے وہ رائٹ (100) سے آئے گا
+      // جو رائٹ (index 1) پر ہے وہ لیفٹ (-100) سے آئے گا
       x: index % 2 === 0 ? 100 : -100 
     },
     visible: { 
@@ -143,12 +123,14 @@ function ProductCard({ product, index, style }) { // <-- 'style' prop لیں
   return (
     <motion.div
       // --- یہ ہے حل 2: کارڈ کا رنگ ---
-      className={`rounded-lg overflow-hidden shadow-lg flex flex-col ${style.bg}`}
+      // 'bg-white' کو ہٹا دیا گیا ہے اور 'style.bg' (بیک گراؤنڈ) کو شامل کیا گیا ہے
+      className={`border rounded-lg overflow-hidden shadow-sm flex flex-col ${style.bg}`}
       variants={animationVariants}
       initial="hidden"
       whileInView="visible"
       // --- یہ ہے حل 3: اینیمیشن ہر بار ---
-      viewport={{ once: false, amount: 0.3 }} // 'once: true' کو 'false' کر دیا
+      // 'once: true' کو 'once: false' سے بدل دیا گیا ہے (یا مکمل ہٹا دیں)
+      viewport={{ once: false, amount: 0.3 }}
       // --- حل ختم ---
       transition={{ duration: 0.5 }}
     >
@@ -162,16 +144,18 @@ function ProductCard({ product, index, style }) { // <-- 'style' prop لیں
         />
       </div>
       
-      {/* --- یہ ہے حل 2 (جاری): ٹیکسٹ کا رنگ --- */}
+      {/* --- یہ ہے حل 2 (جاری): ٹیکسٹ کا رنگ ---
+          'bg-white' کو ہٹا دیا گیا ہے اور 'style.text' (ٹیکسٹ کا رنگ) شامل کیا گیا ہے
+      --- */}
       <div className={`p-3 flex-grow flex flex-col ${style.text}`}>
         <h3 className="text-lg font-semibold break-words min-h-[4rem]">{product.name}</h3>
         <p className="text-sm opacity-80 truncate mt-1">{product.detail}</p>
         <p className="text-lg font-bold mt-2">PKR {product.price}</p>
         
-        {/* بٹن اسٹائل کو اپ ڈیٹ کیا تاکہ یہ رنگین بیک گراؤنڈ پر اچھا لگے */}
+        {/* اینیمیٹڈ بٹن (یہ اب رنگین بیک گراؤنڈ پر بھی اچھا لگے گا) */}
         <Link 
           href={`/product/${product.id}`}
-          className="mt-3 w-full text-center bg-white/20 text-white py-2 rounded-lg text-sm font-medium hover:bg-white/30 transition-colors"
+          className="mt-3 w-full text-center text-white py-2 rounded-lg text-sm font-medium transition-all duration-300 animated-gradient-button"
         >
           View Details
         </Link>
@@ -180,16 +164,16 @@ function ProductCard({ product, index, style }) { // <-- 'style' prop لیں
   );
 }
 
-// --- Sidebar Component (ڈارک موڈ کے لیے اپ ڈیٹ شدہ) ---
+// --- Sidebar Component (ویسا ہی) ---
 function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
+  // ... (پہلے جیسا کوڈ) ...
   return (
     <>
       {isOpen && <div className="fixed inset-0 z-30 bg-black/50" onClick={onClose}></div>}
-      {/* 'bg-white' کو 'bg-gray-800' سے بدل دیا */}
-      <div className={`fixed top-0 left-0 z-40 w-64 h-full bg-gray-800 shadow-lg transition-transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex justify-between items-center p-4 border-b border-gray-700">
-          <h2 className="font-bold text-lg text-white">Filter by Brand</h2>
-          <button onClick={onClose} className="p-2 rounded-full text-gray-300 hover:bg-gray-700">
+      <div className={`fixed top-0 left-0 z-40 w-64 h-full bg-white shadow-lg transition-transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex justify-between items-center p-4 border-b">
+          <h2 className="font-bold text-lg">Filter by Brand</h2>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100">
             <IconClose />
           </button>
         </div>
@@ -198,12 +182,7 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
             <li key="all-brands">
               <button 
                 onClick={() => onSelectBrand(null)} 
-                className={`w-full text-left p-2 rounded-lg mb-1
-                  ${!selectedBrand 
-                    ? 'bg-blue-600 text-white font-semibold' 
-                    : 'text-gray-300 hover:bg-gray-700'
-                  }
-                `}
+                className={`w-full text-left p-2 rounded-lg mb-1 ${!selectedBrand ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-100'}`}
               >
                 All Brands
               </button>
@@ -212,12 +191,7 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
               <li key={brand}>
                 <button 
                   onClick={() => onSelectBrand(brand)} 
-                  className={`w-full text-left p-2 rounded-lg mb-1
-                    ${selectedBrand === brand 
-                      ? 'bg-blue-600 text-white font-semibold' 
-                      : 'text-gray-300 hover:bg-gray-700'
-                    }
-                  `}
+                  className={`w-full text-left p-2 rounded-lg mb-1 ${selectedBrand === brand ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-100'}`}
                 >
                   {brand}
                 </button>
@@ -230,23 +204,21 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
   );
 }
 
-// --- SearchBar Component (ڈارک موڈ کے لیے اپ ڈیٹ شدہ) ---
+// --- SearchBar Component (ویسا ہی) ---
 function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
   if (!isSearchOpen) return null;
-  // 'bg-gray-50' کو 'bg-gray-800' سے بدل دیا
   return (
-    <div className="sticky top-[149px] z-10 p-4 bg-gray-800 border-b border-gray-700">
+    <div className="sticky top-[149px] z-10 p-4 bg-gray-50 border-b">
       <div className="relative">
         <input
           type="text"
           placeholder="Search products by name or brand..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.glowing.value)}
-          // ڈارک موڈ ان پٹ اسٹائل
-          className="w-full p-2 pr-10 bg-gray-700 text-white border border-gray-600 rounded-lg shadow-sm"
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full p-2 pr-10 border rounded-lg shadow-sm"
           autoFocus
         />
-        <button onClick={onClose} className="absolute right-2 top-1.2 -translate-y-1.2 p-1 text-gray-400 hover:text-gray-200">
+        <button onClick={onClose} className="absolute right-2 top-1.2 -translate-y-1.2 p-1 text-gray-400 hover:text-gray-700">
           <IconClose />
         </button>
       </div>
@@ -261,16 +233,17 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState(null);
-  const [quickFilter, setQuickFilter] = useState('all'); 
+  const [quickFilter, setQuickFilter] = useState('all');
 
   // --- یہ ہے حل 4: کارڈز کے لیے نئی کلر پیلیٹ ---
+  // (اسکرین شاٹ سے متاثر ہو کر)
   const cardStyles = [
-    { bg: 'bg-blue-600', text: 'text-white' }, 
-    { bg: 'bg-pink-600', text: 'text-white' }, 
-    { bg: 'bg-lime-500', text: 'text-gray-900' },
-    { bg: 'bg-purple-600', text: 'text-white' },
-    { bg: 'bg-gray-900', text: 'text-white' },
-    { bg: 'bg-yellow-400', text: 'text-gray-900' },
+    { bg: 'bg-red-500', text: 'text-white' }, // سرخ
+    { bg: 'bg-gray-800', text: 'text-white' }, // کالا
+    { bg: 'bg-yellow-400', text: 'text-gray-800' }, // پیلا
+    { bg: 'bg-blue-500', text: 'text-white' }, // نیلا
+    { bg: 'bg-green-500', text: 'text-white' }, // سبز
+    { bg: 'bg-indigo-600', text: 'text-white' }  // جامنی
   ];
   // --- حل ختم ---
 
@@ -316,8 +289,6 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
         onSearchClick={() => { setIsSearchOpen(prev => !prev); setIsMenuOpen(false); }}
       />
       
-      <HeroBanner /> {/* <-- نیا بینر یہاں شامل کیا */}
-
       <Sidebar 
         isOpen={isMenuOpen} 
         onClose={() => setIsMenuOpen(false)} 
@@ -346,6 +317,7 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
                 key={product.id || product.name} 
                 product={product} 
                 index={index}
+                // --- یہ ہے حل 4 (جاری): کلر اسٹائل کو پاس کریں ---
                 style={cardStyles[index % cardStyles.length]}
               />
             ))}
