@@ -4,12 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-// --- Icon Components (ویسے ہی) ---
-function IconSettings() { /* ... (پہلے جیسا کوڈ) ... */ }
-function IconSearch() { /* ... (پہلے جیسا کوڈ) ... */ }
-function IconPlus() { /* ... (پہلے جیسا کوڈ) ... */ }
-function IconClose() { /* ... (پہلے جیسا کوڈ) ... */ }
-// (یہاں آئیکنز کا مکمل کوڈ ہے تاکہ کوئی غلطی نہ ہو)
+// --- Icon Components (صرف ایک بار ڈیفائن کیے گئے) ---
 function IconSettings() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -41,11 +36,9 @@ function IconClose() {
 // --- (آئیکنز ختم) ---
 
 // --- مین ڈیش بورڈ کلائنٹ کمپوننٹ (اپ ڈیٹ شدہ) ---
-// 'initialProducts' کو ہٹا دیا گیا ہے اور '{children}' کو شامل کیا گیا ہے
 export default function AdminDashboardClient({ logoUrl, passwordQuery, children }) {
   const sessionQuery = `?password=${passwordQuery}`;
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  // 'searchTerm' اور 'handleDelete' وغیرہ کو ProductList کمپوننٹ میں منتقل کر دیا گیا ہے
   
   const cacheBustedLogoSrc = `${logoUrl}?v=${new Date().getTime()}`;
 
@@ -70,12 +63,10 @@ export default function AdminDashboardClient({ logoUrl, passwordQuery, children 
         </button>
       </header>
       
-      {/* سرچ بار کو بھی 'ProductList' میں منتقل کر دیا گیا ہے */}
-
-      {/* --- یہ ہے حل 1 (جاری) --- */}
       {/* پروڈکٹ لسٹ (جو سست ہے) یہاں رینڈر ہو گی جب وہ تیار ہو گی */}
+      {/* 'isSearchOpen' کو 'children' کو پاس کریں (یہ غلطی تھی، اب یہ ProductListClient میں ہے) */}
+      {/* ہم 'children' کو براہ راست رینڈر کریں گے، جو 'Suspense' اور 'ProductList' کو سنبھالے گا */}
       {children}
-      {/* --- حل ختم --- */}
 
 
       {/* --- فلوٹنگ '+' بٹن (یہ فوراً لوڈ ہو گا) --- */}
