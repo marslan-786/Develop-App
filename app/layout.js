@@ -5,7 +5,6 @@ import { head } from '@vercel/blob';
 
 const inter = Inter({ subsets: ["latin"] });
 
-// --- ڈائنامک ٹائٹل اور آئیکن ---
 export async function generateMetadata() {
   let settings = { websiteTitle: "Ilyas Mobile Mall" };
   let logoUrl = "/placeholder-logo.png";
@@ -17,12 +16,12 @@ export async function generateMetadata() {
       const textData = await settingsResponse.text();
       if (textData) settings = JSON.parse(textData);
     }
-  } catch (e) {}
+  } catch (e) { /* ... */ }
 
   try {
     const logoBlob = await head('logo.png', { cache: 'no-store' });
     logoUrl = logoBlob.url;
-  } catch (e) {}
+  } catch (e) { /* ... */ }
 
   return {
     title: settings.websiteTitle || "Ilyas Mobile Mall",
@@ -31,7 +30,9 @@ export async function generateMetadata() {
       icon: logoUrl,
       apple: logoUrl,
     },
-    viewport: 'width=1200, user-scalable=no, maximum-scale=1', // ✅ ہمیشہ ڈیسک ٹاپ
+    // --- یہ ہے حل: 'viewport' کو یہاں سے ہٹا دیں ---
+    // viewport: 'width=1200', // <-- اس لائن کو ڈیلیٹ کر دیں
+    // --- حل ختم ---
   };
 }
 
@@ -43,12 +44,13 @@ export default function RootLayout({ children }) {
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1963262096178695" 
           crossOrigin="anonymous"
-          strategy="lazyOnload"
+          strategy="lazyOnload" 
         />
       </head>
       
-      <body className="bg-gray-900">
-        <div className="w-[1200px] mx-auto bg-gray-800 min-h-screen shadow-lg overflow-x-auto">
+      <body className={`${inter.className} bg-gray-900`}>
+        {/* 'max-w-6xl' (ڈیسک ٹاپ) کو 'max-w-full' (فل وڈتھ) سے بدل دیں */}
+        <div className="max-w-full mx-auto bg-gray-800 min-h-screen">
           {children}
         </div>
       </body>
