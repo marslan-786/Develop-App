@@ -155,7 +155,7 @@ function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
 
 // --- مین کلائنٹ کمپوننٹ (ویسا ہی) ---
 export default function HomePageClient({ initialProducts, settings, logoUrl }) {
-  const [isMenuOpen, setIsMenuOpen] =useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState(null);
