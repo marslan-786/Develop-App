@@ -30,9 +30,12 @@ export async function generateMetadata() {
       icon: logoUrl,
       apple: logoUrl,
     },
-    // --- یہ ہے حل: 'viewport' کو یہاں سے ہٹا دیں ---
-    // viewport: 'width=1200', // <-- اس لائن کو ڈیلیٹ کر دیں
-    // --- حل ختم ---
+    
+    // --- تبدیلی 1: 'viewport' کو اس آبجیکٹ سے بدل دیا گیا ہے ---
+    viewport: {
+      width: 1200,
+    },
+    // --- تبدیلی ختم ---
   };
 }
 
@@ -49,10 +52,11 @@ export default function RootLayout({ children }) {
       </head>
       
       <body className={`${inter.className} bg-gray-900`}>
-        {/* 'max-w-6xl' (ڈیسک ٹاپ) کو 'max-w-full' (فل وڈتھ) سے بدل دیں */}
-        <div className="max-w-full mx-auto bg-gray-800 min-h-screen">
+        {/* --- تبدیلی 2: 'max-w-full' کو 'max-w-6xl' سے بدل دیا گیا ہے --- */}
+        <div className="max-w-6xl mx-auto bg-gray-800 min-h-screen">
           {children}
         </div>
+        {/* --- تبدیلی ختم --- */}
       </body>
     </html>
   );
