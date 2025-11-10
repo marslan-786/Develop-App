@@ -6,13 +6,6 @@ import Link from 'next/link';
 import { motion } from 'framer-motion'; // اینیمیشن کے لیے
 
 // --- Icon Components (صرف ایک بار ڈیفائن کیے گئے) ---
-function IconFilter() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 7.963.648a.75.75 0 0 1 .488.901l-1.118 4.473a.75.75 0 0 0 .14.54l3.175 3.174a.75.75 0 0 1-.53 1.28H4.218a.75.75 0 0 1-.53-1.28l3.175-3.174a.75.75 0 0 0 .14-.54L5.89 4.55a.75.75 0 0 1 .488-.901A47.384 47.384 0 0 1 12 3Z" />
-    </svg>
-  );
-}
 function IconMenu() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -37,63 +30,81 @@ function IconClose() {
 // --- (آئیکنز ختم) ---
 
 
-// --- Header Component (ویسا ہی) ---
-function AppHeader({ title, logoSrc, onMenuClick, onSearchClick }) {
-  const cacheBustedLogoSrc = `${logoSrc}?v=${new Date().getTime()}`;
+// --- 1. نیا ہیڈر (اسکرین شاٹ کے مطابق) ---
+function AppHeader({ title, onMenuClick, onSearchClick }) {
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between p-4 bg-white shadow-md">
-      <button onClick={onMenuClick} className="p-2 rounded-full hover:bg-gray-100">
-        <IconMenu />
-      </button>
-      <div className="flex items-center gap-2">
-        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
-          <Image src={cacheBustedLogoSrc} alt="Logo" width={40} height={40} className="object-cover" priority unoptimized />
-        </div>
-        <h1 className="text-xl font-bold whitespace-nowrap animated-gradient-text">{title}</h1>
-        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
-          <Image src={cacheBustedLogoSrc} alt="Logo" width={40} height={40} className="object-cover" priority unoptimized />
-        </div>
+    <header className="sticky top-0 z-20 flex items-center justify-between p-4 bg-gray-900 shadow-md border-b border-gray-700">
+      <div className="flex items-center gap-4">
+        <button onClick={onMenuClick} className="p-2 rounded-full text-gray-300 hover:bg-gray-700">
+          <IconMenu />
+        </button>
+        <span className="text-xl font-bold text-white">{title}</span>
       </div>
-      <button onClick={onSearchClick} className="p-2 rounded-full hover:bg-gray-100">
-        <IconSearch />
-      </button>
+      <div className="flex items-center gap-4">
+        <button onClick={onSearchClick} className="p-2 rounded-full text-gray-300 hover:bg-gray-700">
+          <IconSearch />
+        </button>
+        {/* آپ بعد میں کارٹ اور یوزر آئیکن یہاں شامل کر سکتے ہیں */}
+      </div>
     </header>
   );
 }
+// --- (نیا ہیڈر ختم) ---
 
-// --- فلٹر ببلز (Bubbles) کمپوننٹ (ویسا ہی) ---
+// --- 2. نیا ہیرو بینر (Hero Banner) ---
+function HeroBanner({ bannerUrl, title, settings }) {
+  const cacheBustedBannerUrl = `${bannerUrl}?v=${new Date().getTime()}`;
+  return (
+    <div className="w-full h-64 bg-gray-700 relative flex items-center justify-start p-10">
+      {/* بینر امیج */}
+      <Image 
+        src={cacheBustedBannerUrl} 
+        layout="fill" 
+        objectFit="cover" 
+        alt="Banner" 
+        className="opacity-30" // تصویر کو مدھم (dim) کیا
+        unoptimized
+        priority
+      />
+      
+      {/* بینر ٹیکسٹ (آپ کی ریکوائرمنٹ کے مطابق) */}
+      <div className="z-10 text-white space-y-2">
+        <h2 className="text-4xl font-bold">{title}</h2>
+        <p className="text-lg">{settings.address || 'Your Address Here'}</p>
+        <p className="text-lg">{settings.whatsappNumber || 'Your Phone Number Here'}</p>
+      </div>
+    </div>
+  );
+}
+// --- (بینر ختم) ---
+
+
+// --- 3. نئے فلٹر ببلز (Bubbles) ---
 const filters = [
-  { id: 'all', label: 'All' },
-  { id: 'low-range', label: 'Low Range (< 20k)' },
-  { id: 'gaming', label: 'Gaming' },
+  { id: 'low-range', label: 'Low Range' },
   { id: 'pta', label: 'PTA Approved' },
-  { id: 'non-pta', label: 'Non-PTA' },
+  { id: 'gaming', label: 'Gaming' },
 ];
 
 function FilterBubbles({ activeFilter, onFilterChange }) {
   return (
-    <div className="sticky top-[73px] z-10 p-4 bg-white/80 backdrop-blur-sm border-b">
-      <div className="flex items-center gap-2 overflow-x-auto">
+    <div className="sticky top-[73px] z-10 p-4 bg-gray-900/80 backdrop-blur-sm border-b border-gray-700">
+      <div className="flex items-center gap-3">
         {filters.map(filter => (
           <button
             key={filter.id}
+            // --- 4. نئی ٹاگل (Toggle) لاجک ---
             onClick={() => onFilterChange(filter.id)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors
+            className={`px-5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors
               ${activeFilter === filter.id 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-pink-600 text-white' // ایکٹیو (Active)
+                : 'bg-gray-700 text-gray-200 hover:bg-gray-600' // ان-ایکٹیو
               }
             `}
           >
             {filter.label}
           </button>
         ))}
-        <button 
-          onClick={() => alert('Advanced Filter (Price Range) coming soon!')}
-          className="p-2 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200"
-        >
-          <IconFilter />
-        </button>
       </div>
     </div>
   );
@@ -101,40 +112,40 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
 // --- (فلٹر ببلز ختم) ---
 
 
-// --- Product Card Component (مکمل اپ گریڈ شدہ) ---
-function ProductCard({ product, index, style }) { // <-- 'style' prop لیں
+// --- 5. Product Card Component (مکمل اپ گریڈ شدہ) ---
+function ProductCard({ product, index, style }) {
   const cacheBustedImageUrl = `${product.imageUrl || "/placeholder-image.png"}?v=${new Date().getTime()}`;
 
-  // --- یہ ہے حل 1: کراس اوور اینیمیشن ---
+  // --- 6. نئی اینیمیشن لاجک (3 کالم کے لیے) ---
   const animationVariants = {
     hidden: { 
       opacity: 0, 
-      // جو لیفٹ (index 0) پر ہے وہ رائٹ (100) سے آئے گا
-      // جو رائٹ (index 1) پر ہے وہ لیفٹ (-100) سے آئے گا
-      x: index % 2 === 0 ? 100 : -100 
+      // کالم 0 (لیفٹ) رائٹ سے آئے گا
+      // کالم 1 (مڈل) نیچے سے آئے گا
+      // کالم 2 (رائٹ) لیفٹ سے آئے گا
+      x: index % 3 === 0 ? 100 : (index % 3 === 1 ? 0 : -100),
+      y: index % 3 === 1 ? 50 : 0
     },
     visible: { 
       opacity: 1, 
-      x: 0 
+      x: 0,
+      y: 0 
     },
   };
   // --- حل ختم ---
 
   return (
     <motion.div
-      // --- یہ ہے حل 2: کارڈ کا رنگ ---
-      // 'bg-white' کو ہٹا دیا گیا ہے اور 'style.bg' (بیک گراؤنڈ) کو شامل کیا گیا ہے
-      className={`border rounded-lg overflow-hidden shadow-sm flex flex-col ${style.bg}`}
+      // --- 7. کارڈ کا رنگ ---
+      className={`rounded-lg overflow-hidden shadow-lg flex flex-col ${style.bg}`}
       variants={animationVariants}
       initial="hidden"
       whileInView="visible"
-      // --- یہ ہے حل 3: اینیمیشن ہر بار ---
-      // 'once: true' کو 'once: false' سے بدل دیا گیا ہے (یا مکمل ہٹا دیں)
+      // --- اینیمیشن ہر بار ---
       viewport={{ once: false, amount: 0.3 }}
-      // --- حل ختم ---
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.5, delay: 0.1 }}
     >
-      <div className="w-full h-40 relative">
+      <div className="w-full h-56 relative"> {/* تصویر کا سائز بڑا کیا */}
         <Image 
           src={cacheBustedImageUrl} 
           alt={product.name} 
@@ -144,36 +155,34 @@ function ProductCard({ product, index, style }) { // <-- 'style' prop لیں
         />
       </div>
       
-      {/* --- یہ ہے حل 2 (جاری): ٹیکسٹ کا رنگ ---
-          'bg-white' کو ہٹا دیا گیا ہے اور 'style.text' (ٹیکسٹ کا رنگ) شامل کیا گیا ہے
-      --- */}
-      <div className={`p-3 flex-grow flex flex-col ${style.text}`}>
-        <h3 className="text-lg font-semibold break-words min-h-[4rem]">{product.name}</h3>
-        <p className="text-sm opacity-80 truncate mt-1">{product.detail}</p>
-        <p className="text-lg font-bold mt-2">PKR {product.price}</p>
+      {/* --- 8. ٹیکسٹ کا رنگ --- */}
+      <div className={`p-4 flex-grow flex flex-col ${style.text}`}>
+        <h3 className="text-xl font-semibold break-words min-h-[3.5rem]">{product.name}</h3>
+        <p className="text-md opacity-80 truncate mt-1">PKR {product.price}</p>
         
-        {/* اینیمیٹڈ بٹن (یہ اب رنگین بیک گراؤنڈ پر بھی اچھا لگے گا) */}
+        {/* بٹن اسٹائل (اسکرین شاٹ جیسا) */}
         <Link 
           href={`/product/${product.id}`}
-          className="mt-3 w-full text-center text-white py-2 rounded-lg text-sm font-medium transition-all duration-300 animated-gradient-button"
+          className={`mt-4 w-auto self-start px-4 py-1.5 rounded-lg text-sm font-medium ${style.button} transition-all duration-300`}
         >
-          View Details
+          View Product
         </Link>
       </div>
     </motion.div>
   );
 }
+// --- (کارڈ ختم) ---
 
-// --- Sidebar Component (ویسا ہی) ---
+
+// --- Sidebar Component (ڈارک موڈ کے لیے اپ ڈیٹ شدہ) ---
 function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
-  // ... (پہلے جیسا کوڈ) ...
   return (
     <>
       {isOpen && <div className="fixed inset-0 z-30 bg-black/50" onClick={onClose}></div>}
-      <div className={`fixed top-0 left-0 z-40 w-64 h-full bg-white shadow-lg transition-transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="font-bold text-lg">Filter by Brand</h2>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100">
+      <div className={`fixed top-0 left-0 z-40 w-64 h-full bg-gray-800 shadow-lg transition-transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex justify-between items-center p-4 border-b border-gray-700">
+          <h2 className="font-bold text-lg text-white">Filter by Brand</h2>
+          <button onClick={onClose} className="p-2 rounded-full text-gray-300 hover:bg-gray-700">
             <IconClose />
           </button>
         </div>
@@ -182,7 +191,7 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
             <li key="all-brands">
               <button 
                 onClick={() => onSelectBrand(null)} 
-                className={`w-full text-left p-2 rounded-lg mb-1 ${!selectedBrand ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-100'}`}
+                className={`w-full text-left p-2 rounded-lg mb-1 ${!selectedBrand ? 'bg-blue-600 text-white font-semibold' : 'text-gray-300 hover:bg-gray-700'}`}
               >
                 All Brands
               </button>
@@ -191,7 +200,7 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
               <li key={brand}>
                 <button 
                   onClick={() => onSelectBrand(brand)} 
-                  className={`w-full text-left p-2 rounded-lg mb-1 ${selectedBrand === brand ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-100'}`}
+                  className={`w-full text-left p-2 rounded-lg mb-1 ${selectedBrand === brand ? 'bg-blue-600 text-white font-semibold' : 'text-gray-300 hover:bg-gray-700'}`}
                 >
                   {brand}
                 </button>
@@ -204,21 +213,21 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
   );
 }
 
-// --- SearchBar Component (ویسا ہی) ---
+// --- SearchBar Component (ڈارک موڈ کے لیے اپ ڈیٹ شدہ) ---
 function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
   if (!isSearchOpen) return null;
   return (
-    <div className="sticky top-[149px] z-10 p-4 bg-gray-50 border-b">
+    <div className="sticky top-[141px] z-10 p-4 bg-gray-800 border-b border-gray-700">
       <div className="relative">
         <input
           type="text"
           placeholder="Search products by name or brand..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full p-2 pr-10 border rounded-lg shadow-sm"
+          className="w-full p-2 pr-10 bg-gray-700 text-white border border-gray-600 rounded-lg shadow-sm"
           autoFocus
         />
-        <button onClick={onClose} className="absolute right-2 top-1.2 -translate-y-1.2 p-1 text-gray-400 hover:text-gray-700">
+        <button onClick={onClose} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-200">
           <IconClose />
         </button>
       </div>
@@ -227,23 +236,19 @@ function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
 }
 
 
-// --- اپ ڈیٹ شدہ: مین کلائنٹ کمپوننٹ ---
-export default function HomePageClient({ initialProducts, settings, logoUrl }) {
+// --- 9. اپ ڈیٹ شدہ: مین کلائنٹ کمپوننٹ ---
+export default function HomePageClient({ initialProducts, settings, logoUrl, bannerUrl }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState(null);
-  const [quickFilter, setQuickFilter] = useState('all');
+  const [quickFilter, setQuickFilter] = useState('all'); // 'all' کا مطلب ہے کوئی فلٹر نہیں
 
-  // --- یہ ہے حل 4: کارڈز کے لیے نئی کلر پیلیٹ ---
-  // (اسکرین شاٹ سے متاثر ہو کر)
+  // --- 10. کارڈز کے لیے نئی کلر پیلیٹ (اسکرین شاٹ جیسی) ---
   const cardStyles = [
-    { bg: 'bg-red-500', text: 'text-white' }, // سرخ
-    { bg: 'bg-gray-800', text: 'text-white' }, // کالا
-    { bg: 'bg-yellow-400', text: 'text-gray-800' }, // پیلا
-    { bg: 'bg-blue-500', text: 'text-white' }, // نیلا
-    { bg: 'bg-green-500', text: 'text-white' }, // سبز
-    { bg: 'bg-indigo-600', text: 'text-white' }  // جامنی
+    { bg: 'bg-blue-600', text: 'text-white', button: 'bg-white/20 text-white hover:bg-white/30' }, 
+    { bg: 'bg-pink-600', text: 'text-white', button: 'bg-white/20 text-white hover:bg-white/30' }, 
+    { bg: 'bg-lime-500', text: 'text-gray-900', button: 'bg-gray-900/20 text-gray-900 hover:bg-gray-900/30' },
   ];
   // --- حل ختم ---
 
@@ -253,7 +258,11 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
     return [...new Set(brands.filter(b => b))]; 
   }, [initialProducts]);
 
-  // اپ ڈیٹ شدہ: فلٹر کی مکمل لاجک
+  // --- 11. نئی فلٹر لاجک (ببل ٹاگل کے ساتھ) ---
+  const handleFilterChange = (id) => {
+    setQuickFilter(prev => (prev === id ? 'all' : id));
+  };
+
   const filteredProducts = useMemo(() => {
     if (!initialProducts) return [];
     
@@ -265,30 +274,36 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
         : true;
         
       let matchesQuickFilter = true;
-      if (quickFilter === 'low-range') {
-        const price = parseFloat(product.price.replace(/,/g, ''));
-        matchesQuickFilter = price < 20000;
-      } else if (quickFilter === 'gaming') {
-        matchesQuickFilter = (product.detail?.toLowerCase().includes('gaming') || product.name?.toLowerCase().includes('gaming'));
-      } else if (quickFilter === 'pta') {
-        matchesQuickFilter = (product.condition?.toLowerCase().includes('pta approved') || product.detail?.toLowerCase().includes('pta approved'));
-      } else if (quickFilter === 'non-pta') {
-        matchesQuickFilter = (product.condition?.toLowerCase().includes('non-pta') || product.detail?.toLowerCase().includes('non-pta'));
+      if (quickFilter !== 'all') { // اگر فلٹر 'all' نہیں ہے
+        if (quickFilter === 'low-range') {
+          const price = parseFloat(product.price.replace(/,/g, ''));
+          matchesQuickFilter = price < 20000;
+        } else if (quickFilter === 'gaming') {
+          matchesQuickFilter = (product.detail?.toLowerCase().includes('gaming') || product.name?.toLowerCase().includes('gaming'));
+        } else if (quickFilter === 'pta') {
+          matchesQuickFilter = (product.condition?.toLowerCase().includes('pta approved') || product.detail?.toLowerCase().includes('pta approved'));
+        }
       }
 
       return matchesBrand && matchesSearch && matchesQuickFilter;
     });
   }, [initialProducts, searchTerm, selectedBrand, quickFilter]);
+  // --- حل ختم ---
 
   return (
     <main>
       <AppHeader 
-        title={settings.websiteTitle} 
-        logoSrc={logoUrl} 
+        title="softlink.pk" // <-- ٹائٹل آپ کی مرضی کے مطابق
         onMenuClick={() => { setIsMenuOpen(true); setIsSearchOpen(false); }}
         onSearchClick={() => { setIsSearchOpen(prev => !prev); setIsMenuOpen(false); }}
       />
       
+      <HeroBanner 
+        bannerUrl={bannerUrl} 
+        title={settings.websiteTitle || "Ilyas Mobile Mall"}
+        settings={settings} // <-- ایڈریس اور فون نمبر کے لیے
+      />
+
       <Sidebar 
         isOpen={isMenuOpen} 
         onClose={() => setIsMenuOpen(false)} 
@@ -299,7 +314,7 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
 
       <FilterBubbles 
         activeFilter={quickFilter} 
-        onFilterChange={setQuickFilter} 
+        onFilterChange={handleFilterChange} // <-- نئی ٹاگل لاجک
       />
 
       <SearchBar
@@ -309,15 +324,15 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
         onSearchChange={setSearchTerm}
       />
 
-      <div className="p-4">
+      <div className="p-4 md:p-8">
         {filteredProducts && filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 gap-4">
+          // --- 12. گرڈ کو 3 کالم میں تبدیل کیا ---
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {filteredProducts.map((product, index) => (
               <ProductCard 
                 key={product.id || product.name} 
                 product={product} 
                 index={index}
-                // --- یہ ہے حل 4 (جاری): کلر اسٹائل کو پاس کریں ---
                 style={cardStyles[index % cardStyles.length]}
               />
             ))}
