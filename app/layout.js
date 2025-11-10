@@ -7,8 +7,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 // --- ڈائنامک ٹائٹل اور آئیکن ---
 export async function generateMetadata() {
-  let settings = { websiteTitle: "Ilyas Mobile Mall" }; // ڈیفالٹ
-  let logoUrl = "/placeholder-logo.png"; // ڈیفالٹ
+  let settings = { websiteTitle: "Ilyas Mobile Mall" };
+  let logoUrl = "/placeholder-logo.png";
 
   try {
     const settingsBlob = await head('settings.json', { cache: 'no-store' });
@@ -17,16 +17,12 @@ export async function generateMetadata() {
       const textData = await settingsResponse.text();
       if (textData) settings = JSON.parse(textData);
     }
-  } catch (e) {
-    console.warn("layout.js: Could not fetch settings.json for metadata");
-  }
+  } catch (e) { /* ... */ }
 
   try {
     const logoBlob = await head('logo.png', { cache: 'no-store' });
     logoUrl = logoBlob.url;
-  } catch (e) {
-     console.warn("layout.js: Could not fetch logo.png for metadata");
-  }
+  } catch (e) { /* ... */ }
 
   return {
     title: settings.websiteTitle || "Ilyas Mobile Mall",
@@ -36,8 +32,9 @@ export async function generateMetadata() {
       apple: logoUrl,
     },
     // --- یہ ہے حل 1: ڈیسک ٹاپ ویو پورٹ ---
-    // یہ براؤزر کو 1200px چوڑائی پر رینڈر کرنے پر مجبور کرے گا
-    viewport: 'width=1200, initial-scale=1',
+    // 'initial-scale=1' کو ہٹا دیا گیا ہے۔
+    // اب یہ براؤزر کو 1200px پر رینڈر کرنے اور پھر "زوم آؤٹ" کرنے پر مجبور کرے گا۔
+    viewport: 'width=1200',
     // --- حل ختم ---
   };
 }
@@ -55,7 +52,6 @@ export default function RootLayout({ children }) {
       </head>
       
       <body className={`${inter.className} bg-gray-900`}>
-        {/* 'max-w-6xl' (ڈیسک ٹاپ سائز) پہلے سے سیٹ ہے */}
         <div className="max-w-6xl mx-auto bg-gray-800 min-h-screen shadow-lg">
           {children}
         </div>
