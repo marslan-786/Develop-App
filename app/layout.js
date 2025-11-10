@@ -43,7 +43,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        {/* --- فکس 1: یہاں سے بگ والا <meta name="viewport"...> ٹیگ ہٹا دیا گیا ہے --- */}
+        {/* --- فکس 1: Viewport کو 1200px پر لاک کر دیا گیا ہے --- */}
+        <meta name="viewport" content="width=1200" />
+        {/* --- فکس ختم --- */}
 
         <Script
           async
@@ -54,14 +56,12 @@ export default function RootLayout({ children }) {
       </head>
 
       <body className={`${inter.className} bg-gray-900`}>
-        {/* یہ max-w-full ٹھیک ہے، تاکہ ایڈمن پیج responsive رہے */}
-        <div className="max-w-full mx-auto bg-gray-800 min-h-screen overflow-x-hidden relative">
+        {/* --- فکس 2: 'max-w-full', 'overflow-x-hidden' اور 'relative' ہٹا دیا گیا ہے --- */}
+        {/* 'max-w-[1200px]' اور 'mx-auto' کو یہاں سیٹ کیا گیا ہے */}
+        <div className="max-w-[1200px] mx-auto bg-gray-800 min-h-screen">
           {children}
-
-          {/* --- فکس 2: یہاں سے بگ والی 'enforceZoom' اسکرپٹ ہٹا دی گئی ہے --- */}
-          
-          {/* --- فکس 3: یہاں سے بگ والا (اضافی) واٹس ایپ بٹن ہٹا دیا گیا ہے --- */}
         </div>
+        {/* --- فکس ختم --- */}
       </body>
     </html>
   );
