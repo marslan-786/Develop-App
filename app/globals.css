@@ -17,7 +17,7 @@
   }
 }
 
-/* --- Animated Gradient --- */
+/* --- Animated Gradient Text --- */
 @keyframes animated-gradient {
   0% {
     background-position: 0% 50%;
@@ -31,4 +31,17 @@
 }
 
 .animated-gradient-text {
-  background: linear-gradient(-45deg, #4a90e2
+  background: linear-gradient(-45deg, #4a90e2, #9013fe, #50e3c2, #b8e986);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: animated-gradient 6s ease infinite;
+}
+
+/* --- Animated Gradient Button --- */
+.animated-gradient-button {
+  background: linear-gradient(-45deg, #4a90e2, #9013fe, #50e3c2, #b8e986);
+  background-size: 400% 400%;
+  color: white;
+  animation: animated-gradient 6s ease infinite;
+}
