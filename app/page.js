@@ -8,19 +8,26 @@ async function getBlobData() {
   const defaultSettings = { websiteTitle: "Ilyas Mobile Mall" };
   let settings = defaultSettings;
   let products = [];
-  const logoUrl = "https://hnt5qthrn2hkqfn9.public.blob.vercel-storage.com/logo.png";
   
-  // --- یہ ہے حل: بینر امیج URL ---
-  let bannerUrl = ""; // ڈیفالٹ
+  // --- یہ ہے حل 6: لوگو پاتھ ---
+  let logoUrl = "/placeholder-logo.png"; // ڈیفالٹ
+  try {
+    const logoBlob = await head('logo.png', { cache: 'no-store' });
+    logoUrl = logoBlob.url;
+  } catch (error) {
+    console.warn("page.js: Could not fetch 'logo.png'.");
+  }
+  // --- حل ختم ---
+  
+  let bannerUrl = "";
   try {
     const bannerBlob = await head('background.png', { cache: 'no-store' });
     bannerUrl = bannerBlob.url;
   } catch (error) {
-    console.warn("Could not fetch 'background.png'.", error.message);
+    console.warn("page.js: Could not fetch 'background.png'.", error.message);
   }
-  // --- حل ختم ---
 
-  // 1. سیٹنگز Fetch کریں
+  // سیٹنگز Fetch کریں
   try {
     const settingsBlob = await head('settings.json', { cache: 'no-store' });
     const settingsResponse = await fetch(settingsBlob.url, { cache: 'no-store' });
@@ -29,10 +36,10 @@ async function getBlobData() {
       if (textData) settings = JSON.parse(textData);
     }
   } catch (error) {
-    console.warn("Could not fetch 'settings.json'.", error.message);
+    console.warn("page.js: Could not fetch 'settings.json'.", error.message);
   }
 
-  // 2. پروڈکٹس Fetch کریں
+  // پروڈکٹس Fetch کریں
   try {
     const dataBlob = await head('data.json', { cache: 'no-store' });
     const dataResponse = await fetch(dataBlob.url, { cache: 'no-store' });
@@ -41,10 +48,10 @@ async function getBlobData() {
       if (textData) products = JSON.parse(textData);
     }
   } catch (error) {
-    console.warn("Could not fetch 'data.json'.", error.message);
+    console.warn("page.js: Could not fetch 'data.json'.", error.message);
   }
 
-  return { settings, products, logoUrl, bannerUrl }; // <-- bannerUrl کو پاس کریں
+  return { settings, products, logoUrl, bannerUrl };
 }
 
 
@@ -56,7 +63,7 @@ export default async function HomePage() {
       initialProducts={products} 
       settings={settings} 
       logoUrl={logoUrl}
-      bannerUrl={bannerUrl} // <-- bannerUrl کو کلائنٹ کو دیں
+      bannerUrl={bannerUrl}
     />
   );
 }
