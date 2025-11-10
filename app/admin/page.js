@@ -1,12 +1,13 @@
 import { head } from '@vercel/blob';
-import { isValidPassword } from '../../lib/auth.js'; // 2 فولڈر باہر
+import { isValidPassword } from '../../lib/auth.js'; 
 import AdminDashboardClient from './AdminDashboardClient.js'; 
 import Link from 'next/link';
+import { Suspense } from 'react'; // <-- Suspense کو امپورٹ کریں
+import ProductList from './ProductList.js'; // <-- ہماری نئی پروڈکٹ لسٹ
 
-// Vercel کو بتاتا ہے کہ اس پیج کو کیش نہ کرے
 export const dynamic = 'force-dynamic';
 
-// --- لاگ ان پیج (اس میں کوئی تبدیلی نہیں) ---
+// --- لاگ ان پیج (ویسا ہی) ---
 function LoginPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
@@ -38,48 +39,51 @@ function LoginPage() {
   );
 }
 
-// --- مین پیج (جو فیصلہ کرتا ہے کہ کیا دکھانا ہے) ---
+// --- پروڈکٹ لسٹ کے لیے لوڈنگ (Loading) انڈیکیٹر ---
+function ProductsLoading() {
+  return (
+    <div className="p-4">
+      <h2 className="text-lg font-semibold mb-2">Manage Products</h2>
+      <div className="text-center text-gray-400 mt-10">
+        <p>Loading products...</p>
+      </div>
+    </div>
+  );
+}
+
+// --- مین پیج ---
 export default async function AdminPage({ searchParams }) {
   
   const passwordQuery = searchParams.password;
   
   if (await isValidPassword(passwordQuery)) {
-    // --- پاس ورڈ ٹھیک ہے: ڈیش بورڈ دکھائیں ---
+    // --- پاس ورڈ ٹھیک ہے ---
     
-    // 2. لوگو URL حاصل کریں (no-store کے ساتھ)
+    // 1. لوگو URL (تیز) کو فوراً لوڈ کریں
     let logoUrl = "https://hnt5qthrn2hkqfn9.public.blob.vercel-storage.com/logo.png";
     try {
       const logoBlob = await head('logo.png', { cache: 'no-store' });
       logoUrl = logoBlob.url; 
-    } catch (error) {
-      console.warn("Admin Panel: Could not fetch 'logo.png'.");
-    }
+    } catch (error) { /* ... */ }
 
-    // 3. پروڈکٹس کی لسٹ حاصل کریں (no-store کے ساتھ)
-    let products = [];
-    try {
-      const dataBlob = await head('data.json', { cache: 'no-store' });
-      const dataResponse = await fetch(dataBlob.url, { cache: 'no-store' });
-      
-      if (dataResponse.ok) {
-        const textData = await dataResponse.text();
-        if (textData) products = JSON.parse(textData);
-      }
-    } catch (error) {
-      console.warn("Admin Panel: Could not fetch products.", error.message);
-    }
+    // 2. پروڈکٹ لسٹ (سست) کو لوڈ نہ کریں
     
-    // 4. تمام (تازہ ترین) ڈیٹا کلائنٹ کمپوننٹ کو پاس کریں
     return (
       <AdminDashboardClient 
-        initialProducts={products} 
         logoUrl={logoUrl} 
         passwordQuery={passwordQuery} 
-      />
+      >
+        {/* --- یہ ہے حل 1 --- */}
+        {/* یہ شیل (Shell) کو فوراً دکھائے گا اور 'ProductList' کا انتظار کرے گا */}
+        <Suspense fallback={<ProductsLoading />}>
+          <ProductList />
+        </Suspense>
+        {/* --- حل ختم --- */}
+      </AdminDashboardClient>
     );
     
   } else {
-    // --- پاس ورڈ غلط ہے: لاگ ان پیج دکھائیں ---
+    // --- پاس ورڈ غلط ہے ---
     return <LoginPage />;
   }
 }
