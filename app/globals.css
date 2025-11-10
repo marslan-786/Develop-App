@@ -18,7 +18,7 @@
   }
 }
 
-/* 2. ہیڈر ٹائٹل کے لیے کلاس */
+/* 2. ہیڈر ٹائٹل کے لیے کلاس (حل 3) */
 .animated-gradient-text {
   background: linear-gradient(
     -45deg,
@@ -34,7 +34,7 @@
   animation: animated-gradient 10s ease infinite;
 }
 
-/* 3. بٹن کے لیے کلاس */
+/* 3. بٹن کے لیے کلاس (یہ پروڈکٹ کارڈز پر استعمال ہو گی) */
 .animated-gradient-button {
   background: linear-gradient(
     -45deg,
