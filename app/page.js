@@ -1,15 +1,13 @@
-// --- app/page.js ---
-// (Viewport fix, desktop container)
+// --- 2. app/page.js (مکمل فکس شدہ) ---
 
 import { head } from "@vercel/blob";
 import HomePageClient from "./HomePageClient";
 
 export const dynamic = "force-dynamic";
 
-// ✅ Fix viewport metadata
-export const metadata = {
-  viewport: { width: 1200 },
-};
+// --- فکس 3: یہاں سے 'metadata' آبجیکٹ ہٹا دیا گیا ہے ---
+// (کیونکہ یہ اب layout.js میں ہے)
+// --- فکس ختم ---
 
 async function getBlobData() {
   const defaultSettings = { websiteTitle: "Ilyas Mobile Mall" };
@@ -52,14 +50,15 @@ async function getBlobData() {
 export default async function HomePage() {
   const { settings, products, logoUrl, bannerUrl } = await getBlobData();
 
+  // --- فکس 4: یہاں سے 'max-w-[1200px]' والا div ہٹا دیا گیا ہے ---
+  // (کیونکہ یہ اب layout.js میں ہے)
   return (
-    <div className="max-w-[1200px] mx-auto bg-gray-900 min-h-screen">
-      <HomePageClient
-        initialProducts={products}
-        settings={settings}
-        logoUrl={logoUrl}
-        bannerUrl={bannerUrl}
-      />
-    </div>
+    <HomePageClient
+      initialProducts={products}
+      settings={settings}
+      logoUrl={logoUrl}
+      bannerUrl={bannerUrl}
+    />
   );
+  // --- فکس ختم ---
 }
