@@ -1,7 +1,10 @@
+// --- 2. app/page.js ---
+// (یہ فائل viewport اور max-width سیٹ کرے گی)
+
 import { head } from '@vercel/blob';
 import HomePageClient from './HomePageClient';
 
-// --- حل 1: ہوم پیج کا Viewport (اسے آبجیکٹ میں لکھنا بہتر ہے) ---
+// --- حل 1: ہوم پیج کا Viewport 1200px ---
 export const metadata = {
   viewport: {
     width: 1200,
@@ -12,7 +15,6 @@ export const metadata = {
 
 export const dynamic = 'force-dynamic'; 
 
-// --- ڈیٹا Fetch کرنے کا فنکشن (یہ ٹھیک ہے) ---
 async function getBlobData() {
   const defaultSettings = { websiteTitle: "Ilyas Mobile Mall" };
   let settings = defaultSettings;
@@ -34,7 +36,6 @@ async function getBlobData() {
     console.warn("page.js: Could not fetch 'background.png'.", error.message);
   }
 
-  // سیٹنگز Fetch کریں
   try {
     const settingsBlob = await head('settings.json', { cache: 'no-store' });
     const settingsResponse = await fetch(settingsBlob.url, { cache: 'no-store' });
@@ -46,7 +47,6 @@ async function getBlobData() {
     console.warn("page.js: Could not fetch 'settings.json'.", error.message);
   }
 
-  // پروڈکٹس Fetch کریں
   try {
     const dataBlob = await head('data.json', { cache: 'no-store' });
     const dataResponse = await fetch(dataBlob.url, { cache: 'no-store' });
@@ -62,15 +62,14 @@ async function getBlobData() {
 }
 
 
-// --- مین ہوم پیج (Server Component) ---
+// --- مین ہوم پیج ---
 export default async function HomePage() {
   const { settings, products, logoUrl, bannerUrl } = await getBlobData();
   
   // --- حل 2: 'max-w-6xl' کنٹینر کو یہاں واپس لائیں ---
   return (
     <div className="max-w-6xl mx-auto"> 
-      {/* یہ وہ کلاس ہے جو ہم نے layout.js سے ہٹائی تھی */}
-      {/* یہ صرف ہوم پیج پر لاگو ہو گی */}
+      {/* یہ کلاس صرف ہوم پیج پر لاگو ہو گی */}
       <HomePageClient 
         initialProducts={products} 
         settings={settings} 
