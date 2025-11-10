@@ -3,10 +3,10 @@
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion'; // <-- اینیمیشن کے لیے امپورٹ
+import { motion } from 'framer-motion'; // اینیمیشن کے لیے
 
 // --- Icon Components (صرف ایک بار ڈیفائن کیے گئے) ---
-function IconFilter() { // <-- فلٹر کے لیے نیا آئیکن
+function IconFilter() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 7.963.648a.75.75 0 0 1 .488.901l-1.118 4.473a.75.75 0 0 0 .14.54l3.175 3.174a.75.75 0 0 1-.53 1.28H4.218a.75.75 0 0 1-.53-1.28l3.175-3.174a.75.75 0 0 0 .14-.54L5.89 4.55a.75.75 0 0 1 .488-.901A47.384 47.384 0 0 1 12 3Z" />
@@ -61,7 +61,7 @@ function AppHeader({ title, logoSrc, onMenuClick, onSearchClick }) {
   );
 }
 
-// --- فلٹر ببلز (Bubbles) کمپوننٹ ---
+// --- فلٹر ببلز (Bubbles) کمپوننٹ (ویسا ہی) ---
 const filters = [
   { id: 'all', label: 'All' },
   { id: 'low-range', label: 'Low Range (< 20k)' },
@@ -88,7 +88,6 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
             {filter.label}
           </button>
         ))}
-        {/* ایڈوانس فلٹر بٹن */}
         <button 
           onClick={() => alert('Advanced Filter (Price Range) coming soon!')}
           className="p-2 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -102,29 +101,37 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
 // --- (فلٹر ببلز ختم) ---
 
 
-// --- Product Card Component ---
-function ProductCard({ product, index, colorClass }) {
+// --- Product Card Component (مکمل اپ گریڈ شدہ) ---
+function ProductCard({ product, index, style }) { // <-- 'style' prop لیں
   const cacheBustedImageUrl = `${product.imageUrl || "/placeholder-image.png"}?v=${new Date().getTime()}`;
 
-  // اسکرول اینیمیشن کی سیٹنگز
+  // --- یہ ہے حل 1: کراس اوور اینیمیشن ---
   const animationVariants = {
     hidden: { 
       opacity: 0, 
-      x: index % 2 === 0 ? -100 : 100 // 0, 2, 4... بائیں سے; 1, 3, 5... دائیں سے
+      // جو لیفٹ (index 0) پر ہے وہ رائٹ (100) سے آئے گا
+      // جو رائٹ (index 1) پر ہے وہ لیفٹ (-100) سے آئے گا
+      x: index % 2 === 0 ? 100 : -100 
     },
     visible: { 
       opacity: 1, 
       x: 0 
     },
   };
+  // --- حل ختم ---
 
   return (
     <motion.div
-      className={`border rounded-lg overflow-hidden shadow-sm flex flex-col ${colorClass}`} // <-- کارڈ کا رنگ
+      // --- یہ ہے حل 2: کارڈ کا رنگ ---
+      // 'bg-white' کو ہٹا دیا گیا ہے اور 'style.bg' (بیک گراؤنڈ) کو شامل کیا گیا ہے
+      className={`border rounded-lg overflow-hidden shadow-sm flex flex-col ${style.bg}`}
       variants={animationVariants}
       initial="hidden"
-      whileInView="visible" // <-- جب اسکرول کر کے یہاں پہنچیں
-      viewport={{ once: true, amount: 0.3 }} // <-- 30% نظر آنے پر اینیمیٹ ہو
+      whileInView="visible"
+      // --- یہ ہے حل 3: اینیمیشن ہر بار ---
+      // 'once: true' کو 'once: false' سے بدل دیا گیا ہے (یا مکمل ہٹا دیں)
+      viewport={{ once: false, amount: 0.3 }}
+      // --- حل ختم ---
       transition={{ duration: 0.5 }}
     >
       <div className="w-full h-40 relative">
@@ -136,10 +143,16 @@ function ProductCard({ product, index, colorClass }) {
           unoptimized 
         />
       </div>
-      <div className="p-3 flex-grow flex flex-col bg-white">
+      
+      {/* --- یہ ہے حل 2 (جاری): ٹیکسٹ کا رنگ ---
+          'bg-white' کو ہٹا دیا گیا ہے اور 'style.text' (ٹیکسٹ کا رنگ) شامل کیا گیا ہے
+      --- */}
+      <div className={`p-3 flex-grow flex flex-col ${style.text}`}>
         <h3 className="text-lg font-semibold break-words min-h-[4rem]">{product.name}</h3>
-        <p className="text-sm text-gray-600 truncate mt-1">{product.detail}</p>
-        <p className="text-lg font-bold text-blue-600 mt-2">PKR {product.price}</p>
+        <p className="text-sm opacity-80 truncate mt-1">{product.detail}</p>
+        <p className="text-lg font-bold mt-2">PKR {product.price}</p>
+        
+        {/* اینیمیٹڈ بٹن (یہ اب رنگین بیک گراؤنڈ پر بھی اچھا لگے گا) */}
         <Link 
           href={`/product/${product.id}`}
           className="mt-3 w-full text-center text-white py-2 rounded-lg text-sm font-medium transition-all duration-300 animated-gradient-button"
@@ -153,6 +166,7 @@ function ProductCard({ product, index, colorClass }) {
 
 // --- Sidebar Component (ویسا ہی) ---
 function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
+  // ... (پہلے جیسا کوڈ) ...
   return (
     <>
       {isOpen && <div className="fixed inset-0 z-30 bg-black/50" onClick={onClose}></div>}
@@ -219,10 +233,19 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState(null);
-  const [quickFilter, setQuickFilter] = useState('all'); // <-- ببلز کے لیے نئی اسٹیٹ
+  const [quickFilter, setQuickFilter] = useState('all');
 
-  // کارڈز کے لیے مختلف رنگ
-  const cardColors = ['bg-blue-50', 'bg-green-50', 'bg-yellow-50', 'bg-red-50', 'bg-purple-50', 'bg-indigo-50'];
+  // --- یہ ہے حل 4: کارڈز کے لیے نئی کلر پیلیٹ ---
+  // (اسکرین شاٹ سے متاثر ہو کر)
+  const cardStyles = [
+    { bg: 'bg-red-500', text: 'text-white' }, // سرخ
+    { bg: 'bg-gray-800', text: 'text-white' }, // کالا
+    { bg: 'bg-yellow-400', text: 'text-gray-800' }, // پیلا
+    { bg: 'bg-blue-500', text: 'text-white' }, // نیلا
+    { bg: 'bg-green-500', text: 'text-white' }, // سبز
+    { bg: 'bg-indigo-600', text: 'text-white' }  // جامنی
+  ];
+  // --- حل ختم ---
 
   const uniqueBrands = useMemo(() => {
     if (!initialProducts) return [];
@@ -235,16 +258,12 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
     if (!initialProducts) return [];
     
     return initialProducts.filter(product => {
-      // 1. برانڈ فلٹر (سائیڈ مینیو سے)
       const matchesBrand = selectedBrand ? product.brand === selectedBrand : true;
-      
-      // 2. سرچ فلٹر
       const matchesSearch = searchTerm
         ? (product.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
            product.brand?.toLowerCase().includes(searchTerm.toLowerCase()))
         : true;
         
-      // 3. ببل فلٹر
       let matchesQuickFilter = true;
       if (quickFilter === 'low-range') {
         const price = parseFloat(product.price.replace(/,/g, ''));
@@ -259,7 +278,7 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
 
       return matchesBrand && matchesSearch && matchesQuickFilter;
     });
-  }, [initialProducts, searchTerm, selectedBrand, quickFilter]); // <-- quickFilter کو شامل کریں
+  }, [initialProducts, searchTerm, selectedBrand, quickFilter]);
 
   return (
     <main>
@@ -278,7 +297,6 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
         onSelectBrand={(brand) => { setSelectedBrand(brand); setIsMenuOpen(false); }}
       />
 
-      {/* ببلز کو یہاں شامل کریں */}
       <FilterBubbles 
         activeFilter={quickFilter} 
         onFilterChange={setQuickFilter} 
@@ -294,12 +312,13 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
       <div className="p-4">
         {filteredProducts && filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 gap-4">
-            {filteredProducts.map((product, index) => ( // <-- 'index' کو یہاں حاصل کریں
+            {filteredProducts.map((product, index) => (
               <ProductCard 
                 key={product.id || product.name} 
                 product={product} 
-                index={index} // <-- اینیمیشن کے لیے index پاس کریں
-                colorClass={cardColors[index % cardColors.length]} // <-- رنگ پاس کریں
+                index={index}
+                // --- یہ ہے حل 4 (جاری): کلر اسٹائل کو پاس کریں ---
+                style={cardStyles[index % cardStyles.length]}
               />
             ))}
           </div>
