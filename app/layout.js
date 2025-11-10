@@ -1,5 +1,5 @@
 // --- app/layout.js ---
-// (یہ فائل اب ہمیشہ desktop view رکھے گی اور responsive نہیں رہے گی)
+// (ہمیشہ desktop view پر fix کیا گیا ہے)
 
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -33,24 +33,19 @@ export async function generateMetadata() {
   return {
     title: settings.websiteTitle || "Ilyas Mobile Mall",
     description: "Your one-stop mobile shop.",
-    icons: {
-      icon: logoUrl,
-      apple: logoUrl,
-    },
+    icons: { icon: logoUrl, apple: logoUrl },
   };
 }
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" dir="ltr">
+    <html lang="en">
       <head>
-        {/* ✅ یہ لائن بہت اہم ہے: یہ viewport fix کر دیتی ہے */}
+        {/* ✅ Viewport fix for desktop width */}
         <meta
           name="viewport"
           content="width=1200, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
         />
-
-        {/* ✅ Google Ads Script */}
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1963262096178695"
@@ -60,8 +55,7 @@ export default function RootLayout({ children }) {
       </head>
 
       <body className={`${inter.className} bg-gray-900`}>
-        {/* ✅ پورا صفحہ desktop width پر fix */}
-        <div className="max-w-full mx-auto bg-gray-800 min-h-screen overflow-x-hidden">
+        <div className="bg-gray-800 min-h-screen overflow-x-hidden">
           {children}
         </div>
       </body>
