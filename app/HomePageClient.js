@@ -31,20 +31,35 @@ function IconClose() {
 
 
 // --- 1. نیا ہیڈر (اسکرین شاٹ کے مطابق) ---
-function AppHeader({ title, onMenuClick, onSearchClick }) {
+function AppHeader({ title, logoUrl, whatsappNumber, onMenuClick, onSearchClick }) {
+  const cacheBustedLogoSrc = `${logoUrl}?v=${new Date().getTime()}`;
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Hello, I am interested in your products.')}`;
+
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between p-4 bg-gray-900 shadow-md border-b border-gray-700">
+      {/* لیفٹ سائیڈ */}
       <div className="flex items-center gap-4">
         <button onClick={onMenuClick} className="p-2 rounded-full text-gray-300 hover:bg-gray-700">
           <IconMenu />
         </button>
-        <span className="text-xl font-bold text-white">{title}</span>
+        {/* ویب سائٹ کا ٹائٹل */}
+        <span className="text-xl font-bold text-white whitespace-nowrap">{title}</span>
       </div>
+      
+      {/* رائٹ سائیڈ */}
       <div className="flex items-center gap-4">
         <button onClick={onSearchClick} className="p-2 rounded-full text-gray-300 hover:bg-gray-700">
           <IconSearch />
         </button>
-        {/* آپ بعد میں کارٹ اور یوزر آئیکن یہاں شامل کر سکتے ہیں */}
+        {/* واٹس ایپ پر کلک ہونے والا لوگو */}
+        <a 
+          href={whatsappUrl} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-600 flex-shrink-0 transition-transform hover:scale-110"
+        >
+          <Image src={cacheBustedLogoSrc} alt="Logo" width={40} height={40} className="object-cover" priority unoptimized />
+        </a>
       </div>
     </header>
   );
@@ -52,27 +67,22 @@ function AppHeader({ title, onMenuClick, onSearchClick }) {
 // --- (نیا ہیڈر ختم) ---
 
 // --- 2. نیا ہیرو بینر (Hero Banner) ---
-function HeroBanner({ bannerUrl, title, settings }) {
+function HeroBanner({ bannerUrl }) {
   const cacheBustedBannerUrl = `${bannerUrl}?v=${new Date().getTime()}`;
+  if (!bannerUrl) return null; // اگر بینر اپ لوڈ نہ ہو تو کچھ نہ دکھائیں
+
   return (
-    <div className="w-full h-64 bg-gray-700 relative flex items-center justify-start p-10">
-      {/* بینر امیج */}
+    <div className="w-full relative">
+      {/* 'h-auto' تصویر کو اس کے اصل سائز میں دکھائے گا */}
       <Image 
         src={cacheBustedBannerUrl} 
-        layout="fill" 
-        objectFit="cover" 
+        width={1200} // ڈیسک ٹاپ کے لیے ایک بڑی ڈیفالٹ چوڑائی
+        height={400} // ڈیسک ٹاپ کے لیے ایک ڈیفالٹ اونچائی
         alt="Banner" 
-        className="opacity-30" // تصویر کو مدھم (dim) کیا
+        className="w-full h-auto object-cover" // <-- حل
         unoptimized
         priority
       />
-      
-      {/* بینر ٹیکسٹ (آپ کی ریکوائرمنٹ کے مطابق) */}
-      <div className="z-10 text-white space-y-2">
-        <h2 className="text-4xl font-bold">{title}</h2>
-        <p className="text-lg">{settings.address || 'Your Address Here'}</p>
-        <p className="text-lg">{settings.whatsappNumber || 'Your Phone Number Here'}</p>
-      </div>
     </div>
   );
 }
@@ -89,7 +99,8 @@ const filters = [
 function FilterBubbles({ activeFilter, onFilterChange }) {
   return (
     <div className="sticky top-[73px] z-10 p-4 bg-gray-900/80 backdrop-blur-sm border-b border-gray-700">
-      <div className="flex items-center gap-3">
+      {/* 'justify-center' انہیں درمیان میں لے آئے گا */}
+      <div className="flex items-center justify-center gap-3">
         {filters.map(filter => (
           <button
             key={filter.id}
@@ -97,7 +108,7 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
             onClick={() => onFilterChange(filter.id)}
             className={`px-5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors
               ${activeFilter === filter.id 
-                ? 'bg-pink-600 text-white' // ایکٹیو (Active)
+                ? 'bg-pink-600 text-white' // ایکٹیو (Active) - اسکرین شاٹ جیسا
                 : 'bg-gray-700 text-gray-200 hover:bg-gray-600' // ان-ایکٹیو
               }
             `}
@@ -113,39 +124,19 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
 
 
 // --- 5. Product Card Component (مکمل اپ گریڈ شدہ) ---
-function ProductCard({ product, index, style }) {
+function ProductCard({ product, index, style, animationVariant }) {
   const cacheBustedImageUrl = `${product.imageUrl || "/placeholder-image.png"}?v=${new Date().getTime()}`;
-
-  // --- 6. نئی اینیمیشن لاجک (3 کالم کے لیے) ---
-  const animationVariants = {
-    hidden: { 
-      opacity: 0, 
-      // کالم 0 (لیفٹ) رائٹ سے آئے گا
-      // کالم 1 (مڈل) نیچے سے آئے گا
-      // کالم 2 (رائٹ) لیفٹ سے آئے گا
-      x: index % 3 === 0 ? 100 : (index % 3 === 1 ? 0 : -100),
-      y: index % 3 === 1 ? 50 : 0
-    },
-    visible: { 
-      opacity: 1, 
-      x: 0,
-      y: 0 
-    },
-  };
-  // --- حل ختم ---
 
   return (
     <motion.div
-      // --- 7. کارڈ کا رنگ ---
       className={`rounded-lg overflow-hidden shadow-lg flex flex-col ${style.bg}`}
-      variants={animationVariants}
+      variants={animationVariant} // <-- ہر کارڈ کی منفرد اینیمیشن
       initial="hidden"
       whileInView="visible"
-      // --- اینیمیشن ہر بار ---
-      viewport={{ once: false, amount: 0.3 }}
-      transition={{ duration: 0.5, delay: 0.1 }}
+      viewport={{ once: true, amount: 0.3 }} // <-- صرف ایک بار لوڈ پر
+      transition={{ duration: 0.8, delay: (index % 3) * 0.1 }} // <-- 0.8 سیکنڈ، تھوڑے وقفے کے ساتھ
     >
-      <div className="w-full h-56 relative"> {/* تصویر کا سائز بڑا کیا */}
+      <div className="w-full h-56 relative"> {/* تصویر کا سائز */}
         <Image 
           src={cacheBustedImageUrl} 
           alt={product.name} 
@@ -155,18 +146,20 @@ function ProductCard({ product, index, style }) {
         />
       </div>
       
-      {/* --- 8. ٹیکسٹ کا رنگ --- */}
       <div className={`p-4 flex-grow flex flex-col ${style.text}`}>
         <h3 className="text-xl font-semibold break-words min-h-[3.5rem]">{product.name}</h3>
-        <p className="text-md opacity-80 truncate mt-1">PKR {product.price}</p>
         
-        {/* بٹن اسٹائل (اسکرین شاٹ جیسا) */}
-        <Link 
-          href={`/product/${product.id}`}
-          className={`mt-4 w-auto self-start px-4 py-1.5 rounded-lg text-sm font-medium ${style.button} transition-all duration-300`}
-        >
-          View Product
-        </Link>
+        {/* --- 6. نیا کارڈ لے آؤٹ (اسکرین شاٹ جیسا) --- */}
+        <div className="flex justify-between items-center mt-2">
+          <p className="text-md opacity-80 font-bold">PKR {product.price}</p>
+          <Link 
+            href={`/product/${product.id}`}
+            className={`px-3 py-1 rounded-md text-xs font-medium ${style.button} transition-all duration-300`}
+          >
+            View Product
+          </Link>
+        </div>
+        {/* --- حل ختم --- */}
       </div>
     </motion.div>
   );
@@ -174,8 +167,9 @@ function ProductCard({ product, index, style }) {
 // --- (کارڈ ختم) ---
 
 
-// --- Sidebar Component (ڈارک موڈ کے لیے اپ ڈیٹ شدہ) ---
+// --- Sidebar Component (ویسا ہی) ---
 function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
+  // ... (پہلے جیسا کوڈ) ...
   return (
     <>
       {isOpen && <div className="fixed inset-0 z-30 bg-black/50" onClick={onClose}></div>}
@@ -213,7 +207,7 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
   );
 }
 
-// --- SearchBar Component (ڈارک موڈ کے لیے اپ ڈیٹ شدہ) ---
+// --- SearchBar Component (ویسا ہی) ---
 function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
   if (!isSearchOpen) return null;
   return (
@@ -236,7 +230,7 @@ function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
 }
 
 
-// --- 9. اپ ڈیٹ شدہ: مین کلائنٹ کمپوننٹ ---
+// --- 7. اپ ڈیٹ شدہ: مین کلائنٹ کمپوننٹ ---
 export default function HomePageClient({ initialProducts, settings, logoUrl, bannerUrl }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -244,11 +238,22 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [quickFilter, setQuickFilter] = useState('all'); // 'all' کا مطلب ہے کوئی فلٹر نہیں
 
-  // --- 10. کارڈز کے لیے نئی کلر پیلیٹ (اسکرین شاٹ جیسی) ---
+  // --- 8. کارڈز کے لیے نئی کلر پیلیٹ (اسکرین شاٹ جیسی) ---
   const cardStyles = [
-    { bg: 'bg-blue-600', text: 'text-white', button: 'bg-white/20 text-white hover:bg-white/30' }, 
-    { bg: 'bg-pink-600', text: 'text-white', button: 'bg-white/20 text-white hover:bg-white/30' }, 
-    { bg: 'bg-lime-500', text: 'text-gray-900', button: 'bg-gray-900/20 text-gray-900 hover:bg-gray-900/30' },
+    { bg: 'bg-blue-600', text: 'text-white', button: 'bg-white/90 text-blue-600 hover:bg-white' }, 
+    { bg: 'bg-pink-600', text: 'text-white', button: 'bg-white/90 text-pink-600 hover:bg-white' }, 
+    { bg: 'bg-lime-500', text: 'text-gray-900', button: 'bg-gray-900/90 text-lime-500 hover:bg-black' },
+  ];
+  // --- حل ختم ---
+
+  // --- 9. ہر کارڈ کے لیے منفرد اینیمیشنز ---
+  const animationVariants = [
+    // لیفٹ سے
+    { hidden: { opacity: 0, x: -100 }, visible: { opacity: 1, x: 0 } },
+    // نیچے سے
+    { hidden: { opacity: 0, y: 100 }, visible: { opacity: 1, y: 0 } },
+    // رائٹ سے
+    { hidden: { opacity: 0, x: 100 }, visible: { opacity: 1, x: 0 } },
   ];
   // --- حل ختم ---
 
@@ -258,7 +263,7 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
     return [...new Set(brands.filter(b => b))]; 
   }, [initialProducts]);
 
-  // --- 11. نئی فلٹر لاجک (ببل ٹاگل کے ساتھ) ---
+  // --- 10. نئی فلٹر لاجک (ببل ٹاگل کے ساتھ) ---
   const handleFilterChange = (id) => {
     setQuickFilter(prev => (prev === id ? 'all' : id));
   };
@@ -293,15 +298,15 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
   return (
     <main>
       <AppHeader 
-        title="softlink.pk" // <-- ٹائٹل آپ کی مرضی کے مطابق
+        title={settings.websiteTitle || "softlink.pk"} // سیٹنگز سے ٹائٹل لے گا
+        logoUrl={logoUrl}
+        whatsappNumber={settings.whatsappNumber} // واٹس ایپ لنک کے لیے
         onMenuClick={() => { setIsMenuOpen(true); setIsSearchOpen(false); }}
         onSearchClick={() => { setIsSearchOpen(prev => !prev); setIsMenuOpen(false); }}
       />
       
       <HeroBanner 
-        bannerUrl={bannerUrl} 
-        title={settings.websiteTitle || "Ilyas Mobile Mall"}
-        settings={settings} // <-- ایڈریس اور فون نمبر کے لیے
+        bannerUrl={bannerUrl}
       />
 
       <Sidebar 
@@ -324,16 +329,17 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
         onSearchChange={setSearchTerm}
       />
 
+      {/* --- 11. گرڈ کو 3 کالم میں تبدیل کیا --- */}
       <div className="p-4 md:p-8">
         {filteredProducts && filteredProducts.length > 0 ? (
-          // --- 12. گرڈ کو 3 کالم میں تبدیل کیا ---
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {filteredProducts.map((product, index) => (
               <ProductCard 
                 key={product.id || product.name} 
                 product={product} 
                 index={index}
-                style={cardStyles[index % cardStyles.length]}
+                style={cardStyles[index % cardStyles.length]} // <-- کلر اسٹائل
+                animationVariant={animationVariants[index % animationVariants.length]} // <-- اینیمیشن اسٹائل
               />
             ))}
           </div>
