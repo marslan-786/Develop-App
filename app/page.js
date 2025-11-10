@@ -1,29 +1,30 @@
 import { head } from '@vercel/blob';
 import HomePageClient from './HomePageClient';
 
-// --- یہ ہے حل: 'viewport' کو صرف ہوم پیج پر لاک کریں ---
+// --- حل 1: ہوم پیج کا Viewport (اسے آبجیکٹ میں لکھنا بہتر ہے) ---
 export const metadata = {
-  viewport: 'width=1200',
+  viewport: {
+    width: 1200,
+  },
 };
+// --- حل ختم ---
 
 
 export const dynamic = 'force-dynamic'; 
 
-// --- ڈیٹا Fetch کرنے کا فنکشن (اپ ڈیٹ شدہ) ---
+// --- ڈیٹا Fetch کرنے کا فنکشن (یہ ٹھیک ہے) ---
 async function getBlobData() {
   const defaultSettings = { websiteTitle: "Ilyas Mobile Mall" };
   let settings = defaultSettings;
   let products = [];
   
-  // --- یہ ہے حل 6: لوگو پاتھ ---
-  let logoUrl = "/placeholder-logo.png"; // ڈیفالٹ
+  let logoUrl = "/placeholder-logo.png"; 
   try {
     const logoBlob = await head('logo.png', { cache: 'no-store' });
     logoUrl = logoBlob.url;
   } catch (error) {
     console.warn("page.js: Could not fetch 'logo.png'.");
   }
-  // --- حل ختم ---
   
   let bannerUrl = "";
   try {
@@ -64,12 +65,19 @@ async function getBlobData() {
 // --- مین ہوم پیج (Server Component) ---
 export default async function HomePage() {
   const { settings, products, logoUrl, bannerUrl } = await getBlobData();
+  
+  // --- حل 2: 'max-w-6xl' کنٹینر کو یہاں واپس لائیں ---
   return (
-    <HomePageClient 
-      initialProducts={products} 
-      settings={settings} 
-      logoUrl={logoUrl}
-      bannerUrl={bannerUrl}
-    />
+    <div className="max-w-6xl mx-auto"> 
+      {/* یہ وہ کلاس ہے جو ہم نے layout.js سے ہٹائی تھی */}
+      {/* یہ صرف ہوم پیج پر لاگو ہو گی */}
+      <HomePageClient 
+        initialProducts={products} 
+        settings={settings} 
+        logoUrl={logoUrl}
+        bannerUrl={bannerUrl}
+      />
+    </div>
   );
+  // --- حل ختم ---
 }
