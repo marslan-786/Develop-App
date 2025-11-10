@@ -1,3 +1,6 @@
+// --- 1. app/layout.js ---
+// (اس فائل کو responsive رہنا چاہیے)
+
 import "./globals.css";
 import { Inter } from "next/font/google";
 import Script from 'next/script'; 
@@ -30,12 +33,7 @@ export async function generateMetadata() {
       icon: logoUrl,
       apple: logoUrl,
     },
-    
-    // --- تبدیلی 1: 'viewport' کو اس آبجیکٹ سے بدل دیا گیا ہے ---
-    viewport: {
-      width: 1200,
-    },
-    // --- تبدیلی ختم ---
+    // یہاں سے viewport ہٹا دیا گیا ہے تاکہ یہ دوسرے پیجز کو خراب نہ کرے
   };
 }
 
@@ -52,11 +50,10 @@ export default function RootLayout({ children }) {
       </head>
       
       <body className={`${inter.className} bg-gray-900`}>
-        {/* --- تبدیلی 2: 'max-w-full' کو 'max-w-6xl' سے بدل دیا گیا ہے --- */}
-        <div className="max-w-6xl mx-auto bg-gray-800 min-h-screen">
+        {/* یہ max-w-full رہے گا */}
+        <div className="max-w-full mx-auto bg-gray-800 min-h-screen">
           {children}
         </div>
-        {/* --- تبدیلی ختم --- */}
       </body>
     </html>
   );
