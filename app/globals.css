@@ -1,11 +1,23 @@
-/* --- یہ 3 لائنیں ہمیشہ سب سے اوپر ہونی چاہئیں --- */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* --- ہمارا اینیمیشن کوڈ --- */
+/* --- Force desktop layout even on mobile --- */
+@media (max-width: 1199px) {
+  html {
+    zoom: 0.8;
+    transform: scale(0.8);
+    transform-origin: top center;
+    width: 1200px;
+    overflow-x: hidden;
+  }
+  body {
+    width: 1200px !important;
+    overflow-x: hidden !important;
+  }
+}
 
-/* 1. اینیمیشن کی "لہر" (Keyframes) */
+/* --- Animated Gradient --- */
 @keyframes animated-gradient {
   0% {
     background-position: 0% 50%;
@@ -18,30 +30,5 @@
   }
 }
 
-/* 2. ہیڈر ٹائٹل کے لیے کلاس (حل 3) */
 .animated-gradient-text {
-  background: linear-gradient(
-    -45deg,
-    #4a90e2, /* نیلا */
-    #50e3c2, /* سبز */
-    #f5a623, /* اورنج */
-    #d0021b  /* سرخ */
-  );
-  background-size: 300% 300%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: animated-gradient 10s ease infinite;
-}
-
-/* 3. بٹن کے لیے کلاس (یہ پروڈکٹ کارڈز پر استعمال ہو گی) */
-.animated-gradient-button {
-  background: linear-gradient(
-    -45deg,
-    #4a90e2, /* نیلا */
-    #34e89e, /* سبز */
-    #4a90e2  /* واپس نیلا */
-  );
-  background-size: 300% 300%;
-  animation: animated-gradient 6s ease infinite;
-}
+  background: linear-gradient(-45deg, #4a90e2
