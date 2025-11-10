@@ -1,3 +1,5 @@
+// --- HomePageClient.js (مکمل فکس شدہ) ---
+
 "use client"; 
 
 import { useState, useMemo } from 'react';
@@ -338,11 +340,12 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
         onSearchChange={setSearchTerm}
       />
 
+      {/* --- فکس 3: 'md:p-8' کو 'p-8' سے بدل دیا گیا ہے --- */}
       <div className="p-8"> 
-        {/* 'md:p-8' کو 'p-8' سے بدل دیا ہے */}
         {filteredProducts && filteredProducts.length > 0 ? (
+          
+          /* --- فکس 4: 'grid-cols-1 md:grid-cols-3' کو 'grid-cols-3' سے بدل دیا گیا ہے --- */
           <div className="grid grid-cols-3 gap-6"> 
-            {/* 'grid-cols-1 md:grid-cols-3' کو 'grid-cols-3' سے بدل دیا ہے */}
             {filteredProducts.map((product, index) => (
               <ProductCard 
                 key={product.id || product.name} 
