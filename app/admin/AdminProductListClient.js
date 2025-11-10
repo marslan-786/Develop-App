@@ -24,7 +24,8 @@ function IconClose() {
 
 // --- پروڈکٹ لسٹ آئٹم (ویسا ہی) ---
 function ProductListItem({ product, passwordQuery, onDelete, isDeleting }) {
-  const cacheBustedImageUrl = `${product.imageUrl}?v=${new Date().getTime()}`;
+  // ✅ صحیح کوڈ (کیشنگ کے لیے)
+  const cacheBustedImageUrl = product.imageUrl;
   const sessionQuery = `?password=${passwordQuery}`;
 
   return (
