@@ -17,12 +17,12 @@ export async function generateMetadata() {
       const textData = await settingsResponse.text();
       if (textData) settings = JSON.parse(textData);
     }
-  } catch (e) { /* ... */ }
+  } catch (e) {}
 
   try {
     const logoBlob = await head('logo.png', { cache: 'no-store' });
     logoUrl = logoBlob.url;
-  } catch (e) { /* ... */ }
+  } catch (e) {}
 
   return {
     title: settings.websiteTitle || "Ilyas Mobile Mall",
@@ -31,11 +31,7 @@ export async function generateMetadata() {
       icon: logoUrl,
       apple: logoUrl,
     },
-    // --- یہ ہے حل 1: ڈیسک ٹاپ ویو پورٹ ---
-    // 'initial-scale=1' کو ہٹا دیا گیا ہے۔
-    // اب یہ براؤزر کو 1200px پر رینڈر کرنے اور پھر "زوم آؤٹ" کرنے پر مجبور کرے گا۔
-    viewport: 'width=1200',
-    // --- حل ختم ---
+    viewport: 'width=1200, user-scalable=no, maximum-scale=1', // ✅ ہمیشہ ڈیسک ٹاپ
   };
 }
 
@@ -47,12 +43,12 @@ export default function RootLayout({ children }) {
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1963262096178695" 
           crossOrigin="anonymous"
-          strategy="lazyOnload" 
+          strategy="lazyOnload"
         />
       </head>
       
-      <body className={`${inter.className} bg-gray-900`}>
-        <div className="max-w-6xl mx-auto bg-gray-800 min-h-screen shadow-lg">
+      <body className="bg-gray-900">
+        <div className="w-[1200px] mx-auto bg-gray-800 min-h-screen shadow-lg overflow-x-auto">
           {children}
         </div>
       </body>
