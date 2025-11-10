@@ -3,12 +3,9 @@
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion'; // <-- 1. اینیمیشن کے لیے امپورٹ
+import { motion } from 'framer-motion'; // <-- اینیمیشن کے لیے امپورٹ
 
-// --- Icon Components (ویسے ہی) ---
-function IconMenu() { /* ... */ }
-function IconSearch() { /* ... */ }
-function IconClose() { /* ... */ }
+// --- Icon Components (صرف ایک بار ڈیفائن کیے گئے) ---
 function IconFilter() { // <-- فلٹر کے لیے نیا آئیکن
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -16,7 +13,6 @@ function IconFilter() { // <-- فلٹر کے لیے نیا آئیکن
     </svg>
   );
 }
-// (یہاں آئیکنز کا مکمل کوڈ ہے تاکہ کوئی غلطی نہ ہو)
 function IconMenu() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -65,7 +61,7 @@ function AppHeader({ title, logoSrc, onMenuClick, onSearchClick }) {
   );
 }
 
-// --- 2. نیا: فلٹر ببلز (Bubbles) کمپوننٹ ---
+// --- فلٹر ببلز (Bubbles) کمپوننٹ ---
 const filters = [
   { id: 'all', label: 'All' },
   { id: 'low-range', label: 'Low Range (< 20k)' },
@@ -92,7 +88,7 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
             {filter.label}
           </button>
         ))}
-        {/* 3. نیا: ایڈوانس فلٹر بٹن */}
+        {/* ایڈوانس فلٹر بٹن */}
         <button 
           onClick={() => alert('Advanced Filter (Price Range) coming soon!')}
           className="p-2 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -106,12 +102,11 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
 // --- (فلٹر ببلز ختم) ---
 
 
-// --- 4. اپ ڈیٹ شدہ: Product Card Component ---
-// (اینیمیشن اور مختلف رنگوں کے ساتھ)
+// --- Product Card Component ---
 function ProductCard({ product, index, colorClass }) {
   const cacheBustedImageUrl = `${product.imageUrl || "/placeholder-image.png"}?v=${new Date().getTime()}`;
 
-  // 5. اسکرول اینیمیشن کی سیٹنگز
+  // اسکرول اینیمیشن کی سیٹنگز
   const animationVariants = {
     hidden: { 
       opacity: 0, 
@@ -125,7 +120,7 @@ function ProductCard({ product, index, colorClass }) {
 
   return (
     <motion.div
-      className={`border rounded-lg overflow-hidden shadow-sm flex flex-col ${colorClass}`} // <-- 6. کارڈ کا رنگ
+      className={`border rounded-lg overflow-hidden shadow-sm flex flex-col ${colorClass}`} // <-- کارڈ کا رنگ
       variants={animationVariants}
       initial="hidden"
       whileInView="visible" // <-- جب اسکرول کر کے یہاں پہنچیں
@@ -158,7 +153,6 @@ function ProductCard({ product, index, colorClass }) {
 
 // --- Sidebar Component (ویسا ہی) ---
 function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
-  // ... (پہلے جیسا کوڈ) ...
   return (
     <>
       {isOpen && <div className="fixed inset-0 z-30 bg-black/50" onClick={onClose}></div>}
@@ -200,7 +194,7 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
 function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
   if (!isSearchOpen) return null;
   return (
-    <div className="sticky top-[149px] z-10 p-4 bg-gray-50 border-b"> {/* ٹاپ پوزیشن اپ ڈیٹ کی */}
+    <div className="sticky top-[149px] z-10 p-4 bg-gray-50 border-b">
       <div className="relative">
         <input
           type="text"
@@ -210,7 +204,7 @@ function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
           className="w-full p-2 pr-10 border rounded-lg shadow-sm"
           autoFocus
         />
-        <button onClick={onClose} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-700">
+        <button onClick={onClose} className="absolute right-2 top-1.2 -translate-y-1.2 p-1 text-gray-400 hover:text-gray-700">
           <IconClose />
         </button>
       </div>
@@ -219,15 +213,15 @@ function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
 }
 
 
-// --- 7. اپ ڈیٹ شدہ: مین کلائنٹ کمپوننٹ ---
+// --- اپ ڈیٹ شدہ: مین کلائنٹ کمپوننٹ ---
 export default function HomePageClient({ initialProducts, settings, logoUrl }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState(null);
-  const [quickFilter, setQuickFilter] = useState('all'); // <-- 8. ببلز کے لیے نئی اسٹیٹ
+  const [quickFilter, setQuickFilter] = useState('all'); // <-- ببلز کے لیے نئی اسٹیٹ
 
-  // 9. کارڈز کے لیے مختلف رنگ
+  // کارڈز کے لیے مختلف رنگ
   const cardColors = ['bg-blue-50', 'bg-green-50', 'bg-yellow-50', 'bg-red-50', 'bg-purple-50', 'bg-indigo-50'];
 
   const uniqueBrands = useMemo(() => {
@@ -236,7 +230,7 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
     return [...new Set(brands.filter(b => b))]; 
   }, [initialProducts]);
 
-  // 10. اپ ڈیٹ شدہ: فلٹر کی مکمل لاجک
+  // اپ ڈیٹ شدہ: فلٹر کی مکمل لاجک
   const filteredProducts = useMemo(() => {
     if (!initialProducts) return [];
     
@@ -256,11 +250,11 @@ export default function HomePageClient({ initialProducts, settings, logoUrl }) {
         const price = parseFloat(product.price.replace(/,/g, ''));
         matchesQuickFilter = price < 20000;
       } else if (quickFilter === 'gaming') {
-        matchesQuickFilter = product.detail?.toLowerCase().includes('gaming');
+        matchesQuickFilter = (product.detail?.toLowerCase().includes('gaming') || product.name?.toLowerCase().includes('gaming'));
       } else if (quickFilter === 'pta') {
-        matchesQuickFilter = product.condition?.toLowerCase().includes('pta approved');
+        matchesQuickFilter = (product.condition?.toLowerCase().includes('pta approved') || product.detail?.toLowerCase().includes('pta approved'));
       } else if (quickFilter === 'non-pta') {
-        matchesQuickFilter = product.condition?.toLowerCase().includes('non-pta');
+        matchesQuickFilter = (product.condition?.toLowerCase().includes('non-pta') || product.detail?.toLowerCase().includes('non-pta'));
       }
 
       return matchesBrand && matchesSearch && matchesQuickFilter;
