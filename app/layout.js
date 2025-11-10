@@ -1,17 +1,16 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
 import Script from 'next/script'; 
-import { head } from '@vercel/blob'; // <-- Blob کو امپورٹ کریں
+import { head } from '@vercel/blob'; 
 
 const inter = Inter({ subsets: ["latin"] });
 
-// --- یہ ہے حل 4: ڈائنامک ٹائٹل اور آئیکن ---
+// --- ڈائنامک ٹائٹل اور آئیکن ---
 export async function generateMetadata() {
   let settings = { websiteTitle: "Ilyas Mobile Mall" }; // ڈیفالٹ
   let logoUrl = "/placeholder-logo.png"; // ڈیفالٹ
 
   try {
-    // سیٹنگز سے ٹائٹل حاصل کریں
     const settingsBlob = await head('settings.json', { cache: 'no-store' });
     const settingsResponse = await fetch(settingsBlob.url, { cache: 'no-store' });
     if (settingsResponse.ok) {
@@ -23,8 +22,6 @@ export async function generateMetadata() {
   }
 
   try {
-    // --- یہ ہے حل 6: لوگو پاتھ ---
-    // لوگو پاتھ سے آئیکن حاصل کریں
     const logoBlob = await head('logo.png', { cache: 'no-store' });
     logoUrl = logoBlob.url;
   } catch (e) {
@@ -38,9 +35,12 @@ export async function generateMetadata() {
       icon: logoUrl,
       apple: logoUrl,
     },
+    // --- یہ ہے حل 1: ڈیسک ٹاپ ویو پورٹ ---
+    // یہ براؤزر کو 1200px چوڑائی پر رینڈر کرنے پر مجبور کرے گا
+    viewport: 'width=1200, initial-scale=1',
+    // --- حل ختم ---
   };
 }
-// --- حل ختم ---
 
 export default function RootLayout({ children }) {
   return (
@@ -55,6 +55,7 @@ export default function RootLayout({ children }) {
       </head>
       
       <body className={`${inter.className} bg-gray-900`}>
+        {/* 'max-w-6xl' (ڈیسک ٹاپ سائز) پہلے سے سیٹ ہے */}
         <div className="max-w-6xl mx-auto bg-gray-800 min-h-screen shadow-lg">
           {children}
         </div>
