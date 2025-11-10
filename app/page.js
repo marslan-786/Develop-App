@@ -1,6 +1,12 @@
 import { head } from '@vercel/blob';
 import HomePageClient from './HomePageClient';
 
+// --- یہ ہے حل: 'viewport' کو صرف ہوم پیج پر لاک کریں ---
+export const metadata = {
+  viewport: 'width=1200',
+};
+
+
 export const dynamic = 'force-dynamic'; 
 
 // --- ڈیٹا Fetch کرنے کا فنکشن (اپ ڈیٹ شدہ) ---
