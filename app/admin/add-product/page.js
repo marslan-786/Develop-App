@@ -1,7 +1,8 @@
-"use client"; // <-- یہ بہت اہم ہے
+"use client"; 
 
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import FileUploader from '../FileUploader.js'; // <-- نیا امپورٹ (پاتھ ../ کے ساتھ)
 
 // بیک (Back) آئیکن
 function IconArrowLeft() {
@@ -15,10 +16,11 @@ function IconArrowLeft() {
 export default function AddProductPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const passwordQuery = searchParams.get('password'); // URL سے سیشن پاس ورڈ
+  const passwordQuery = searchParams.get('password'); 
 
-  // فارم کی تمام فیلڈز کے لیے اسٹیٹ
-  const [imageFile, setImageFile] = useState(null);
+  // --- یہ ہے حل 2: اسٹیٹ کو اپ ڈیٹ کریں ---
+  const [imageFile, setImageFile] = useState(null); // <-- یہ اب فائل کو اسٹور کرے گا
+  // --- حل ختم ---
   const [videoLink, setVideoLink] = useState('');
   const [brand, setBrand] = useState('');
   const [model, setModel] = useState('');
@@ -29,7 +31,7 @@ export default function AddProductPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  // فارم جمع کروانے کا فنکشن
+  // فارم جمع کروانے کا فنکشن (اپ ڈیٹ شدہ)
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!imageFile || !brand || !model || !price) {
@@ -42,32 +44,31 @@ export default function AddProductPage() {
 
     try {
       // --- مرحلہ 1: تصویر اپ لوڈ کریں ---
-      // تصویر کے لیے ایک منفرد نام بنائیں
       const imageName = `product-${Date.now()}.${imageFile.name.split('.').pop()}`;
       
       const uploadRes = await fetch(
         `/api/upload?filename=${imageName}&password=${passwordQuery}`,
         {
           method: 'POST',
-          body: imageFile,
+          body: imageFile, // <-- 'imageFile' اسٹیٹ کا استعمال کریں
         }
       );
       if (!uploadRes.ok) throw new Error('Image upload failed');
       
       const blob = await uploadRes.json();
-      const imageUrl = blob.url; // اپ لوڈ کی گئی تصویر کا URL
+      const imageUrl = blob.url; 
 
       // --- مرحلہ 2: تمام ڈیٹا کو 'data.json' میں سیو کریں ---
       const productData = {
-        id: '', // API خود ID بنائے گی
-        name: `${brand} ${model}`, // نام خود بخود برانڈ اور ماڈل سے بن جائے گا
+        id: '',
+        name: `${brand} ${model}`,
         brand,
         model,
         detail: details,
         condition,
         price,
         videoLink,
-        imageUrl, // تصویر کا URL
+        imageUrl, 
       };
 
       const productRes = await fetch(
@@ -82,7 +83,6 @@ export default function AddProductPage() {
 
       setMessage('Product added successfully! Redirecting...');
       
-      // کامیابی کے بعد، 2 سیکنڈ انتظار کریں اور ایڈمن ڈیش بورڈ پر واپس جائیں
       setTimeout(() => {
         router.push(`/admin?password=${passwordQuery}`);
       }, 2000);
@@ -109,18 +109,14 @@ export default function AddProductPage() {
       {/* پروڈکٹ فارم */}
       <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
         
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Product Image (Required)
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImageFile(e.target.files[0])}
-            className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            required
-          />
-        </div>
+        {/* --- یہ ہے حل 2: ڈریگ اینڈ ڈراپ --- */}
+        <FileUploader 
+          title="Product Image (Required)"
+          onFileSelect={(file) => setImageFile(file)}
+        />
+        {imageFile && <p className="text-sm text-green-600">Image selected: {imageFile.name}</p>}
+        {/* --- حل ختم --- */}
+
 
         <div>
           <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
@@ -203,7 +199,7 @@ export default function AddProductPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400"
+            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"
           >
             {isLoading ? 'Saving...' : 'Save Product'}
           </button>
