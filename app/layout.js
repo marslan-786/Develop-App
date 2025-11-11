@@ -1,4 +1,4 @@
-// app/layout.js
+// --- 1. app/layout.js (مکمل فائنل فکس - Ads کے ساتھ) ---
 
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -7,27 +7,20 @@ import { head } from "@vercel/blob";
 
 const inter = Inter({ subsets: ["latin"] });
 
-// --- ✅ نیا فنکشن: ایڈ سیٹنگز لوڈ کرنا ---
+// --- ایڈ سیٹنگز لوڈ کرنا (یہ بالکل ٹھیک ہے) ---
 async function getAdSettings() {
   try {
     const blob = await head('ads.json', { cache: 'no-store' });
-    
-    // --- ✅ تبدیلی یہاں ہے ---
-    // ہم نے 'tags' کو 'no-store' سے بدل دیا ہے
-    // تاکہ یہ فائل کبھی کیش نہ ہو
     const response = await fetch(blob.url, {
-      cache: 'no-store' 
+      cache: 'no-store' // <-- یہ کیش کو بند رکھتا ہے
     });
-    // --- --- ---
     
     if (response.ok) {
       const text = await response.text();
       if (text) return JSON.parse(text);
     }
-  } catch (e) {
-    // اگر فائل نہیں ملتی تو کوئی مسئلہ نہیں
-  }
-  // ڈیفالٹ ویلیو اگر کچھ نہ ملے
+  } catch (e) {}
+  
   return { 
     googleSiteVerification: null, 
     adsenseClientId: null, 
@@ -75,13 +68,15 @@ export async function generateMetadata() {
 
 export default async function RootLayout({ children }) {
   
-  // ایڈ سیٹنگز لوڈ کریں (اب یہ ہمیشہ تازہ ترین ہوں گی)
   const adSettings = await getAdSettings();
 
   return (
     <html lang="en">
       <head>
-        {/* 1. گوگل ویری فکیشن کوڈ */}
+        
+        {/* --- ✅ گوگل اسنیپ کوڈ انجیکشن (اپ ڈیٹ شدہ) --- */}
+
+        {/* 1. پہلا ویری فکیشن طریقہ (اگر آپ نے پہلے خانے میں کچھ ڈالا) */}
         {adSettings.googleSiteVerification && (
           <meta 
             name="google-site-verification" 
@@ -89,7 +84,16 @@ export default async function RootLayout({ children }) {
           />
         )}
         
-        {/* 2. گوگل ایڈسینس اسکرپٹ (صرف اگر ایڈز 'On' ہوں) */}
+        {/* 2. دوسرا ویری فکیشن طریقہ (جو گوگل اب مانگ رہا ہے) */}
+        {/* یہ 'AdSense Client ID' والے خانے سے ca-pub-... اٹھائے گا */}
+        {adSettings.adsenseClientId && (
+          <meta 
+            name="google-adsense-account" 
+            content={adSettings.adsenseClientId} 
+          />
+        )}
+        
+        {/* 3. گوگل ایڈسینس اسکرپٹ (ایڈز دکھانے کے لیے) */}
         {adSettings.masterAdsEnabled && adSettings.adsenseClientId && (
           <Script 
             async 
@@ -98,6 +102,8 @@ export default async function RootLayout({ children }) {
             strategy="lazyOnload" 
           />
         )}
+        
+        {/* --- --- --- */}
       </head>
 
       <body className={`${inter.className} bg-gray-900`}>
