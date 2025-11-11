@@ -25,16 +25,41 @@ function ToggleSwitch({ label, isEnabled, onToggle }) {
   );
 }
 
+// --- ✅ نیا: سلاٹ ID کے لیے ان پٹ فیلڈ ---
+function AdSlotInput({ label, value, onChange }) {
+  return (
+    <div className="pl-4 pr-4 pb-3 -mt-2 bg-white rounded-b-lg border-b border-l border-r">
+      <label className="block text-xs font-medium text-gray-500">{label}</label>
+      <input
+        type="text"
+        value={value}
+        onChange={onChange}
+        placeholder="e.g., 1234567890"
+        className="mt-1 block w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md shadow-sm"
+      />
+    </div>
+  );
+}
+
+
 export default function AdsPanelClient({ initialSettings, passwordQuery }) {
   
   // تمام فیلڈز کے لیے اسٹیٹ
   const [googleSiteVerification, setGoogleSiteVerification] = useState('');
   const [adsenseClientId, setAdsenseClientId] = useState('');
   const [masterAdsEnabled, setMasterAdsEnabled] = useState(false);
+  
   const [showHomepageBannerAd, setShowHomepageBannerAd] = useState(false);
+  const [homepageBannerSlotId, setHomepageBannerSlotId] = useState(''); // <-- ✅ نیا
+
   const [showHomepageInFeedAds, setShowHomepageInFeedAds] = useState(false);
+  const [homepageInFeedSlotId, setHomepageInFeedSlotId] = useState(''); // <-- ✅ نیا
+  
   const [showHomepagePopupAd, setShowHomepagePopupAd] = useState(false);
+  const [homepagePopupSlotId, setHomepagePopupSlotId] = useState(''); // <-- ✅ نیا
+
   const [showProductInterstitialAd, setShowProductInterstitialAd] = useState(false);
+  const [productInterstitialSlotId, setProductInterstitialSlotId] = useState(''); // <-- ✅ نیا
   
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -44,10 +69,19 @@ export default function AdsPanelClient({ initialSettings, passwordQuery }) {
     setGoogleSiteVerification(initialSettings.googleSiteVerification || '');
     setAdsenseClientId(initialSettings.adsenseClientId || '');
     setMasterAdsEnabled(initialSettings.masterAdsEnabled || false);
+    
     setShowHomepageBannerAd(initialSettings.showHomepageBannerAd || false);
+    setHomepageBannerSlotId(initialSettings.homepageBannerSlotId || ''); // <-- ✅ نیا
+
     setShowHomepageInFeedAds(initialSettings.showHomepageInFeedAds || false);
+    setHomepageInFeedSlotId(initialSettings.homepageInFeedSlotId || ''); // <-- ✅ نیا
+    
     setShowHomepagePopupAd(initialSettings.showHomepagePopupAd || false);
+    setHomepagePopupSlotId(initialSettings.homepagePopupSlotId || ''); // <-- ✅ نیا
+
     setShowProductInterstitialAd(initialSettings.showProductInterstitialAd || false);
+    setProductInterstitialSlotId(initialSettings.productInterstitialSlotId || ''); // <-- ✅ نیا
+    
   }, [initialSettings]);
 
   // سیو کرنے کا فنکشن
@@ -61,9 +95,13 @@ export default function AdsPanelClient({ initialSettings, passwordQuery }) {
       adsenseClientId,
       masterAdsEnabled,
       showHomepageBannerAd,
+      homepageBannerSlotId, // <-- ✅ نیا
       showHomepageInFeedAds,
+      homepageInFeedSlotId, // <-- ✅ نیا
       showHomepagePopupAd,
-      showProductInterstitialAd
+      homepagePopupSlotId, // <-- ✅ نیا
+      showProductInterstitialAd,
+      productInterstitialSlotId // <-- ✅ نیا
     };
 
     try {
@@ -103,7 +141,7 @@ export default function AdsPanelClient({ initialSettings, passwordQuery }) {
               id="verification"
               value={googleSiteVerification}
               onChange={(e) => setGoogleSiteVerification(e.target.value)}
-              placeholder="Paste your verification code here"
+              placeholder="(Optional) e.g., ABC123XYZ..."
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
             />
           </div>
@@ -116,7 +154,7 @@ export default function AdsPanelClient({ initialSettings, passwordQuery }) {
               id="adsenseId"
               value={adsenseClientId}
               onChange={(e) => setAdsenseClientId(e.target.value)}
-              placeholder="ca-pub-1234567890"
+              placeholder="e.g., ca-pub-1234567890"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
             />
           </div>
@@ -133,25 +171,53 @@ export default function AdsPanelClient({ initialSettings, passwordQuery }) {
           onToggle={() => setMasterAdsEnabled(!masterAdsEnabled)}
         />
         <hr/>
+        
+        {/* --- ہوم پیج بینر ایڈ --- */}
         <ToggleSwitch 
           label="Home: Ad below Banner"
           isEnabled={showHomepageBannerAd}
           onToggle={() => setShowHomepageBannerAd(!showHomepageBannerAd)}
         />
+        <AdSlotInput
+          label="Ad Slot ID (Banner):"
+          value={homepageBannerSlotId}
+          onChange={(e) => setHomepageBannerSlotId(e.target.value)}
+        />
+        
+        {/* --- ہوم پیج ان-فیڈ ایڈ --- */}
         <ToggleSwitch 
           label="Home: Ads in Product Feed"
           isEnabled={showHomepageInFeedAds}
           onToggle={() => setShowHomepageInFeedAds(!showHomepageInFeedAds)}
         />
+        <AdSlotInput
+          label="Ad Slot ID (In-Feed):"
+          value={homepageInFeedSlotId}
+          onChange={(e) => setHomepageInFeedSlotId(e.target.value)}
+        />
+
+        {/* --- ہوم پیج پوپ اپ ایڈ --- */}
         <ToggleSwitch 
           label="Home: Top-Right Popup Ad"
           isEnabled={showHomepagePopupAd}
           onToggle={() => setShowHomepagePopupAd(!showHomepagePopupAd)}
         />
+        <AdSlotInput
+          label="Ad Slot ID (Popup):"
+          value={homepagePopupSlotId}
+          onChange={(e) => setHomepagePopupSlotId(e.target.value)}
+        />
+
+        {/* --- پروڈکٹ پیج ایڈ --- */}
         <ToggleSwitch 
           label="Product Page: Interstitial Ad"
           isEnabled={showProductInterstitialAd}
           onToggle={() => setShowProductInterstitialAd(!showProductInterstitialAd)}
+        />
+        <AdSlotInput
+          label="Ad Slot ID (Interstitial):"
+          value={productInterstitialSlotId}
+          onChange={(e) => setProductInterstitialSlotId(e.target.value)}
         />
       </div>
 
@@ -172,5 +238,4 @@ export default function AdsPanelClient({ initialSettings, passwordQuery }) {
       </div>
     </form>
   );
-    }
-                
+}
