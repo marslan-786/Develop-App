@@ -1,6 +1,7 @@
 import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 import { isValidPassword } from '../../../lib/auth.js';
+import { revalidateTag } from 'next/cache'; // <-- 1. اسے امپورٹ کریں
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,11 @@ export async function POST(request) {
       access: 'public',
       addRandomSuffix: false, // <-- یہ ہے حل!
     });
+
+    // --- ✅ تبدیلی یہاں ہے ---
+    // 2. 'settings' ٹیگ والی کیش کو کلیئر کریں
+    revalidateTag('settings');
+    // --- --- ---
 
     return NextResponse.json(blob);
 
