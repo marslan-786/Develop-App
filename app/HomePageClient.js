@@ -272,29 +272,40 @@ function FloatingWhatsAppButton({ whatsappNumber }) {
 }
 
 
-// --- ✅ نیا: ایڈ دکھانے کا کمپوننٹ ---
-function AdComponent({ adSlotId }) {
+// --- ✅ نیا: ایڈ دکھانے کا اصل کمپوننٹ ---
+function AdComponent({ adClientId, adSlotId }) {
+  // اگر IDs موجود نہیں ہیں تو ایڈ نہ دکھائیں
+  if (!adClientId || !adSlotId) {
+    return (
+      <div className="w-full bg-gray-700 text-center py-10 border border-gray-600 rounded-lg">
+        <p className="text-gray-400">Ad Slot not configured.</p>
+      </div>
+    );
+  }
+
   useEffect(() => {
-    // (یہاں آپ کا گوگل ایڈ پش کوڈ آئے گا)
-    // (window.adsbygoogle = window.adsbygoogle || []).push({});
-  }, []);
+    // گوگل ایڈسینس کا آفیشل پش کوڈ
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (e) {
+      console.error("AdSense Error:", e);
+    }
+  }, [adSlotId]); // جب بھی سلاٹ ID بدلے، ایڈ کو پش کریں
   
   return (
-    <div className="w-full bg-gray-700 text-center py-10 border border-gray-600 rounded-lg">
-      <p className="text-gray-400">Ad Placeholder (Slot: {adSlotId})</p>
-      {/* <ins className="adsbygoogle"
-             style={{ display: 'block' }}
-             data-ad-client="ca-pub-..."
-             data-ad-slot={adSlotId}
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-      */}
+    <div className="w-full text-center overflow-hidden">
+      <ins className="adsbygoogle"
+           style={{ display: 'block' }}
+           data-ad-client={adClientId} // <-- ڈائنامک کلائنٹ ID
+           data-ad-slot={adSlotId}      // <-- ڈائنامک سلاٹ ID
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
     </div>
   );
 }
 
 // --- ✅ نیا: پوپ اپ ایڈ ---
-function PopupAd({ adSlotId, onClose }) {
+function PopupAd({ adClientId, adSlotId, onClose }) {
   return (
     <div className="fixed top-4 right-4 z-[999] w-72 bg-gray-800 shadow-2xl border border-gray-700 rounded-lg">
       <button 
@@ -304,7 +315,7 @@ function PopupAd({ adSlotId, onClose }) {
         <IconClose />
       </button>
       <div className="p-2">
-        <AdComponent adSlotId={adSlotId} />
+        <AdComponent adClientId={adClientId} adSlotId={adSlotId} />
       </div>
     </div>
   );
@@ -401,6 +412,7 @@ export default function HomePageClient({
   const showAds = adSettings?.masterAdsEnabled;
   const showBannerAd = showAds && adSettings?.showHomepageBannerAd;
   const showInFeedAds = showAds && adSettings?.showHomepageInFeedAds;
+  const clientId = adSettings?.adsenseClientId; // <-- کلائنٹ ID
 
   return (
     <main>
@@ -414,10 +426,13 @@ export default function HomePageClient({
       
       <HeroBanner bannerUrl={bannerUrl} />
       
-      {/* --- ✅ 1. بینر کے نیچے والا ایڈ --- */}
+      {/* --- ✅ 1. بینر کے نیچے والا ایڈ (ڈائنامک IDs کے ساتھ) --- */}
       {showBannerAd && (
         <div className="p-4">
-          <AdComponent adSlotId="HOMEPAGE_BANNER_AD_SLOT" />
+          <AdComponent 
+            adClientId={clientId}
+            adSlotId={adSettings.homepageBannerSlotId} 
+          />
         </div>
       )}
 
@@ -443,21 +458,22 @@ export default function HomePageClient({
         {filtered.length ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             
-            {/* --- ✅ 2. ان-فیڈ ایڈز (پروڈکٹس کے درمیان) --- */}
             {filtered.map((p, i) => (
               <Fragment key={p.id || p.name}>
                 <ProductCard
-                  // key کو Fragment میں منتقل کر دیا گیا ہے
                   product={p}
                   index={i}
                   style={styles[i % styles.length]}
                   animationVariant={anim[i % anim.length]}
                 />
                 
-                {/* ہر 2 پروڈکٹس کے بعد (یعنی انڈیکس 1, 3, 5...) ایک ایڈ دکھاؤ */}
+                {/* --- ✅ 2. ان-فیڈ ایڈز (ڈائنامک IDs کے ساتھ) --- */}
                 {showInFeedAds && (i % 2 === 1) && (
                   <div className="col-span-2 md:col-span-3 lg:col-span-4 p-2" key={`ad-${i}`}>
-                    <AdComponent adSlotId={`IN_FEED_AD_${i}`} />
+                    <AdComponent 
+                      adClientId={clientId}
+                      adSlotId={adSettings.homepageInFeedSlotId} 
+                    />
                   </div>
                 )}
               </Fragment>
@@ -469,10 +485,11 @@ export default function HomePageClient({
         )}
       </div>
       
-      {/* --- ✅ 3. پوپ اپ ایڈ --- */}
+      {/* --- ✅ 3. پوپ اپ ایڈ (ڈائنامک IDs کے ساتھ) --- */}
       {showPopup && (
         <PopupAd 
-          adSlotId="HOMEPAGE_POPUP_AD_SLOT" 
+          adClientId={clientId}
+          adSlotId={adSettings.homepagePopupSlotId}
           onClose={() => setShowPopup(false)} 
         />
       )}
