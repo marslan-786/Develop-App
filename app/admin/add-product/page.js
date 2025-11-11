@@ -37,13 +37,12 @@ async function performUpload(productData, imageFile, passwordQuery) {
     );
     if (!productRes.ok) throw new Error('Failed to save product data.');
     
-    // کامیابی! (ہم یہاں نوٹیفکیشن دکھا سکتے ہیں، لیکن ابھی کے لیے کچھ نہیں)
+    // کامیابی!
     console.log("Product saved successfully in background:", productData.name);
 
   } catch (error) {
     // اگر فیل ہو
     console.error("Background upload failed:", error.message);
-    // ہم صارف کو ایک نوٹیفکیشن بھیج سکتے ہیں
   }
 }
 // --- حل ختم ---
@@ -58,11 +57,11 @@ export default function AddProductPage() {
   const [videoLink, setVideoLink] = useState('');
   const [brand, setBrand] = useState('');
   const [model, setModel] = useState('');
-  const [detail, setDetails] = useState('');
+  const [details, setDetails] = useState('');
   const [condition, setCondition] = useState('');
   const [price, setPrice] = useState('');
   
-  const [isLoading, setIsLoading] = useState(false); // یہ اب صرف چند ملی سیکنڈ کے لیے 'true' ہو گا
+  const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
 
   // فارم ری سیٹ فنکشن
@@ -74,7 +73,6 @@ export default function AddProductPage() {
     setDetails('');
     setCondition('');
     setPrice('');
-    // نوٹ: 'message' کو ری سیٹ نہ کریں
   };
 
   // --- یہ ہے حل 2 (جاری): اپ ڈیٹ شدہ handleSubmit ---
@@ -85,26 +83,39 @@ export default function AddProductPage() {
       return;
     }
     
-    setIsLoading(true); // <-- 1. لوڈنگ شروع
-    setMessage('Starting upload...'); // 2. میسج دکھائیں
+    setIsLoading(true);
+    setMessage('Starting upload...');
 
-    // 3. ڈیٹا تیار کریں
+    // --- تبدیلیاں یہاں ہیں ---
+
+    // 1. پاکستانی وقت حاصل کریں
+    const now = new Date();
+    // 'sv-SE' لوکیل YYYY-MM-DD HH:MM:SS فارمیٹ دیتا ہے
+    const pakistanTime = now.toLocaleString('sv-SE', { 
+        timeZone: 'Asia/Karachi', // اسلام آباد/کراچی کا ٹائم زون
+        hour12: false 
+    });
+
+    // 2. ڈیٹا تیار کریں
     const productData = {
       id: '',
       name: `${brand} ${model}`,
-      brand, model, details, condition, price, videoLink,
+      brand, model, 
+      detail: details,   // <-- تبدیلی 1: 'details' کو 'detail' کر دیا گیا
+      condition, price, videoLink,
       imageUrl: '', // یہ 'performUpload' میں سیٹ ہو گا
+      uploadTime: pakistanTime // <-- تبدیلی 2: پاکستانی وقت شامل کر دیا گیا
     };
 
-    // 4. اپ لوڈ کو بیک گراؤنڈ میں "Fire-and-Forget" کریں
+    // --- تبدیلیاں ختم ---
+
+    // 3. اپ لوڈ کو بیک گراؤنڈ میں "Fire-and-Forget" کریں
     performUpload(productData, imageFile, passwordQuery);
 
-    // 5. UI کو فوراً ری سیٹ اور ان بلاک کریں
+    // 4. UI کو فوراً ری سیٹ اور ان بلاک کریں
     resetForm();
     setMessage('Upload started in background! You can add another product.');
-    setIsLoading(false); // <-- 6. لوڈنگ فوراً ختم
-    
-    // 'router.push' کو ہٹا دیا گیا ہے تاکہ آپ اسی پیج پر رہ سکیں
+    setIsLoading(false);
   };
   // --- حل ختم ---
 
@@ -127,7 +138,7 @@ export default function AddProductPage() {
           onFileSelect={(file) => setImageFile(file)}
         />
         {imageFile && <p className="text-sm text-green-600">Image selected: {imageFile.name}</p>}
-        {/* (باقی فارم ویسا ہی) */}
+        
         <div>
           <label htmlFor="brand" className="block text-sm font-medium text-gray-700">Brand (Required)</label>
           <input
