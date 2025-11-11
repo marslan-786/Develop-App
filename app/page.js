@@ -1,4 +1,4 @@
-// --- 2. app/page.js (مکمل فکس شدہ - Responsive) ---
+// --- 2. app/page.js کمل فکس شدہ - Responsive) ---
 
 import { head } from "@vercel/blob";
 import HomePageClient from "./HomePageClient";
