@@ -1,4 +1,4 @@
-// --- 3. app/HomePageClient.js (مکمل فکس شدہ) ---
+// --- 3. app/HomePageClient.js (مکمل فکس شدہ - نیا ڈیزائن) ---
 
 "use client";
 
@@ -37,14 +37,13 @@ function IconClose() {
   );
 }
 
-// --- Header ---
+// --- Header (ویسے ہی) ---
 function AppHeader({ title, logoUrl, whatsappNumber, onMenuClick, onSearchClick }) {
   const cacheBustedLogoSrc = `${logoUrl}?v=${new Date().getTime()}`;
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     "Hello, I am interested in your products."
   )}`;
   return (
-    // ہیڈر کا z-index 'z-20' ہے
     <header className="sticky top-0 z-20 flex items-center justify-between p-4 bg-gray-900 border-b border-gray-700">
       <div className="flex items-center gap-4">
         <button onClick={onMenuClick} className="p-2 rounded-full text-gray-300 hover:bg-gray-700">
@@ -96,7 +95,6 @@ const filters = [
 ];
 function FilterBubbles({ activeFilter, onFilterChange }) {
   return (
-    // فلٹر کا z-index 'z-10' ہے
     <div className="sticky top-[73px] z-10 p-4 bg-gray-900/80 border-b border-gray-700">
       <div className="flex items-center justify-center gap-3">
         {filters.map((f) => (
@@ -117,9 +115,15 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
   );
 }
 
-// --- Product Card (ویسے ہی) ---
+// --- فکس 5: پروڈکٹ کارڈ کا نیا ڈیزائن ---
 function ProductCard({ product, index, style, animationVariant }) {
   const img = `${product.imageUrl || "/placeholder-image.png"}?v=${new Date().getTime()}`;
+  
+  // تفصیل کو مختصر کرنے کے لیے (اگر موجود ہے)
+  const shortDetail = product.detail 
+    ? product.detail.substring(0, 50) + (product.detail.length > 50 ? "..." : "")
+    : ""; // 50 حروف کی حد
+
   return (
     <motion.div
       className={`rounded-lg overflow-hidden shadow-lg flex flex-col ${style.bg}`}
@@ -127,18 +131,35 @@ function ProductCard({ product, index, style, animationVariant }) {
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.8, delay: (index % 3) * 0.1 }}
+      transition={{ duration: 0.8, delay: (index % 2) * 0.1 }} // (index % 3) کو (index % 2) کر دیا
     >
-      <div className="w-full h-56 relative">
+      {/* 1. تصویر */}
+      <div className="w-full h-48 md:h-56 relative">
         <Image src={img} alt={product.name} fill className="object-cover" unoptimized />
       </div>
+
+      {/* 2. مواد (نیا ڈیزائن) */}
       <div className={`p-4 flex flex-col flex-grow ${style.text}`}>
-        <h3 className="text-xl font-semibold">{product.name}</h3>
-        <div className="flex justify-between items-center mt-2">
-          <p className="font-bold">PKR {product.price}</p>
+        {/* نام */}
+        <h3 className="text-xl font-semibold mb-2 h-14 overflow-hidden">
+          {product.name}
+        </h3>
+        
+        {/* تفصیل (اگر موجود ہے) */}
+        {shortDetail && (
+          <p className="text-sm opacity-80 mb-3 h-10 overflow-hidden">
+            {shortDetail}
+          </p>
+        )}
+
+        {/* قیمت */}
+        <p className="font-bold text-lg mb-4">PKR {product.price}</p>
+
+        {/* بٹن (نیچے رکھنے کے لیے 'mt-auto') */}
+        <div className="mt-auto">
           <Link
             href={`/product/${product.id}`}
-            className={`px-3 py-1 rounded-md text-xs font-medium ${style.button}`}
+            className={`block w-full text-center px-3 py-2 rounded-md text-sm font-medium ${style.button}`}
           >
             View Product
           </Link>
@@ -147,15 +168,13 @@ function ProductCard({ product, index, style, animationVariant }) {
     </motion.div>
   );
 }
+// --- فکس ختم ---
 
 // --- Sidebar (ویسے ہی) ---
 function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
   return (
     <>
-      {/* اوورلے کا z-index 'z-30' ہے */}
       {isOpen && <div className="fixed inset-0 z-30 bg-black/50" onClick={onClose}></div>}
-      
-      {/* سائیڈ بار کا z-index 'z-40' ہے (یہ ہیڈر 'z-20' سے اوپر آئے گا) */}
       <div
         className={`fixed top-0 left-0 z-40 w-64 h-full bg-gray-800 transition-transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
@@ -197,7 +216,6 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
 function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
   if (!isSearchOpen) return null;
   return (
-    // سرچ بار کا z-index 'z-10' ہے
     <div className="sticky top-[141px] z-10 p-4 bg-gray-800 border-b border-gray-700">
       <div className="relative">
         <input
@@ -219,7 +237,7 @@ function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
   );
 }
 
-// --- Floating WhatsApp ---
+// --- Floating WhatsApp (ویسے ہی, z-50 کے ساتھ) ---
 function FloatingWhatsAppButton({ whatsappNumber }) {
   if (!whatsappNumber) return null;
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
@@ -230,7 +248,6 @@ function FloatingWhatsAppButton({ whatsappNumber }) {
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      // --- فکس 5: z-index کو 'z-20' سے 'z-50' کر دیا گیا ہے ---
       className="fixed bottom-6 right-6 z-50 p-6 bg-green-500 text-white rounded-full shadow-lg hover:scale-110 transition-transform whatsapp-float"
     >
       <IconWhatsApp />
@@ -238,9 +255,9 @@ function FloatingWhatsAppButton({ whatsappNumber }) {
   );
 }
 
-// --- Main Client Component (ویسے ہی) ---
+// --- Main Client Component ---
 export default function HomePageClient({ initialProducts, settings, logoUrl, bannerUrl }) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBrand, setSelectedBrand] = useState(null);
@@ -302,9 +319,11 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
         onSearchChange={setSearchTerm}
       />
 
-      <div className="p-8">
+      {/* --- فکس 6: نیا Responsive گرڈ --- */}
+      <div className="p-4 md:p-8"> {/* موبائل پر کم پیڈنگ، ڈیسک ٹاپ پر زیادہ */}
         {filtered.length ? (
-          <div className="grid grid-cols-3 gap-6">
+          // موبائل پر 2، میڈیم پر 3، لارج پر 4 کالم
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {filtered.map((p, i) => (
               <ProductCard
                 key={p.id || p.name}
@@ -319,6 +338,8 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
           <div className="text-center text-gray-400 mt-20">No products found.</div>
         )}
       </div>
+      {/* --- فکس ختم --- */}
+      
       <FloatingWhatsAppButton whatsappNumber={settings.whatsappNumber} />
     </main>
   );
