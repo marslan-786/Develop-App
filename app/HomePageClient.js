@@ -98,11 +98,11 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
         {filters.map((f) => (
           <button
             key={f.id}
-            onClick={() => onFilterChange(f.id)}
+            onClick={() => onFilterChange(f.id)} // یہ 'onFilterChange' اب toggle لاجک کو کال کرے گا
             className={`px-5 py-2 rounded-full text-sm font-medium ${
               activeFilter === f.id
-                ? "animated-gradient-button text-white"
-                : "bg-gray-700 text-gray-200 hover:bg-gray-600"
+                ? "animated-gradient-button text-white" // ایکٹیو (Active)
+                : "bg-gray-700 text-gray-200 hover:bg-gray-600" // ان-ایکٹیو
             }`}
           >
             {f.label}
@@ -113,15 +113,12 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
   );
 }
 
-// --- پروڈکٹ کارڈ کا نیا ڈیزائن ---
+// --- پروڈکٹ کارڈ کا نیا ڈیزائن (ویسے ہی) ---
 function ProductCard({ product, index, style, animationVariant }) {
   const img = `${product.imageUrl || "/placeholder-image.png"}?v=${new Date().getTime()}`;
-  
-  // تفصیل کو مختصر کرنے کے لیے (اگر موجود ہے)
   const shortDetail = product.detail 
     ? product.detail.substring(0, 50) + (product.detail.length > 50 ? "..." : "")
-    : ""; // 50 حروف کی حد
-
+    : "";
   return (
     <motion.div
       className={`rounded-lg overflow-hidden shadow-lg flex flex-col ${style.bg}`}
@@ -129,31 +126,21 @@ function ProductCard({ product, index, style, animationVariant }) {
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.8, delay: (index % 2) * 0.1 }} // (index % 3) کو (index % 2) کر دیا
+      transition={{ duration: 0.8, delay: (index % 2) * 0.1 }}
     >
-      {/* 1. تصویر */}
       <div className="w-full h-48 md:h-56 relative">
         <Image src={img} alt={product.name} fill className="object-cover" unoptimized />
       </div>
-
-      {/* 2. مواد (نیا ڈیزائن) */}
       <div className={`p-4 flex flex-col flex-grow ${style.text}`}>
-        {/* نام */}
         <h3 className="text-xl font-semibold mb-2 h-14 overflow-hidden">
           {product.name}
         </h3>
-        
-        {/* تفصیل (اگر موجود ہے) */}
         {shortDetail && (
           <p className="text-sm opacity-80 mb-3 h-10 overflow-hidden">
             {shortDetail}
           </p>
         )}
-
-        {/* قیمت */}
         <p className="font-bold text-lg mb-4">PKR {product.price}</p>
-
-        {/* بٹن (نیچے رکھنے کے لیے 'mt-auto') */}
         <div className="mt-auto">
           <Link
             href={`/product/${product.id}`}
@@ -254,7 +241,6 @@ function FloatingWhatsAppButton({ whatsappNumber }) {
 
 // --- Main Client Component ---
 export default function HomePageClient({ initialProducts, settings, logoUrl, bannerUrl }) {
-  // --- ✅ فکس: یہاں سے اضافی '=' ہٹا دیا گیا ہے ---
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -266,16 +252,48 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
     return [...new Set(all)];
   }, [initialProducts]);
 
+  // --- ✅ فکس 1: فلٹر کو ٹوگل (toggle) کرنے کی لاجک ---
+  const handleFilterChange = (id) => {
+    setQuickFilter((prev) => (prev === id ? "all" : id));
+  };
+  // --- فکس ختم ---
+
+  // --- ✅ فکس 2: فلٹر لاجک کو useMemo میں شامل کیا گیا ---
   const filtered = useMemo(() => {
     return initialProducts.filter((p) => {
+      // 1. برانڈ فلٹر (سائیڈ بار سے)
       const matchBrand = selectedBrand ? p.brand === selectedBrand : true;
+      
+      // 2. سرچ فلٹر (سرچ بار سے)
       const matchSearch =
         !searchTerm ||
         p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.brand?.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchBrand && matchSearch;
+      
+      // 3. کوئیک فلٹر (ببلز سے)
+      let matchesQuickFilter = true;
+      if (quickFilter !== 'all') {
+        if (quickFilter === 'low-range') {
+          // قیمت سے کوما (,) ہٹا کر نمبر میں تبدیل کرنا
+          const price = parseFloat(String(p.price).replace(/,/g, ''));
+          matchesQuickFilter = price < 20000; // 20 ہزار سے کم
+        } else if (quickFilter === 'pta') {
+          matchesQuickFilter = 
+            p.name?.toLowerCase().includes('pta') ||
+            p.detail?.toLowerCase().includes('pta') ||
+            p.condition?.toLowerCase().includes('pta'); // PTA الفاظ چیک کرنا
+        } else if (quickFilter === 'gaming') {
+          matchesQuickFilter = 
+            p.name?.toLowerCase().includes('gaming') ||
+            p.detail?.toLowerCase().includes('gaming'); // Gaming الفاظ چیک کرنا
+        }
+      }
+
+      // تینوں فلٹرز کو ملا کر رزلٹ دینا
+      return matchBrand && matchSearch && matchesQuickFilter;
     });
-  }, [initialProducts, selectedBrand, searchTerm]);
+  }, [initialProducts, selectedBrand, searchTerm, quickFilter]); // quickFilter کو یہاں شامل کیا گیا
+  // --- فکس ختم ---
 
   const styles = [
     { bg: "bg-blue-600", text: "text-white", button: "bg-white/90 text-blue-600 hover:bg-white" },
@@ -309,7 +327,8 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
           setIsMenuOpen(false);
         }}
       />
-      <FilterBubbles activeFilter={quickFilter} onFilterChange={setQuickFilter} />
+      {/* ✅ فکس 3: پرانا 'setQuickFilter' کی جگہ نیا 'handleFilterChange' فنکشن پاس کیا گیا */}
+      <FilterBubbles activeFilter={quickFilter} onFilterChange={handleFilterChange} />
       <SearchBar
         isSearchOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
@@ -317,10 +336,9 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
         onSearchChange={setSearchTerm}
       />
 
-      {/* --- نیا Responsive گرڈ --- */}
-      <div className="p-4 md:p-8"> {/* موبائل پر کم پیڈنگ، ڈیسک ٹاپ پر زیادہ */}
+      {/* نیا Responsive گرڈ (ویسے ہی) */}
+      <div className="p-4 md:p-8">
         {filtered.length ? (
-          // موبائل پر 2، میڈیم پر 3، لارج پر 4 کالم
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {filtered.map((p, i) => (
               <ProductCard
@@ -336,7 +354,6 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
           <div className="text-center text-gray-400 mt-20">No products found.</div>
         )}
       </div>
-      {/* --- فکس ختم --- */}
       
       <FloatingWhatsAppButton whatsappNumber={settings.whatsappNumber} />
     </main>
