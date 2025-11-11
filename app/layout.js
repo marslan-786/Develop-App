@@ -1,4 +1,4 @@
-// --- 1. app/layout.js (مکمل فکس شدہ - Ads کے ساتھ) ---
+// app/layout.js
 
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -10,13 +10,15 @@ const inter = Inter({ subsets: ["latin"] });
 // --- ✅ نیا فنکشن: ایڈ سیٹنگز لوڈ کرنا ---
 async function getAdSettings() {
   try {
-    // 1. 'ads.json' فائل کو تلاش کریں
     const blob = await head('ads.json', { cache: 'no-store' });
     
-    // 2. اسے fetch کریں اور 'ads' کا ٹیگ استعمال کریں
+    // --- ✅ تبدیلی یہاں ہے ---
+    // ہم نے 'tags' کو 'no-store' سے بدل دیا ہے
+    // تاکہ یہ فائل کبھی کیش نہ ہو
     const response = await fetch(blob.url, {
-      next: { tags: ['ads'] } // <-- یہ 'ads' سگنل کا انتظار کرے گا
+      cache: 'no-store' 
     });
+    // --- --- ---
     
     if (response.ok) {
       const text = await response.text();
@@ -64,28 +66,21 @@ export async function generateMetadata() {
       icon: logoUrl,
       apple: logoUrl,
     },
-    
-    // --- فکس 1: Viewport کو واپس Responsive (device-width) پر سیٹ کیا گیا ہے ---
     viewport: {
       width: "device-width",
       initialScale: 1,
     },
-    // --- فکس ختم ---
   };
 }
 
 export default async function RootLayout({ children }) {
   
-  // --- ✅ تبدیلی: ایڈ سیٹنگز لوڈ کریں ---
+  // ایڈ سیٹنگز لوڈ کریں (اب یہ ہمیشہ تازہ ترین ہوں گی)
   const adSettings = await getAdSettings();
 
   return (
     <html lang="en">
       <head>
-        {/* آپ کا پرانا ہارڈ کوڈڈ اسکرپٹ یہاں سے ہٹا دیا گیا ہے */}
-
-        {/* --- ✅ یہ ہے آپ کا گوگل اسنیپ کوڈ انجیکشن --- */}
-        
         {/* 1. گوگل ویری فکیشن کوڈ */}
         {adSettings.googleSiteVerification && (
           <meta 
@@ -100,19 +95,15 @@ export default async function RootLayout({ children }) {
             async 
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adSettings.adsenseClientId}`}
             crossOrigin="anonymous"
-            strategy="lazyOnload" // <-- 'lazyOnload' بہترین ہے
+            strategy="lazyOnload" 
           />
         )}
-        
-        {/* --- --- --- */}
       </head>
 
       <body className={`${inter.className} bg-gray-900`}>
-        {/* --- فکس 2: کنٹینر کو 'max-w-full' (Responsive) پر سیٹ کیا گیا ہے --- */}
         <div className="max-w-full mx-auto bg-gray-800 min-h-screen">
           {children}
         </div>
-        {/* --- فکس ختم --- */}
       </body>
     </html>
   );
