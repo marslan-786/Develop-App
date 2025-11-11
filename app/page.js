@@ -3,15 +3,17 @@
 import { head } from "@vercel/blob";
 import HomePageClient from "./HomePageClient";
 
-// 'force-dynamic' کو ہٹا دیا گیا ہے
-
-// --- ✅ ایڈ سیٹنگز لوڈ کرنے کا فنکشن (یہاں بھی) ---
+// --- ✅ ایڈ سیٹنگز لوڈ کرنے کا فنکشن (اپ ڈیٹ شدہ) ---
 async function getAdSettings() {
   try {
     const blob = await head('ads.json', { cache: 'no-store' });
+    
+    // --- ✅ تبدیلی یہاں ہے ---
     const response = await fetch(blob.url, {
-      next: { tags: ['ads'] } // <-- 'ads' ٹیگ استعمال کریں
+      cache: 'no-store' // <-- 'tags' کی جگہ 'no-store'
     });
+    // --- --- ---
+    
     if (response.ok) {
       const text = await response.text();
       if (text) return JSON.parse(text);
@@ -22,9 +24,6 @@ async function getAdSettings() {
 
 // --- پرانا فنکشن (ویسا ہی) ---
 async function getBlobData() {
-  // ... (آپ کا پرانا کوڈ جو settings.json, logo.png, background.png لوڈ کرتا ہے)
-  // ... (اس میں کوئی تبدیلی نہیں کرنی)
-  
   const defaultSettings = { websiteTitle: "Ilyas Mobile Mall" };
   let settings = defaultSettings;
   let products = [];
@@ -60,7 +59,7 @@ async function getBlobData() {
   // 4. پروڈکٹس حاصل کریں
   try {
     const dataBlob = await head("data.json", { cache: "no-store" });
-    const response = await fetch(dataBlob.url, { cache: "no-store" }); // (اسے بھی بعد میں 'products' ٹیگ دے دیں)
+    const response = await fetch(dataBlob.url, { cache: "no-store" });
     if (response.ok) {
       const text = await response.text();
       if (text) products = JSON.parse(text);
@@ -74,7 +73,7 @@ export default async function HomePage() {
   // 1. پرانا ڈیٹا لوڈ کریں
   const { settings, products, logoUrl, bannerUrl } = await getBlobData();
   
-  // 2. --- ✅ نیا: ایڈ سیٹنگز بھی لوڈ کریں ---
+  // 2. ایڈ سیٹنگز لوڈ کریں (اب یہ ہمیشہ تازہ ترین ہوں گی)
   const adSettings = await getAdSettings();
 
   return (
@@ -83,7 +82,7 @@ export default async function HomePage() {
       settings={settings}
       logoUrl={logoUrl}
       bannerUrl={bannerUrl}
-      adSettings={adSettings} // <-- ✅ ایڈ سیٹنگز کو کلائنٹ کو پاس کریں
+      adSettings={adSettings} // <-- ایڈ سیٹنگز کو کلائنٹ کو پاس کریں
     />
   );
 }
