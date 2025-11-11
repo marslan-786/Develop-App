@@ -1,9 +1,7 @@
 import { head } from "@vercel/blob";
 import HomePageClient from "./HomePageClient";
 
-// --- تبدیلی 1: 'force-dynamic' کو ہٹا دیا گیا ---
-// اب یہ پیج کیشنگ استعمال کرے گا اور صرف سگنل ملنے پر اپ ڈیٹ ہوگا۔
-// export const dynamic = "force-dynamic"; 
+// 'force-dynamic' کو ہٹا دیا گیا ہے
 
 async function getBlobData() {
   const defaultSettings = { websiteTitle: "Ilyas Mobile Mall" };
@@ -12,42 +10,44 @@ async function getBlobData() {
   let logoUrl = "/placeholder-logo.png";
   let bannerUrl = "";
 
-  // 1. لوگو چیک کریں
-  try {
-    const logoBlob = await head("logo.png", { cache: 'no-store' });
-    logoUrl = logoBlob.url;
-  } catch {}
+  // --- ❌ 'cacheBuster' کو یہاں سے ہٹا دیا گیا ہے ---
+  // const cacheBuster = `?v=${Date.now()}`;
 
-  // 2. بینر چیک کریں
+  // 3. سیٹنگز سب سے پہلے حاصل کریں (تاکہ ہمارے پاس ٹائم اسٹیمپس ہوں)
   try {
-    const bannerBlob = await head("background.png", { cache: 'no-store' });
-    bannerUrl = bannerBlob.url;
-  } catch {}
-
-  // 3. سیٹنگز (ٹائٹل، واٹس ایپ) حاصل کریں
-  try {
-    const settingsBlob = await head("settings.json", { cache: 'no-store' });
-    
-    // --- ✅ تبدیلی 2: یہاں سگنل وصول کرنے والا کوڈ لگایا ہے ---
+    const settingsBlob = await head("settings.json", { cache: "no-store" });
     const response = await fetch(settingsBlob.url, { 
-      next: { tags: ['settings'] } // <--- یہ لائن سب سے اہم ہے!
+      next: { tags: ['settings'] } // <--- یہ ٹیگ بالکل ٹھیک ہے
     });
-    // -------------------------------------------------------
-
     if (response.ok) {
       const text = await response.text();
       if (text) settings = JSON.parse(text);
     }
   } catch {}
 
-  // 4. پروڈکٹس حاصل کریں
+  // 1. لوگو چیک کریں (سیٹنگز کے بعد)
   try {
-    const dataBlob = await head("data.json", { cache: 'no-store' });
+    const logoBlob = await head("logo.png", { cache: "no-store" });
     
-    // پروڈکٹس کو فی الحال 'no-store' پر رکھیں تاکہ وہ فوراً نظر آئیں
-    // جب آپ پروڈکٹ API میں بھی revalidateTag لگا لیں تو اسے بھی tags: ['products'] کر دیجئے گا
-    const response = await fetch(dataBlob.url, { cache: 'no-store' });
+    // --- ✅ مخصوص ٹائم اسٹیمپ استعمال کریں ---
+    // اگر 'logoLastUpdated' موجود ہے تو وہ، ورنہ موجودہ وقت
+    const logoTimestamp = settings.logoLastUpdated || Date.now();
+    logoUrl = `${logoBlob.url}?v=${logoTimestamp}`; 
+  } catch {}
+
+  // 2. بینر چیک کریں (سیٹنگز کے بعد)
+  try {
+    const bannerBlob = await head("background.png", { cache: "no-store" });
     
+    // --- ✅ مخصوص ٹائم اسٹیمپ استعمال کریں ---
+    const bannerTimestamp = settings.bannerLastUpdated || Date.now();
+    bannerUrl = `${bannerBlob.url}?v=${bannerTimestamp}`;
+  } catch {}
+
+  // 4. پروڈکٹس حاصل کریں (یہ ویسا ہی رہے گا)
+  try {
+    const dataBlob = await head("data.json", { cache: "no-store" });
+    const response = await fetch(dataBlob.url, { cache: "no-store" });
     if (response.ok) {
       const text = await response.text();
       if (text) products = JSON.parse(text);
