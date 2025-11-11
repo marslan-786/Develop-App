@@ -1,4 +1,4 @@
-// --- 1. app/layout.js(مکمل فکس شدہ - Responsive) ---
+// --- 1. app/layout.js (مکمل فکس شدہ - Ads کے ساتھ) ---
 
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -6,6 +6,34 @@ import Script from "next/script";
 import { head } from "@vercel/blob";
 
 const inter = Inter({ subsets: ["latin"] });
+
+// --- ✅ نیا فنکشن: ایڈ سیٹنگز لوڈ کرنا ---
+async function getAdSettings() {
+  try {
+    // 1. 'ads.json' فائل کو تلاش کریں
+    const blob = await head('ads.json', { cache: 'no-store' });
+    
+    // 2. اسے fetch کریں اور 'ads' کا ٹیگ استعمال کریں
+    const response = await fetch(blob.url, {
+      next: { tags: ['ads'] } // <-- یہ 'ads' سگنل کا انتظار کرے گا
+    });
+    
+    if (response.ok) {
+      const text = await response.text();
+      if (text) return JSON.parse(text);
+    }
+  } catch (e) {
+    // اگر فائل نہیں ملتی تو کوئی مسئلہ نہیں
+  }
+  // ڈیفالٹ ویلیو اگر کچھ نہ ملے
+  return { 
+    googleSiteVerification: null, 
+    adsenseClientId: null, 
+    masterAdsEnabled: false 
+  };
+}
+// --- --- ---
+
 
 export async function generateMetadata() {
   let settings = { websiteTitle: "Ilyas Mobile Mall" };
@@ -46,17 +74,37 @@ export async function generateMetadata() {
   };
 }
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  
+  // --- ✅ تبدیلی: ایڈ سیٹنگز لوڈ کریں ---
+  const adSettings = await getAdSettings();
+
   return (
     <html lang="en">
       <head>
-        {/* یہاں سے دستی <meta name="viewport"...> ٹیگ ہٹا دیا گیا ہے */}
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1963262096178695"
-          crossOrigin="anonymous"
-          strategy="lazyOnload"
-        />
+        {/* آپ کا پرانا ہارڈ کوڈڈ اسکرپٹ یہاں سے ہٹا دیا گیا ہے */}
+
+        {/* --- ✅ یہ ہے آپ کا گوگل اسنیپ کوڈ انجیکشن --- */}
+        
+        {/* 1. گوگل ویری فکیشن کوڈ */}
+        {adSettings.googleSiteVerification && (
+          <meta 
+            name="google-site-verification" 
+            content={adSettings.googleSiteVerification} 
+          />
+        )}
+        
+        {/* 2. گوگل ایڈسینس اسکرپٹ (صرف اگر ایڈز 'On' ہوں) */}
+        {adSettings.masterAdsEnabled && adSettings.adsenseClientId && (
+          <Script 
+            async 
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adSettings.adsenseClientId}`}
+            crossOrigin="anonymous"
+            strategy="lazyOnload" // <-- 'lazyOnload' بہترین ہے
+          />
+        )}
+        
+        {/* --- --- --- */}
       </head>
 
       <body className={`${inter.className} bg-gray-900`}>
