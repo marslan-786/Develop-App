@@ -300,7 +300,7 @@ function FloatingWhatsAppButton({ whatsappNumber }) {
 
 // --- Main Client Component (ویسے ہی) ---
 export default function HomePageClient({ initialProducts, settings, logoUrl, bannerUrl }) {
-  const [isMenuOpen, setIsMenuOpen] = = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBrand, setSelectedBrand] = useState(null);
