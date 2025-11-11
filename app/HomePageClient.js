@@ -1,4 +1,4 @@
-// --- 3. app/HomePageClient.js (مکمل فکس شدہ - نیا ڈیزائن) ---
+// --- 3. app/HomePageClient.js (مکمل فکس شدہ - نیا زائن) ---
 
 "use client";
 
