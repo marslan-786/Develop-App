@@ -1,5 +1,3 @@
-// --- 3. app/HomePageClient.js (مکمل فکس شدہ - نیا زائن) ---
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -115,7 +113,7 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
   );
 }
 
-// --- فکس 5: پروڈکٹ کارڈ کا نیا ڈیزائن ---
+// --- پروڈکٹ کارڈ کا نیا ڈیزائن ---
 function ProductCard({ product, index, style, animationVariant }) {
   const img = `${product.imageUrl || "/placeholder-image.png"}?v=${new Date().getTime()}`;
   
@@ -168,7 +166,6 @@ function ProductCard({ product, index, style, animationVariant }) {
     </motion.div>
   );
 }
-// --- فکس ختم ---
 
 // --- Sidebar (ویسے ہی) ---
 function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
@@ -257,7 +254,8 @@ function FloatingWhatsAppButton({ whatsappNumber }) {
 
 // --- Main Client Component ---
 export default function HomePageClient({ initialProducts, settings, logoUrl, bannerUrl }) {
-  const [isMenuOpen, setIsMenuOpen] = = useState(false);
+  // --- ✅ فکس: یہاں سے اضافی '=' ہٹا دیا گیا ہے ---
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBrand, setSelectedBrand] = useState(null);
@@ -319,7 +317,7 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
         onSearchChange={setSearchTerm}
       />
 
-      {/* --- فکس 6: نیا Responsive گرڈ --- */}
+      {/* --- نیا Responsive گرڈ --- */}
       <div className="p-4 md:p-8"> {/* موبائل پر کم پیڈنگ، ڈیسک ٹاپ پر زیادہ */}
         {filtered.length ? (
           // موبائل پر 2، میڈیم پر 3، لارج پر 4 کالم
