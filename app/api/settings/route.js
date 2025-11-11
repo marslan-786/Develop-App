@@ -1,6 +1,7 @@
 import { put, head } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 import { isValidPassword } from '../../../lib/auth.js'; // 3 فولڈر باہر
+import { revalidateTag } from 'next/cache'; // <-- 1. اسے امپورٹ کریں
 
 export const dynamic = 'force-dynamic';
 
@@ -34,22 +35,19 @@ export async function POST(request) {
       settings.whatsappNumber = whatsappNumber;
     }
 
-    // --- یہ ہے حل! ---
     // 1. اپ ڈیٹ شدہ 'settings' آبجیکٹ سے اسٹرنگ بنائیں
     const settingsString = JSON.stringify(settings, null, 2);
     
-    // 2. اس اسٹرنگ سے ایک Blob آبجیکٹ بنائیں (بالکل ویسے ہی جیسے products API کرتی ہے)
+    // 2. اس اسٹرنگ سے ایک Blob آبجیکٹ بنائیں
     const settingsBlobData = new Blob([settingsString], { type: 'application/json' });
 
     // 3. 'put' کمانڈ کو اسٹرنگ کے بجائے Blob آبجیکٹ بھیجیں
     await put('settings.json', settingsBlobData, {
       access: 'public',
-      // contentType کی ضرورت نہیں، کیونکہ Blob میں پہلے سے موجود ہے
       addRandomSuffix: false,
     });
-    // --- حل ختم ---
     
-    // 4. نیا ایڈمن پاس ورڈ اپ ڈیٹ کریں (یہ پہلے سے ٹھیک تھا)
+    // 4. نیا ایڈمن پاس ورڈ اپ ڈیٹ کریں
     if (newPassword) {
       const passwordData = { password: newPassword };
       const dataBlob = new Blob([JSON.stringify(passwordData)], { type: 'application/json' });
@@ -59,6 +57,11 @@ export async function POST(request) {
         addRandomSuffix: false,
       });
     }
+
+    // --- ✅ تبدیلی یہاں ہے ---
+    // 5. 'settings' ٹیگ والی کیش کو کلیئر کریں
+    revalidateTag('settings');
+    // --- --- ---
 
     return NextResponse.json({ success: true, message: 'Settings saved!' });
 
