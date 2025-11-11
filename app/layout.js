@@ -1,4 +1,4 @@
-// --- 1. app/layout.js (مکمل فکس شدہ - Responsive) ---
+// --- 1. app/layout.js(مکمل فکس شدہ - Responsive) ---
 
 import "./globals.css";
 import { Inter } from "next/font/google";
