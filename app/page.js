@@ -1,13 +1,9 @@
-// --- 2. app/page.js کمل فکس شدہ - Responsive) ---
-
 import { head } from "@vercel/blob";
 import HomePageClient from "./HomePageClient";
 
-export const dynamic = "force-dynamic";
-
-// --- فکس 3: یہاں سے 'metadata' (viewport) آبجیکٹ ہٹا دیا گیا ہے ---
-// (تاکہ یہ layout.js کی responsive سیٹنگ استعمال کرے)
-// --- فکس ختم ---
+// --- تبدیلی 1: 'force-dynamic' کو ہٹا دیا گیا ---
+// اب یہ پیج کیشنگ استعمال کرے گا اور صرف سگنل ملنے پر اپ ڈیٹ ہوگا۔
+// export const dynamic = "force-dynamic"; 
 
 async function getBlobData() {
   const defaultSettings = { websiteTitle: "Ilyas Mobile Mall" };
@@ -16,28 +12,42 @@ async function getBlobData() {
   let logoUrl = "/placeholder-logo.png";
   let bannerUrl = "";
 
+  // 1. لوگو چیک کریں
   try {
-    const logoBlob = await head("logo.png", { cache: "no-store" });
+    const logoBlob = await head("logo.png", { cache: 'no-store' });
     logoUrl = logoBlob.url;
   } catch {}
 
+  // 2. بینر چیک کریں
   try {
-    const bannerBlob = await head("background.png", { cache: "no-store" });
+    const bannerBlob = await head("background.png", { cache: 'no-store' });
     bannerUrl = bannerBlob.url;
   } catch {}
 
+  // 3. سیٹنگز (ٹائٹل، واٹس ایپ) حاصل کریں
   try {
-    const settingsBlob = await head("settings.json", { cache: "no-store" });
-    const response = await fetch(settingsBlob.url, { cache: "no-store" });
+    const settingsBlob = await head("settings.json", { cache: 'no-store' });
+    
+    // --- ✅ تبدیلی 2: یہاں سگنل وصول کرنے والا کوڈ لگایا ہے ---
+    const response = await fetch(settingsBlob.url, { 
+      next: { tags: ['settings'] } // <--- یہ لائن سب سے اہم ہے!
+    });
+    // -------------------------------------------------------
+
     if (response.ok) {
       const text = await response.text();
       if (text) settings = JSON.parse(text);
     }
   } catch {}
 
+  // 4. پروڈکٹس حاصل کریں
   try {
-    const dataBlob = await head("data.json", { cache: "no-store" });
-    const response = await fetch(dataBlob.url, { cache: "no-store" });
+    const dataBlob = await head("data.json", { cache: 'no-store' });
+    
+    // پروڈکٹس کو فی الحال 'no-store' پر رکھیں تاکہ وہ فوراً نظر آئیں
+    // جب آپ پروڈکٹ API میں بھی revalidateTag لگا لیں تو اسے بھی tags: ['products'] کر دیجئے گا
+    const response = await fetch(dataBlob.url, { cache: 'no-store' });
+    
     if (response.ok) {
       const text = await response.text();
       if (text) products = JSON.parse(text);
@@ -50,7 +60,6 @@ async function getBlobData() {
 export default async function HomePage() {
   const { settings, products, logoUrl, bannerUrl } = await getBlobData();
 
-  // --- فکس 4: یہاں سے 'max-w-[1200px]' والا div ہٹا دیا گیا ہے ---
   return (
     <HomePageClient
       initialProducts={products}
@@ -59,5 +68,4 @@ export default async function HomePage() {
       bannerUrl={bannerUrl}
     />
   );
-  // --- فکس ختم ---
 }
