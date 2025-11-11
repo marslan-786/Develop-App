@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+// --- ✅ تبدیلی: 'useEffect' اور 'Fragment' امپورٹ کیے گئے ---
+import { useState, useMemo, useEffect, Fragment } from "react"; 
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -35,51 +36,35 @@ function IconClose() {
   );
 }
 
-// --- ✅ تبدیلی 1: نیا 'Time Ago' فنکشن ---
-/**
- * تاریخ کو "کتنی دیر پہلے" میں تبدیل کرتا ہے
- * @param {string} dateString 'YYYY-MM-DD HH:MM:SS' فارمیٹ میں
- */
+// --- 'Time Ago' فنکشن (ویسا ہی) ---
 function formatTimeAgo(dateString) {
   if (!dateString) return null;
-  
-  // 'YYYY-MM-DD HH:MM:SS' کو 'YYYY-MM-DDTHH:MM:SS' میں تبدیل کریں
   const isoDateString = dateString.replace(' ', 'T');
   const date = new Date(isoDateString);
-  
   if (isNaN(date.getTime())) {
     console.error("Invalid date string provided:", dateString);
     return null;
   }
-
   const now = new Date();
   const seconds = Math.round((now.getTime() - date.getTime()) / 1000);
-  
   if (seconds < 0) return "just now";
   if (seconds < 60) return `${seconds} sec ago`;
-  
   const minutes = Math.round(seconds / 60);
   if (minutes < 60) return `${minutes} min ago`;
-  
   const hours = Math.round(minutes / 60);
   if (hours < 24) return `${hours} hr ago`;
-  
   const days = Math.round(hours / 24);
   if (days === 1) return "Yesterday";
   if (days < 7) return `${days} days ago`;
-
   return date.toLocaleDateString('en-PK', {
     day: 'numeric',
     month: 'short',
     year: 'numeric'
   });
 }
-// --- تبدیلی 1 ختم ---
 
-
-// --- Header ---
+// --- Header (ویسا ہی) ---
 function AppHeader({ title, logoUrl, whatsappNumber, onMenuClick, onSearchClick }) {
-  // --- ✅ فکس: '?v=...' ہٹا دیا گیا ---
   const cacheBustedLogoSrc = logoUrl;
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     "Hello, I am interested in your products."
@@ -109,10 +94,9 @@ function AppHeader({ title, logoUrl, whatsappNumber, onMenuClick, onSearchClick 
   );
 }
 
-// --- Hero Banner ---
+// --- Hero Banner (ویسا ہی) ---
 function HeroBanner({ bannerUrl }) {
   if (!bannerUrl) return null;
-  // --- ✅ فکس: '?v=...' ہٹا دیا گیا ---
   const cacheUrl = bannerUrl;
   return (
     <div className="w-full">
@@ -129,7 +113,7 @@ function HeroBanner({ bannerUrl }) {
   );
 }
 
-// --- Filters (ویسے ہی) ---
+// --- Filters (ویسا ہی) ---
 const filters = [
   { id: "low-range", label: "Low Range" },
   { id: "pta", label: "PTA Approved" },
@@ -157,18 +141,13 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
   );
 }
 
-// --- ✅ تبدیلی 2: پروڈکٹ کارڈ اپ ڈیٹ ---
+// --- Product Card (ویسا ہی) ---
 function ProductCard({ product, index, style, animationVariant }) {
-  // --- ✅ فکس: '?v=...' ہٹا دیا گیا ---
   const img = product.imageUrl || "/placeholder-image.png";
-  
   const shortDetail = product.detail 
     ? product.detail.substring(0, 50) + (product.detail.length > 50 ? "..." : "")
     : "";
-
-  // 'Time Ago' کو کال کریں
   const timeAgo = formatTimeAgo(product.uploadTime);
-
   return (
     <motion.div
       className={`rounded-lg overflow-hidden shadow-lg flex flex-col ${style.bg}`}
@@ -190,15 +169,10 @@ function ProductCard({ product, index, style, animationVariant }) {
             {shortDetail}
           </p>
         )}
-        
-        {/* قیمت کا مارجن کم کیا */}
         <p className="font-bold text-lg mb-1">PKR {product.price}</p>
-        
-        {/* 'Time Ago' ٹیکسٹ شامل کیا */}
         {timeAgo && (
           <p className="text-xs opacity-70 mb-4">{timeAgo}</p>
         )}
-
         <div className="mt-auto">
           <Link
             href={`/product/${product.id}`}
@@ -211,9 +185,8 @@ function ProductCard({ product, index, style, animationVariant }) {
     </motion.div>
   );
 }
-// --- تبدیلی 2 ختم ---
 
-// --- Sidebar (ویسے ہی) ---
+// --- Sidebar (ویسا ہی) ---
 function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
   return (
     <>
@@ -255,7 +228,7 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
   );
 }
 
-// --- SearchBar (ویسے ہی) ---
+// --- SearchBar (ویسا ہی) ---
 function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
   if (!isSearchOpen) return null;
   return (
@@ -280,7 +253,7 @@ function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
   );
 }
 
-// --- Floating WhatsApp (ویسے ہی) ---
+// --- Floating WhatsApp (ویسا ہی) ---
 function FloatingWhatsAppButton({ whatsappNumber }) {
   if (!whatsappNumber) return null;
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
@@ -298,13 +271,76 @@ function FloatingWhatsAppButton({ whatsappNumber }) {
   );
 }
 
-// --- Main Client Component (ویسے ہی) ---
-export default function HomePageClient({ initialProducts, settings, logoUrl, bannerUrl }) {
+
+// --- ✅ نیا: ایڈ دکھانے کا کمپوننٹ ---
+function AdComponent({ adSlotId }) {
+  useEffect(() => {
+    // (یہاں آپ کا گوگل ایڈ پش کوڈ آئے گا)
+    // (window.adsbygoogle = window.adsbygoogle || []).push({});
+  }, []);
+  
+  return (
+    <div className="w-full bg-gray-700 text-center py-10 border border-gray-600 rounded-lg">
+      <p className="text-gray-400">Ad Placeholder (Slot: {adSlotId})</p>
+      {/* <ins className="adsbygoogle"
+             style={{ display: 'block' }}
+             data-ad-client="ca-pub-..."
+             data-ad-slot={adSlotId}
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+      */}
+    </div>
+  );
+}
+
+// --- ✅ نیا: پوپ اپ ایڈ ---
+function PopupAd({ adSlotId, onClose }) {
+  return (
+    <div className="fixed top-4 right-4 z-[999] w-72 bg-gray-800 shadow-2xl border border-gray-700 rounded-lg">
+      <button 
+        onClick={onClose} 
+        className="absolute -top-2 -right-2 p-1 bg-gray-900 text-white rounded-full shadow-lg"
+      >
+        <IconClose />
+      </button>
+      <div className="p-2">
+        <AdComponent adSlotId={adSlotId} />
+      </div>
+    </div>
+  );
+}
+
+
+// --- Main Client Component (اپ ڈیٹ شدہ) ---
+export default function HomePageClient({ 
+  initialProducts, 
+  settings, 
+  logoUrl, 
+  bannerUrl, 
+  adSettings // <-- ✅ نیا prop
+}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [quickFilter, setQuickFilter] = useState("all");
+  
+  // --- ✅ پوپ اپ ایڈ کے لیے اسٹیٹ ---
+  const [showPopup, setShowPopup] = useState(false);
+
+  // --- ✅ پوپ اپ ایڈ دکھانے کا لاجک ---
+  useEffect(() => {
+    // اگر ماسٹر ایڈ اور پوپ ایڈ آن ہیں
+    if (adSettings?.masterAdsEnabled && adSettings?.showHomepagePopupAd) {
+      // 5 سیکنڈ بعد پوپ اپ دکھاؤ
+      const timer = setTimeout(() => {
+        setShowPopup(true);
+      }, 5000); // 5 سیکنڈ
+      
+      return () => clearTimeout(timer);
+    }
+  }, [adSettings]);
+
 
   const brands = useMemo(() => {
     const all = initialProducts.map((p) => p.brand).filter(Boolean);
@@ -315,19 +351,13 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
     setQuickFilter((prev) => (prev === id ? "all" : id));
   };
 
-  // --- ✅ تبدیلی 3: پروڈکٹس کو سارٹ (Sort) کرنا ---
   const filtered = useMemo(() => {
     return initialProducts
-      // 1. پہلے تاریخ کے حساب سے سارٹ کریں (نیا سب سے پہلے)
       .sort((a, b) => {
-        // اگر 'uploadTime' موجود نہیں ہے تو اسے آخر میں بھیج دیں
         const timeA = a.uploadTime || '';
         const timeB = b.uploadTime || '';
-        // localeCompare سٹرنگ کو صحیح طریقے سے compare کرے گا
-        // b کو a سے compare کرنے پر descending order (نیا پہلے) آئے گا
         return timeB.localeCompare(timeA);
       })
-      // 2. پھر فلٹر کریں
       .filter((p) => {
         const matchBrand = selectedBrand ? p.brand === selectedBrand : true;
         const matchSearch =
@@ -354,7 +384,6 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
         return matchBrand && matchSearch && matchesQuickFilter;
       });
   }, [initialProducts, selectedBrand, searchTerm, quickFilter]);
-  // --- تبدیلی 3 ختم ---
 
   const styles = [
     { bg: "bg-blue-600", text: "text-white", button: "bg-white/90 text-blue-600 hover:bg-white" },
@@ -368,6 +397,11 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
     { hidden: { opacity: 0, x: 100 }, visible: { opacity: 1, x: 0 } },
   ];
 
+  // --- ✅ ایڈز کو دکھانے کا لاجک ---
+  const showAds = adSettings?.masterAdsEnabled;
+  const showBannerAd = showAds && adSettings?.showHomepageBannerAd;
+  const showInFeedAds = showAds && adSettings?.showHomepageInFeedAds;
+
   return (
     <main>
       <AppHeader
@@ -377,7 +411,16 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
         onMenuClick={() => setIsMenuOpen(true)}
         onSearchClick={() => setIsSearchOpen((v) => !v)}
       />
+      
       <HeroBanner bannerUrl={bannerUrl} />
+      
+      {/* --- ✅ 1. بینر کے نیچے والا ایڈ --- */}
+      {showBannerAd && (
+        <div className="p-4">
+          <AdComponent adSlotId="HOMEPAGE_BANNER_AD_SLOT" />
+        </div>
+      )}
+
       <Sidebar
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
@@ -399,20 +442,40 @@ export default function HomePageClient({ initialProducts, settings, logoUrl, ban
       <div className="p-4 md:p-8">
         {filtered.length ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            
+            {/* --- ✅ 2. ان-فیڈ ایڈز (پروڈکٹس کے درمیان) --- */}
             {filtered.map((p, i) => (
-              <ProductCard
-                key={p.id || p.name}
-                product={p}
-                index={i}
-                style={styles[i % styles.length]}
-                animationVariant={anim[i % anim.length]}
-              />
+              <Fragment key={p.id || p.name}>
+                <ProductCard
+                  // key کو Fragment میں منتقل کر دیا گیا ہے
+                  product={p}
+                  index={i}
+                  style={styles[i % styles.length]}
+                  animationVariant={anim[i % anim.length]}
+                />
+                
+                {/* ہر 2 پروڈکٹس کے بعد (یعنی انڈیکس 1, 3, 5...) ایک ایڈ دکھاؤ */}
+                {showInFeedAds && (i % 2 === 1) && (
+                  <div className="col-span-2 md:col-span-3 lg:col-span-4 p-2" key={`ad-${i}`}>
+                    <AdComponent adSlotId={`IN_FEED_AD_${i}`} />
+                  </div>
+                )}
+              </Fragment>
             ))}
+
           </div>
         ) : (
           <div className="text-center text-gray-400 mt-20">No products found.</div>
         )}
       </div>
+      
+      {/* --- ✅ 3. پوپ اپ ایڈ --- */}
+      {showPopup && (
+        <PopupAd 
+          adSlotId="HOMEPAGE_POPUP_AD_SLOT" 
+          onClose={() => setShowPopup(false)} 
+        />
+      )}
       
       <FloatingWhatsAppButton whatsappNumber={settings.whatsappNumber} />
     </main>
