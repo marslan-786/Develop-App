@@ -1,14 +1,12 @@
-// --- 2. app/page.js (مکمل فکس شدہ - 1200px) ---
+// --- 2. app/page.js (مکمل فکس شدہ - Responsive) ---
 
 import { head } from "@vercel/blob";
 import HomePageClient from "./HomePageClient";
 
 export const dynamic = "force-dynamic";
 
-// --- فکس 3: ہوم پیج کا Viewport 1200px پر Override کیا گیا ہے ---
-export const metadata = {
-  viewport: { width: 1200 },
-};
+// --- فکس 3: یہاں سے 'metadata' (viewport) آبجیکٹ ہٹا دیا گیا ہے ---
+// (تاکہ یہ layout.js کی responsive سیٹنگ استعمال کرے)
 // --- فکس ختم ---
 
 async function getBlobData() {
@@ -52,17 +50,14 @@ async function getBlobData() {
 export default async function HomePage() {
   const { settings, products, logoUrl, bannerUrl } = await getBlobData();
 
-  // --- فکس 4: 1200px کنٹینر کو یہاں واپس لایا گیا ہے ---
-  // (یہ صرف ہوم پیج پر لاگو ہو گا)
+  // --- فکس 4: یہاں سے 'max-w-[1200px]' والا div ہٹا دیا گیا ہے ---
   return (
-    <div className="max-w-[1200px] mx-auto bg-gray-800 min-h-screen">
-      <HomePageClient
-        initialProducts={products}
-        settings={settings}
-        logoUrl={logoUrl}
-        bannerUrl={bannerUrl}
-      />
-    </div>
+    <HomePageClient
+      initialProducts={products}
+      settings={settings}
+      logoUrl={logoUrl}
+      bannerUrl={bannerUrl}
+    />
   );
   // --- فکس ختم ---
 }
