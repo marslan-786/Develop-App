@@ -58,7 +58,7 @@ export default function AddProductPage() {
   const [videoLink, setVideoLink] = useState('');
   const [brand, setBrand] = useState('');
   const [model, setModel] = useState('');
-  const [details, setDetails] = useState('');
+  const [detail, setDetails] = useState('');
   const [condition, setCondition] = useState('');
   const [price, setPrice] = useState('');
   
