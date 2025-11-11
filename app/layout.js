@@ -37,8 +37,7 @@ export async function generateMetadata() {
       apple: logoUrl,
     },
     
-    // --- فکس 1: یہاں ڈیفالٹ Responsive Viewport سیٹ کیا گیا ہے ---
-    // (یہ باقی پیجز جیسے '/admin' کے لیے ضروری ہے)
+    // --- فکس 1: Viewport کو واپس Responsive (device-width) پر سیٹ کیا گیا ہے ---
     viewport: {
       width: "device-width",
       initialScale: 1,
@@ -51,7 +50,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        {/* یہاں سے پچھلا دستی <meta name="viewport"...> ٹیگ ہٹا دیا گیا ہے */}
+        {/* یہاں سے دستی <meta name="viewport"...> ٹیگ ہٹا دیا گیا ہے */}
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1963262096178695"
@@ -61,7 +60,7 @@ export default function RootLayout({ children }) {
       </head>
 
       <body className={`${inter.className} bg-gray-900`}>
-        {/* --- فکس 2: اسے 'max-w-full' (Responsive) پر واپس سیٹ کیا گیا ہے --- */}
+        {/* --- فکس 2: کنٹینر کو 'max-w-full' (Responsive) پر سیٹ کیا گیا ہے --- */}
         <div className="max-w-full mx-auto bg-gray-800 min-h-screen">
           {children}
         </div>
