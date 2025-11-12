@@ -89,6 +89,17 @@ function AppHeader({ title, logoUrl, whatsappNumber, onMenuClick, onSearchClick 
   );
 }
 
+<script type="text/javascript">
+	atOptions = {
+		'key' : '5d65c5f11e78233231f77b6a0bfb7f4a',
+		'format' : 'iframe',
+		'height' : 60,
+		'width' : 468,
+		'params' : {}
+	};
+</script>
+<script type="text/javascript" src="//www.highperformanceformat.com/5d65c5f11e78233231f77b6a0bfb7f4a/invoke.js"></script>
+            
 function HeroBanner({ bannerUrl }) {
   if (!bannerUrl) return null;
   const cacheUrl = bannerUrl;
