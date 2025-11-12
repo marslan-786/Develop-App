@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSearchParams } from 'next/navigation';
 
-// --- Icons ---
+// --- Icons (ویسے ہی) ---
 function IconWhatsApp() {
   return (
     <svg viewBox="0 0 448 512" fill="currentColor" className="w-8 h-8">
@@ -16,34 +16,31 @@ function IconWhatsApp() {
 }
 function IconMenu() {
   return (
-    <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
       <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
     </svg>
   );
 }
 function IconSearch() {
   return (
-    <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
       <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
     </svg>
   );
 }
 function IconClose() {
   return (
-    <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
     </svg>
   );
 }
 
-// --- 'Time Ago' فنکشن ---
 function formatTimeAgo(dateString) {
   if (!dateString) return null;
   const isoDateString = dateString.replace(' ', 'T');
   const date = new Date(isoDateString);
-  if (isNaN(date.getTime())) {
-    return null;
-  }
+  if (isNaN(date.getTime())) return null;
   const now = new Date();
   const seconds = Math.round((now.getTime() - date.getTime()) / 1000);
   if (seconds < 0) return "just now";
@@ -62,10 +59,9 @@ function formatTimeAgo(dateString) {
   });
 }
 
-// --- Header ---
 function AppHeader({ title, logoUrl, whatsappNumber, onMenuClick, onSearchClick }) {
   const cacheBustedLogoSrc = logoUrl;
-  const whatsappUrl = `[https://wa.me/$](https://wa.me/$){whatsappNumber}?text=${encodeURIComponent(
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     "Hello, I am interested in your products."
   )}`;
   return (
@@ -93,7 +89,6 @@ function AppHeader({ title, logoUrl, whatsappNumber, onMenuClick, onSearchClick 
   );
 }
 
-// --- Hero Banner ---
 function HeroBanner({ bannerUrl }) {
   if (!bannerUrl) return null;
   const cacheUrl = bannerUrl;
@@ -112,7 +107,6 @@ function HeroBanner({ bannerUrl }) {
   );
 }
 
-// --- Filters ---
 function FilterBubbles({ activeFilter, onFilterChange }) {
   const filters = [
     { id: "low-range", label: "Low Range" },
@@ -140,7 +134,6 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
   );
 }
 
-// --- Product Card ---
 function ProductCard({ product, index, style, animationVariant }) {
   const img = product.imageUrl || "/placeholder-image.png";
   const shortDetail = product.detail 
@@ -185,7 +178,6 @@ function ProductCard({ product, index, style, animationVariant }) {
   );
 }
 
-// --- Sidebar ---
 function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
   return (
     <>
@@ -227,7 +219,6 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
   );
 }
 
-// --- SearchBar ---
 function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
   if (!isSearchOpen) return null;
   return (
@@ -252,10 +243,9 @@ function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
   );
 }
 
-// --- Floating WhatsApp ---
 function FloatingWhatsAppButton({ whatsappNumber }) {
   if (!whatsappNumber) return null;
-  const whatsappUrl = `[https://wa.me/$](https://wa.me/$){whatsappNumber}?text=${encodeURIComponent(
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     "Hello, I am interested in your products."
   )}`;
   return (
@@ -270,10 +260,7 @@ function FloatingWhatsAppButton({ whatsappNumber }) {
   );
 }
 
-
-// --- AdComponent ---
 function AdComponent({ adClientId, adSlotId }) {
-  // اگر IDs نہیں ہیں تو کچھ بھی رینڈر نہ کریں (0 height)
   if (!adClientId || !adSlotId) {
     return null; 
   }
@@ -298,7 +285,6 @@ function AdComponent({ adClientId, adSlotId }) {
   );
 }
 
-// --- PopupAd ---
 function PopupAd({ adClientId, adSlotId, onClose }) {
   return (
     <div className="fixed top-4 right-4 z-[999] w-72 bg-gray-800 shadow-2xl border border-gray-700 rounded-lg">
@@ -316,7 +302,7 @@ function PopupAd({ adClientId, adSlotId, onClose }) {
 }
 
 
-// --- Main Client Component ---
+// --- Main Client Component (اپ ڈیٹ شدہ) ---
 export default function HomePageClient({ 
   initialProducts, 
   settings, 
@@ -334,25 +320,30 @@ export default function HomePageClient({
   
   const searchParams = useSearchParams();
 
-  // --- ✅✅✅ ٹریکنگ کا نیا لاجک ---
+  // --- ✅✅✅ ٹریکنگ کا فکسڈ لاجک (Session Lock) ---
   useEffect(() => {
     // 1. ایڈمن چیک
     const adminPassword = searchParams.get('password');
-    if (adminPassword) {
-      // اگر ایڈمن ہے تو کچھ نہ کریں، اور نہ ہی کنسول میں کچھ لکھیں
+    if (adminPassword) return;
+
+    // 2. چیک کریں کہ کیا اس سیشن (ٹیب) میں پہلے ہی گنتی ہو چکی ہے؟
+    const sessionKey = 'session_visit_tracked';
+    if (sessionStorage.getItem(sessionKey)) {
+      // اگر ہو چکی ہے تو رک جاؤ
+      console.log("Visit already tracked for this session.");
       return;
     }
 
-    // 2. API کو 'پِنگ' (Ping) کریں
-    // (ہم localStorage چیک نہیں کر رہے، سیدھا سرور کو بتا رہے ہیں)
-    // (سرور IP چیک کرے گا اور فیصلہ کرے گا)
+    // 3. اگر نہیں ہوئی، تو سرور کو پِنگ کرو
     fetch('/api/track-visit', { method: 'POST' });
-
+    
+    // 4. سیشن میں نشان لگا دو (تاکہ ریفریش پر دوبارہ نہ چلے)
+    sessionStorage.setItem(sessionKey, 'true');
+    
   }, [searchParams]);
   // --- --- ---
 
 
-  // --- پوپ اپ ایڈ لاجک ---
   useEffect(() => {
     if (adSettings?.masterAdsEnabled && adSettings?.showHomepagePopupAd) {
       const timer = setTimeout(() => {
@@ -435,7 +426,6 @@ export default function HomePageClient({
       
       <HeroBanner bannerUrl={bannerUrl} />
       
-      {/* --- 1. بینر ایڈ --- */}
       {showBannerAd && (
         <AdComponent 
           adClientId={clientId}
@@ -474,7 +464,6 @@ export default function HomePageClient({
                   animationVariant={anim[i % anim.length]}
                 />
                 
-                {/* --- 2. ان-فیڈ ایڈ --- */}
                 {showInFeedAds && (i % 2 === 1) && (
                   <div className="col-span-2 md:col-span-3 lg:col-span-4" key={`ad-${i}`}>
                     <AdComponent 
