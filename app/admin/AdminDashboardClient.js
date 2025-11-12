@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-// --- 1. ڈالر آئیکن ---
 function IconDollar() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -13,30 +13,30 @@ function IconDollar() {
   );
 }
 
-// --- 2. مین کمپوننٹ ---
 export default function AdminDashboardClient({ logoUrl, bannerUrl, earning = "0.00", passwordQuery, children }) {
-  
-  // ودڈرا بٹن کو شو/ہائیڈ کرنے کے لیے اسٹیٹ
+  const router = useRouter();
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
+  const handleWithdrawClick = () => {
+    // نئے پیج پر لے جائیں
+    router.push(`/admin/withdraw?password=${passwordQuery}`);
+  };
+
   return (
-    <div className="relative">
+    <div className="relative bg-gray-50 min-h-screen">
       {/* --- ہیڈر --- */}
       <header className="sticky top-0 z-20 flex items-center justify-between p-4 bg-white border-b shadow-sm">
         
-        {/* بائیں طرف کا لوگو */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200">
             <Image src={logoUrl} alt="Logo" width={40} height={40} unoptimized className="object-cover" />
           </div>
         </div>
         
-        {/* درمیان میں ٹائٹل */}
         <span className="text-lg md:text-xl font-bold text-gray-800 absolute left-1/2 transform -translate-x-1/2">
           Admin Panel
         </span>
         
-        {/* --- دائیں طرف: ارننگ ویلٹ --- */}
         <div className="relative">
           <button 
             onClick={() => setIsWithdrawOpen(!isWithdrawOpen)}
@@ -50,16 +50,15 @@ export default function AdminDashboardClient({ logoUrl, bannerUrl, earning = "0.
             </span>
           </button>
 
-          {/* --- ودڈرا پوپ اپ (Dropdown) --- */}
           {isWithdrawOpen && (
-            <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-xl z-30 overflow-hidden">
-              <div className="p-3 text-center border-b bg-gray-50">
-                <p className="text-xs text-gray-500">Total Balance</p>
-                <p className="font-bold text-green-600 text-lg">${earning}</p>
+            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-xl z-30 overflow-hidden">
+              <div className="p-4 text-center border-b bg-gray-50">
+                <p className="text-xs text-gray-500 uppercase tracking-wider">Available Balance</p>
+                <p className="font-bold text-green-600 text-xl mt-1">${earning}</p>
               </div>
               <button 
-                className="w-full py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
-                onClick={() => alert("Withdraw page coming soon!")} 
+                className="w-full py-3 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                onClick={handleWithdrawClick} 
               >
                 Withdraw Funds
               </button>
@@ -68,13 +67,10 @@ export default function AdminDashboardClient({ logoUrl, bannerUrl, earning = "0.
         </div>
         
       </header>
-      {/* --- ہیڈر ختم --- */}
-
 
       <main>
-        {/* --- بینر --- */}
         {bannerUrl && (
-          <div className="w-full h-36 md:h-48 relative">
+          <div className="w-full h-40 md:h-56 relative">
             <Image 
               src={bannerUrl} 
               alt="Admin Banner" 
@@ -82,15 +78,12 @@ export default function AdminDashboardClient({ logoUrl, bannerUrl, earning = "0.
               className="object-cover" 
               unoptimized 
             />
-            {/* بینر کے اوپر ہلکا سا شیڈ تاکہ بٹن صاف نظر آئیں */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-100/50"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-50/80"></div>
           </div>
         )}
 
-        {/* --- بٹن اور کونٹینٹ --- */}
-        <div className="p-4 relative z-10 -mt-6">
-           {/* سفید بیک گراؤنڈ کارڈ ایفیکٹ کے لیے */}
-           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4 relative z-10 -mt-10">
+           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[70vh]">
               {children}
            </div>
         </div>
