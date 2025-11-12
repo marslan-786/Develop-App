@@ -5,46 +5,44 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
   try {
-    // 1. صارف کا IP حاصل کریں
-    // Vercel میں 'x-forwarded-for' ہیڈر سب سے بہتر طریقہ ہے
-    let ip = request.headers.get('x-forwarded-for') || request.ip || 'unknown';
+    // 1. User-Agent چیک کریں (Bots کو روکنے کے لیے)
+    const userAgent = request.headers.get('user-agent') || '';
+    const isBot = /bot|crawler|spider|crawling/i.test(userAgent);
     
-    // اگر ایک سے زیادہ IP ہوں (جیسے proxy) تو پہلا والا اٹھا لیں
-    if (ip.includes(',')) {
-      ip = ip.split(',')[0];
+    if (isBot) {
+      return NextResponse.json({ message: 'Bot detected. Not counting.' });
     }
 
-    // 2. اگر IP نہیں مل رہا تو کاؤنٹ نہ کریں (جیسے لوکل ہوسٹ)
+    // 2. IP ایڈریس حاصل کریں
+    let ip = request.headers.get('x-forwarded-for') || request.ip || 'unknown';
+    if (ip.includes(',')) ip = ip.split(',')[0];
+
     if (ip === 'unknown' || ip === '::1' || ip === '127.0.0.1') {
       return NextResponse.json({ message: 'Local/Unknown IP ignored' });
     }
 
-    // 3. KV میں چیک کریں: کیا یہ IP پچھلے 6 گھنٹے میں آیا ہے؟
+    // 3. KV میں چیک کریں (6 گھنٹے کا لاک)
     const ipKey = `visitor_ip:${ip}`;
     const hasVisited = await kv.get(ipKey);
 
     if (hasVisited) {
-      // اگر پہلے آیا ہے، تو کچھ نہ کریں
-      return NextResponse.json({ message: 'Returning visitor (IP matched). Not counting.' });
+      return NextResponse.json({ message: 'Returning visitor. Not counting.' });
     }
 
-    // --- نیا وزٹر ---
+    // 4. نیا وزٹر - لاک کریں
+    await kv.set(ipKey, 'true', { ex: 21600 }); // 6 گھنٹے
 
-    // 4. اس IP کو 6 گھنٹے (21600 سیکنڈز) کے لیے لاک کر دیں
-    await kv.set(ipKey, 'true', { ex: 21600 });
-
-    // 5. ٹریکرز اپ ڈیٹ کریں
+    // 5. گنتی بڑھائیں
     const today = new Date().toLocaleString('sv-SE', { 
       timeZone: 'Asia/Karachi' 
     }).split(' ')[0]; // YYYY-MM-DD
     
     const dailyKey = `visits:${today}`;
 
-    // ایک ساتھ گنتی بڑھائیں
     await Promise.all([
-      kv.incr(dailyKey),           // آج کے وزٹر +1
-      kv.incr('total_visitors'),   // ٹوٹل وزٹر +1
-      kv.expire(dailyKey, 172800)  // آج کا ریکارڈ 2 دن تک رکھیں
+      kv.incr(dailyKey),
+      kv.incr('total_visitors'),
+      kv.expire(dailyKey, 172800)
     ]);
 
     return NextResponse.json({ message: 'New visit counted successfully!' });
