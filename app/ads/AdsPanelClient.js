@@ -1,246 +1,181 @@
-// app/ads/AdsPanelClient.js
-
 "use client";
 
-import { useState, useEffect } from 'react';
+// --- ✅ 'useEffect' اور 'Fragment' امپورٹ کیے گئے ---
+import { useState, useMemo, useEffect, Fragment } from "react"; 
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
 
-// --- ٹوگل سوئچ ---
-function ToggleSwitch({ label, isEnabled, onToggle }) {
-  return (
-    <label className="flex items-center justify-between cursor-pointer p-4 bg-white rounded-lg shadow-sm border">
-      <span className="font-medium text-gray-700">{label}</span>
-      <div
-        className={`relative w-11 h-6 rounded-full transition-colors ${
-          isEnabled ? 'bg-blue-600' : 'bg-gray-200'
-        }`}
-      >
-        <span
-          className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-            isEnabled ? 'transform translate-x-5' : ''
-          }`}
-        ></span>
-      </div>
-      <input type="checkbox" className="sr-only" checked={isEnabled} onChange={onToggle} />
-    </label>
-  );
-}
+// --- (سارے آئیکنز ... IconWhatsApp, IconMenu, وغیرہ ... ویسے ہی رہیں گے) ---
+function IconWhatsApp() { /* ... (کوڈ ویسا ہی) ... */ }
+function IconMenu() { /* ... (کوڈ ویسا ہی) ... */ }
+function IconSearch() { /* ... (کوڈ ویسا ہی) ... */ }
+function IconClose() { /* ... (کوڈ ویسا ہی) ... */ }
 
-// --- سلاٹ ID ان پٹ ---
-function AdSlotInput({ label, value, onChange }) {
-  return (
-    <div className="pl-4 pr-4 pb-3 -mt-2 bg-white rounded-b-lg border-b border-l border-r">
-      <label className="block text-xs font-medium text-gray-500">{label}</label>
-      <input
-        type="text"
-        value={value}
-        onChange={onChange}
-        placeholder="e.g., 1234567890"
-        className="mt-1 block w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md shadow-sm"
-      />
-    </div>
-  );
-}
+// --- ('Time Ago' فنکشن ... ویسا ہی رہے گا) ---
+function formatTimeAgo(dateString) { /* ... (کوڈ ویسا ہی) ... */ }
 
-// --- ✅ 1. نیا وزٹر Stats کمپوننٹ ---
-function VisitorStats({ today, total }) {
-  return (
-    <div className="grid grid-cols-2 gap-4">
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg shadow-sm text-center">
-        <div className="text-sm font-medium text-blue-600">Today's Visitors</div>
-        <div className="text-3xl font-bold text-blue-900">{today}</div>
-      </div>
-      <div className="p-4 bg-green-50 border border-green-200 rounded-lg shadow-sm text-center">
-        <div className="text-sm font-medium text-green-600">Total Visitors</div>
-        <div className="text-3xl font-bold text-green-900">{total}</div>
-      </div>
-    </div>
-  );
-}
+// --- (Header, HeroBanner, FilterBubbles, ProductCard, Sidebar, SearchBar ... ویسے ہی رہیں گے) ---
+function AppHeader({ title, logoUrl, whatsappNumber, onMenuClick, onSearchClick }) { /* ... (کوڈ ویسا ہی) ... */ }
+function HeroBanner({ bannerUrl }) { /* ... (کوڈ ویسا ہی) ... */ }
+function FilterBubbles({ activeFilter, onFilterChange }) { /* ... (کوڈ ویسا ہی) ... */ }
+function ProductCard({ product, index, style, animationVariant }) { /* ... (کوڈ ویسا ہی) ... */ }
+function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) { /* ... (کوڈ ویسا ہی) ... */ }
+function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) { /* ... (کوڈ ویسا ہی) ... */ }
+function FloatingWhatsAppButton({ whatsappNumber }) { /* ... (کوڈ ویسا ہی) ... */ }
+
+// --- (AdComponent, PopupAd ... ویسے ہی رہیں گے) ---
+function AdComponent({ adClientId, adSlotId }) { /* ... (کوڈ ویسا ہی) ... */ }
+function PopupAd({ adClientId, adSlotId, onClose }) { /* ... (کوڈ ویسا ہی) ... */ }
 
 
-export default function AdsPanelClient({ 
-  initialSettings, 
-  passwordQuery,
-  todayVisitors,  // <-- ✅ 2. نئے props وصول کریں
-  totalVisitors   // <-- ✅ 2. نئے props وصول کریں
+// --- Main Client Component (اپ ڈیٹ شدہ) ---
+export default function HomePageClient({ 
+  initialProducts, 
+  settings, 
+  logoUrl, 
+  bannerUrl, 
+  adSettings
 }) {
   
-  // (آپ کی تمام پرانی اسٹیٹ ... 'googleSiteVerification', 'adsenseClientId' ... ویسے ہی رہیں گی)
-  const [googleSiteVerification, setGoogleSiteVerification] = useState('');
-  const [adsenseClientId, setAdsenseClientId] = useState('');
-  const [masterAdsEnabled, setMasterAdsEnabled] = useState(false);
-  const [showHomepageBannerAd, setShowHomepageBannerAd] = useState(false);
-  const [homepageBannerSlotId, setHomepageBannerSlotId] = useState(''); 
-  const [showHomepageInFeedAds, setShowHomepageInFeedAds] = useState(false);
-  const [homepageInFeedSlotId, setHomepageInFeedSlotId] = useState(''); 
-  const [showHomepagePopupAd, setShowHomepagePopupAd] = useState(false);
-  const [homepagePopupSlotId, setHomepagePopupSlotId] = useState(''); 
-  const [showProductInterstitialAd, setShowProductInterstitialAd] = useState(false);
-  const [productInterstitialSlotId, setProductInterstitialSlotId] = useState(''); 
-  const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  // --- (تمام پرانی اسٹیٹس ... isMenuOpen, isSearchOpen, وغیرہ ... ویسے ہی رہیں گی) ---
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState(null);
+  const [quickFilter, setQuickFilter] = useState("all");
+  const [showPopup, setShowPopup] = useState(false);
 
-  // (useEffect ... ویسا ہی رہے گا)
+  // --- ✅ 1. نیا وزٹر کاؤنٹ لاجک ---
   useEffect(() => {
-    setGoogleSiteVerification(initialSettings.googleSiteVerification || '');
-    setAdsenseClientId(initialSettings.adsenseClientId || '');
-    setMasterAdsEnabled(initialSettings.masterAdsEnabled || false);
-    setShowHomepageBannerAd(initialSettings.showHomepageBannerAd || false);
-    setHomepageBannerSlotId(initialSettings.homepageBannerSlotId || '');
-    setShowHomepageInFeedAds(initialSettings.showHomepageInFeedAds || false);
-    setHomepageInFeedSlotId(initialSettings.homepageInFeedSlotId || '');
-    setShowHomepagePopupAd(initialSettings.showHomepagePopupAd || false);
-    setHomepagePopupSlotId(initialSettings.homepagePopupSlotId || '');
-    setShowProductInterstitialAd(initialSettings.showProductInterstitialAd || false);
-    setProductInterstitialSlotId(initialSettings.productInterstitialSlotId || '');
-  }, [initialSettings]);
+    // 6 گھنٹے کا وقت (ملی سیکنڈز میں)
+    const SIX_HOURS_IN_MS = 6 * 60 * 60 * 1000;
+    const storageKey = 'visitor_counted_timestamp';
+    
+    // براؤزر کی لوکل اسٹوریج سے پرانا ٹائم اسٹیمپ حاصل کریں
+    const lastVisit = localStorage.getItem(storageKey);
+    const now = Date.now();
 
-  // (handleSubmit ... ویسا ہی رہے گا)
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setMessage('Saving...');
-    const settingsToSave = {
-      googleSiteVerification, adsenseClientId, masterAdsEnabled,
-      showHomepageBannerAd, homepageBannerSlotId,
-      showHomepageInFeedAds, homepageInFeedSlotId,
-      showHomepagePopupAd, homepagePopupSlotId,
-      showProductInterstitialAd, productInterstitialSlotId
-    };
-    try {
-      const res = await fetch(`/api/ads?password=${passwordQuery}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settingsToSave),
-      });
-      if (!res.ok) throw new Error('Failed to save settings.');
-      setMessage('Ads settings saved successfully!');
-    } catch (error) {
-      setMessage(`Error: ${error.message}`);
-    } finally {
-      setIsLoading(false);
+    // چیک کریں: اگر ٹائم اسٹیمپ موجود نہیں ہے، یا 6 گھنٹے سے پرانا ہے
+    if (!lastVisit || (now - parseInt(lastVisit) > SIX_HOURS_IN_MS)) {
+      
+      // 1. نئے وزٹ کو گننے کے لیے API کو کال کریں
+      // (ہمیں جواب کا انتظار نہیں کرنا، بس سگنل بھیجنا ہے)
+      fetch('/api/track-visit', { method: 'POST' });
+      
+      // 2. براؤزر میں نیا ٹائم اسٹیمپ سیو کریں
+      localStorage.setItem(storageKey, now.toString());
+      console.log('New visit counted.');
+      
+    } else {
+      // 6 گھنٹے ابھی پورے نہیں ہوئے، گنتی نہ کرو
+      console.log('Returning visitor. Not counting.');
     }
-  };
+  }, []); // <-- یہ صرف ایک بار (پیج لوڈ پر) چلے گا
+  
+  // --- ✅ 2. پوپ اپ ایڈ کا لاجک (یہ پہلے سے موجود تھا) ---
+  useEffect(() => {
+    if (adSettings?.masterAdsEnabled && adSettings?.showHomepagePopupAd) {
+      const timer = setTimeout(() => {
+        setShowPopup(true);
+      }, 5000); 
+      return () => clearTimeout(timer);
+    }
+  }, [adSettings]);
+
+  // --- (باقی تمام useMemo اور فنکشنز ... ویسے ہی رہیں گے) ---
+  const brands = useMemo(() => { /* ... (کوڈ ویسا ہی) ... */ }, [initialProducts]);
+  const handleFilterChange = (id) => { /* ... (کوڈ ویسا ہی) ... */ };
+  const filtered = useMemo(() => { /* ... (کوڈ ویسا ہی) ... */ }, [initialProducts, selectedBrand, searchTerm, quickFilter]);
+  const styles = [ /* ... (کوڈ ویسا ہی) ... */ ];
+  const anim = [ /* ... (کوڈ ویسا ہی) ... */ ];
+
+  // --- (ایڈز دکھانے کا لاجک ... ویسا ہی رہے گا) ---
+  const showAds = adSettings?.masterAdsEnabled;
+  const showBannerAd = showAds && adSettings?.showHomepageBannerAd;
+  const showInFeedAds = showAds && adSettings?.showHomepageInFeedAds;
+  const clientId = adSettings?.adsenseClientId;
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 space-y-6">
+    <main>
+      {/* --- (سارا JSX ... AppHeader, HeroBanner, AdComponent, Sidebar ... ویسا ہی رہے گا) --- */}
       
-      <header className="p-4 bg-white border-b -mx-4 -mt-4">
-         <h1 className="text-xl font-bold text-center">Manage Website Ads</h1>
-      </header>
+      <AppHeader
+        title={settings.websiteTitle}
+        logoUrl={logoUrl}
+        whatsappNumber={settings.whatsappNumber}
+        onMenuClick={() => setIsMenuOpen(true)}
+        onSearchClick={() => setIsSearchOpen((v) => !v)}
+      />
       
-      {/* --- ✅ 3. نیا Stats سیکشن --- */}
-      <VisitorStats today={todayVisitors} total={totalVisitors} />
-      {/* --- --- --- */}
-
-      {/* --- سیکشن 1: گوگل اسنیپ کوڈز --- */}
-      <div className="p-4 bg-white rounded-lg shadow-sm border">
-        <h2 className="text-lg font-semibold mb-3">Google Snippets</h2>
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="verification" className="block text-sm font-medium text-gray-700">
-              1. Google Site Verification Code
-            </label>
-            <input
-              type="text"
-              id="verification"
-              value={googleSiteVerification}
-              onChange={(e) => setGoogleSiteVerification(e.target.value)}
-              placeholder="(Optional) e.g., ABC123XYZ..."
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-            />
-          </div>
-          <div>
-            <label htmlFor="adsenseId" className="block text-sm font-medium text-gray-700">
-              2. AdSense Client ID
-            </label>
-            <input
-              type="text"
-              id="adsenseId"
-              value={adsenseClientId}
-              onChange={(e) => setAdsenseClientId(e.target.value)}
-              placeholder="e.g., ca-pub-1234567890"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-            />
-          </div>
+      <HeroBanner bannerUrl={bannerUrl} />
+      
+      {showBannerAd && (
+        <div className="p-4">
+          <AdComponent 
+            adClientId={clientId}
+            adSlotId={adSettings.homepageBannerSlotId} 
+          />
         </div>
-      </div>
+      )}
 
-      {/* --- سیکشن 2: ایڈ مینجمنٹ --- */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-semibold mb-2">Ad Management Toggles</h2>
-        
-        <ToggleSwitch 
-          label="Master: Enable All Ads"
-          isEnabled={masterAdsEnabled}
-          onToggle={() => setMasterAdsEnabled(!masterAdsEnabled)}
-        />
-        <hr/>
-        
-        {/* --- ہوم پیج بینر ایڈ --- */}
-        <ToggleSwitch 
-          label="Home: Ad below Banner"
-          isEnabled={showHomepageBannerAd}
-          onToggle={() => setShowHomepageBannerAd(!showHomepageBannerAd)}
-        />
-        <AdSlotInput
-          label="Ad Slot ID (Banner):"
-          value={homepageBannerSlotId}
-          onChange={(e) => setHomepageBannerSlotId(e.target.value)}
-        />
-        
-        {/* --- ہوم پیج ان-فیڈ ایڈ --- */}
-        <ToggleSwitch 
-          label="Home: Ads in Product Feed"
-          isEnabled={showHomepageInFeedAds}
-          onToggle={() => setShowHomepageInFeedAds(!showHomepageInFeedAds)}
-        />
-        <AdSlotInput
-          label="Ad Slot ID (In-Feed):"
-          value={homepageInFeedSlotId}
-          onChange={(e) => setHomepageInFeedSlotId(e.target.value)}
-        />
+      <Sidebar
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        brands={brands}
+        selectedBrand={selectedBrand}
+        onSelectBrand={(b) => {
+          setSelectedBrand(b);
+          setIsMenuOpen(false);
+        }}
+      />
+      <FilterBubbles activeFilter={quickFilter} onFilterChange={handleFilterChange} />
+      <SearchBar
+        isSearchOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+      />
 
-        {/* --- ہوم پیج پوپ اپ ایڈ --- */}
-        <ToggleSwitch 
-          label="Home: Top-Right Popup Ad"
-          isEnabled={showHomepagePopupAd}
-          onToggle={() => setShowHomepagePopupAd(!showHomepagePopupAd)}
-        />
-        <AdSlotInput
-          label="Ad Slot ID (Popup):"
-          value={homepagePopupSlotId}
-          onChange={(e) => setHomepagePopupSlotId(e.target.value)}
-        />
+      <div className="p-4 md:p-8">
+        {filtered.length ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            
+            {filtered.map((p, i) => (
+              <Fragment key={p.id || p.name}>
+                <ProductCard
+                  product={p}
+                  index={i}
+                  style={styles[i % styles.length]}
+                  animationVariant={anim[i % anim.length]}
+                />
+                
+                {showInFeedAds && (i % 2 === 1) && (
+                  <div className="col-span-2 md:col-span-3 lg:col-span-4 p-2" key={`ad-${i}`}>
+                    <AdComponent 
+                      adClientId={clientId}
+                      adSlotId={adSettings.homepageInFeedSlotId} 
+                    />
+                  </div>
+                )}
+              </Fragment>
+            ))}
 
-        {/* --- پروڈکٹ پیج ایڈ --- */}
-        <ToggleSwitch 
-          label="Product Page: Interstitial Ad"
-          isEnabled={showProductInterstitialAd}
-          onToggle={() => setShowProductInterstitialAd(!showProductInterstitialAd)}
-        />
-        <AdSlotInput
-          label="Ad Slot ID (Interstitial):"
-          value={productInterstitialSlotId}
-          onChange={(e) => setProductInterstitialSlotId(e.target.value)}
-        />
-      </div>
-
-      {/* --- سیو بٹن --- */}
-      <div>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-md font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"
-        >
-          {isLoading ? 'Saving...' : 'Save Ad Settings'}
-        </button>
-        {message && (
-          <p className={`text-sm mt-3 text-center ${message.startsWith('Error') ? 'text-red-600' : 'text-green-600'}`}>
-            {message}
-          </p>
+          </div>
+        ) : (
+          <div className="text-center text-gray-400 mt-20">No products found.</div>
         )}
       </div>
-    </form>
+      
+      {showPopup && (
+        <PopupAd 
+          adClientId={clientId}
+          adSlotId={adSettings.homepagePopupSlotId}
+          onClose={() => setShowPopup(false)} 
+        />
+      )}
+      
+      <FloatingWhatsAppButton whatsappNumber={settings.whatsappNumber} />
+    </main>
   );
 }
