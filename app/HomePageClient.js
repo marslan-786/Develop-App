@@ -1,11 +1,11 @@
 "use client";
 
-// --- 'useEffect' اور 'Fragment' امپورٹ کیے گئے ---
+// --- ✅ 'useEffect' اور 'Fragment' امپورٹ کیے گئے ---
 import { useState, useMemo, useEffect, Fragment } from "react"; 
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-// --- ✅ useSearchParams کو یہاں سے ہٹا دیا گیا ہے ---
+import { useSearchParams } from 'next/navigation';
 
 // --- Icons ---
 function IconWhatsApp() {
@@ -43,7 +43,6 @@ function formatTimeAgo(dateString) {
   const isoDateString = dateString.replace(' ', 'T');
   const date = new Date(isoDateString);
   if (isNaN(date.getTime())) {
-    console.error("Invalid date string provided:", dateString);
     return null;
   }
   const now = new Date();
@@ -115,12 +114,12 @@ function HeroBanner({ bannerUrl }) {
 }
 
 // --- Filters (ویسا ہی) ---
-const filters = [
-  { id: "low-range", label: "Low Range" },
-  { id: "pta", label: "PTA Approved" },
-  { id: "gaming", label: "Gaming" },
-];
 function FilterBubbles({ activeFilter, onFilterChange }) {
+  const filters = [
+    { id: "low-range", label: "Low Range" },
+    { id: "pta", label: "PTA Approved" },
+    { id: "gaming", label: "Gaming" },
+  ];
   return (
     <div className="sticky top-[73px] z-10 p-4 bg-gray-900/80 border-b border-gray-700">
       <div className="flex items-center justify-center gap-3">
@@ -273,39 +272,37 @@ function FloatingWhatsAppButton({ whatsappNumber }) {
 }
 
 
-// --- ✅ نیا: ایڈ دکھانے کا اصل کمپوننٹ ---
+// --- ✅ اپ ڈیٹ شدہ AdComponent ---
+// یہ اب بالکل شفاف (transparent) ہے اور جگہ نہیں گھیرے گا
 function AdComponent({ adClientId, adSlotId }) {
-  // اگر IDs موجود نہیں ہیں تو ایڈ نہ دکھائیں
+  // اگر IDs نہیں ہیں تو کچھ بھی رینڈر نہ کریں (0 height)
   if (!adClientId || !adSlotId) {
-    return (
-      <div className="w-full bg-gray-700 text-center py-10 border border-gray-600 rounded-lg">
-        <p className="text-gray-400">Ad Slot not configured.</p>
-      </div>
-    );
+    return null; 
   }
 
   useEffect(() => {
-    // گوگل ایڈسینس کا آفیشل پش کوڈ
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (e) {
       console.error("AdSense Error:", e);
     }
-  }, [adSlotId]); // جب بھی سلاٹ ID بدلے، ایڈ کو پش کریں
+  }, [adSlotId]);
   
+  // تمام بیک گراؤنڈ اور پیڈنگ ہٹا دی گئی ہے
+  // min-h کو بھی ہٹا دیا گیا ہے تاکہ اگر ایڈ لوڈ نہ ہو تو جگہ نہ بنے
   return (
-    <div className="w-full text-center overflow-hidden">
+    <div className="w-full flex justify-center items-center overflow-hidden my-4">
       <ins className="adsbygoogle"
            style={{ display: 'block' }}
-           data-ad-client={adClientId} // <-- ڈائنامک کلائنٹ ID
-           data-ad-slot={adSlotId}      // <-- ڈائنامک سلاٹ ID
+           data-ad-client={adClientId}
+           data-ad-slot={adSlotId}
            data-ad-format="auto"
            data-full-width-responsive="true"></ins>
     </div>
   );
 }
 
-// --- ✅ نیا: پوپ اپ ایڈ ---
+// --- PopupAd (ویسا ہی) ---
 function PopupAd({ adClientId, adSlotId, onClose }) {
   return (
     <div className="fixed top-4 right-4 z-[999] w-72 bg-gray-800 shadow-2xl border border-gray-700 rounded-lg">
@@ -323,13 +320,13 @@ function PopupAd({ adClientId, adSlotId, onClose }) {
 }
 
 
-// --- Main Client Component (اپ ڈیٹ شدہ) ---
+// --- Main Client Component ---
 export default function HomePageClient({ 
   initialProducts, 
   settings, 
   logoUrl, 
   bannerUrl, 
-  adSettings // <-- ✅ نیا prop
+  adSettings
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -338,19 +335,32 @@ export default function HomePageClient({
   const [quickFilter, setQuickFilter] = useState("all");
   
   const [showPopup, setShowPopup] = useState(false);
+  
+  const searchParams = useSearchParams();
 
-  // --- ✅✅✅ یہ ہے وزٹر کاؤنٹ کا نیا اور بہتر لاجک ---
+  // --- وزٹر کاؤنٹ ---
   useEffect(() => {
-    // ایڈمن چیک (localStorage) اور 6-گھنٹے کے لاجک کو ہٹا دیا گیا ہے
-    // اب صرف ایک 'فائر-اینڈ-فرگیٹ' (fire-and-forget) ریکویسٹ بھیجیں
-    // سرور (API) خود IP ایڈریس کی بنیاد پر 6 گھنٹے کا فیصلہ کرے گا
-    fetch('/api/track-visit', { method: 'POST' });
+    const adminPassword = searchParams.get('password');
+    if (adminPassword) {
+      console.log('Admin visit. Not counting.');
+      return;
+    }
+
+    const SIX_HOURS_IN_MS = 6 * 60 * 60 * 1000;
+    const storageKey = 'visitor_counted_timestamp';
     
-  }, []); // <-- یہ صرف ایک بار (پیج لوڈ پر) چلے گا
-  // --- ✅✅✅ لاجک ختم ---
+    const lastVisit = localStorage.getItem(storageKey);
+    const now = Date.now();
+
+    // IP ٹریکنگ API کو کال کریں
+    if (!lastVisit || (now - parseInt(lastVisit) > SIX_HOURS_IN_MS)) {
+      fetch('/api/track-visit', { method: 'POST' });
+      localStorage.setItem(storageKey, now.toString());
+    }
+  }, [searchParams]);
 
 
-  // --- ✅ یہ پوپ اپ ایڈ کا لاجک ہے (پہلے سے موجود) ---
+  // --- پوپ اپ ایڈ لاجک ---
   useEffect(() => {
     if (adSettings?.masterAdsEnabled && adSettings?.showHomepagePopupAd) {
       const timer = setTimeout(() => {
@@ -358,7 +368,7 @@ export default function HomePageClient({
       }, 5000); 
       return () => clearTimeout(timer);
     }
-  }, [adSettings]); // <-- اس useEffect کو الگ رکھیں
+  }, [adSettings]);
 
 
   const brands = useMemo(() => {
@@ -416,11 +426,10 @@ export default function HomePageClient({
     { hidden: { opacity: 0, x: 100 }, visible: { opacity: 1, x: 0 } },
   ];
 
-  // --- ✅ ایڈز کو دکھانے کا لاجک ---
   const showAds = adSettings?.masterAdsEnabled;
   const showBannerAd = showAds && adSettings?.showHomepageBannerAd;
   const showInFeedAds = showAds && adSettings?.showHomepageInFeedAds;
-  const clientId = adSettings?.adsenseClientId; // <-- کلائنٹ ID
+  const clientId = adSettings?.adsenseClientId;
 
   return (
     <main>
@@ -434,14 +443,12 @@ export default function HomePageClient({
       
       <HeroBanner bannerUrl={bannerUrl} />
       
-      {/* --- ✅ 1. بینر کے نیچے والا ایڈ (ڈائنامک IDs کے ساتھ) --- */}
+      {/* --- 1. بینر ایڈ (شفاف) --- */}
       {showBannerAd && (
-        <div className="p-4">
-          <AdComponent 
-            adClientId={clientId}
-            adSlotId={adSettings.homepageBannerSlotId} 
-          />
-        </div>
+        <AdComponent 
+          adClientId={clientId}
+          adSlotId={adSettings.homepageBannerSlotId} 
+        />
       )}
 
       <Sidebar
@@ -475,9 +482,9 @@ export default function HomePageClient({
                   animationVariant={anim[i % anim.length]}
                 />
                 
-                {/* --- ✅ 2. ان-فیڈ ایڈز (ڈائنامک IDs کے ساتھ) --- */}
+                {/* --- 2. ان-فیڈ ایڈ (شفاف) --- */}
                 {showInFeedAds && (i % 2 === 1) && (
-                  <div className="col-span-2 md:col-span-3 lg:col-span-4 p-2" key={`ad-${i}`}>
+                  <div className="col-span-2 md:col-span-3 lg:col-span-4" key={`ad-${i}`}>
                     <AdComponent 
                       adClientId={clientId}
                       adSlotId={adSettings.homepageInFeedSlotId} 
@@ -493,7 +500,6 @@ export default function HomePageClient({
         )}
       </div>
       
-      {/* --- ✅ 3. پوپ اپ ایڈ (ڈائنامک IDs کے ساتھ) --- */}
       {showPopup && (
         <PopupAd 
           adClientId={clientId}
