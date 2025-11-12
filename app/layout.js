@@ -1,4 +1,4 @@
-// --- 1. app/layout.js (مکل فائنل فکس - Ads کے ساتھ) ---
+// --- 1. app/layout.js (مکل فائ فکس - Ads کے ساتھ) ---
 
 import "./globals.css";
 import { Inter } from "next/font/google";
