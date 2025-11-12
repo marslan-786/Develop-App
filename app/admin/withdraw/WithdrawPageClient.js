@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function WithdrawPageClient({ earning, passwordQuery }) {
+  const router = useRouter();
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState('EasyPaisa');
   const [accountNumber, setAccountNumber] = useState('');
@@ -13,21 +15,57 @@ export default function WithdrawPageClient({ earning, passwordQuery }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (parseFloat(amount) > parseFloat(earning)) {
+    const withdrawAmount = parseFloat(amount);
+    const currentBalance = parseFloat(earning);
+
+    // --- 1. بیلنس چیک ---
+    if (withdrawAmount > currentBalance) {
       setMessage('Error: Insufficient balance.');
+      return;
+    }
+
+    // --- 2. منیمم 30 ڈالر کی شرط ---
+    if (withdrawAmount < 30) {
+      setMessage('Error: Minimum withdrawal amount is $30.');
       return;
     }
 
     setIsLoading(true);
     setMessage('');
 
-    // ابھی کے لیے ہم صرف ایک کامیابی کا میسج دکھائیں گے
-    // بعد میں آپ یہاں API کال لگا سکتے ہیں جو ایڈمن کو ای میل بھیجے یا ڈیٹا بیس میں ریکویسٹ سیو کرے
-    setTimeout(() => {
-        setIsLoading(false);
-        setMessage('Withdraw request submitted successfully! Allow 24-48 hours.');
-        setAmount('');
-    }, 1500);
+    try {
+      // --- 3. API کو کال کریں ---
+      const res = await fetch(`/api/withdraw?password=${passwordQuery}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            amount: withdrawAmount,
+            method,
+            accountNumber,
+            accountTitle
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to submit request.');
+      }
+
+      // کامیابی!
+      setMessage('Success: Withdrawal request submitted! View status in Ads Panel.');
+      setAmount('');
+      setAccountNumber('');
+      setAccountTitle('');
+      
+      // تھوڑی دیر بعد ایڈمن پیج پر واپس لے جائیں (آپشنل)
+      // setTimeout(() => router.push(`/admin?password=${passwordQuery}`), 3000);
+
+    } catch (error) {
+      setMessage(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -51,11 +89,12 @@ export default function WithdrawPageClient({ earning, passwordQuery }) {
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="Enter amount"
+            placeholder="Minimum $30"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
-            min="1"
+            min="30" // HTML لیول پر بھی روک دیا
           />
+          <p className="text-xs text-gray-500 mt-1">Minimum withdrawal limit: $30</p>
         </div>
 
         <div>
