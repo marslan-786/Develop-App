@@ -2,18 +2,39 @@
 
 import { head } from "@vercel/blob";
 import HomePageClient from "./HomePageClient";
+import { kv } from '@vercel/kv'; // <-- ✅ 1. KV کو امپورٹ کریں
 
-// --- ✅ ایڈ سیٹنگز لوڈ کرنے کا فنکشن (اپ ڈیٹ شدہ) ---
+// --- ✅ 2. وزٹ کو ٹریک کرنے کا فنکشن ---
+async function trackVisit() {
+  try {
+    // موجودہ تاریخ (PKT) حاصل کریں
+    const today = new Date().toLocaleString('sv-SE', { 
+      timeZone: 'Asia/Karachi' 
+    }).split(' ')[0]; // 'YYYY-MM-DD'
+    
+    const dailyVisitsKey = `visits:${today}`;
+
+    // 1. آج کے وزٹ میں 1 جمع کریں
+    await kv.incr(dailyVisitsKey);
+    // 2. ٹوٹل وزٹ میں 1 جمع کریں
+    await kv.incr('total_visitors');
+    
+    // پرانی تاریخوں کا ڈیٹا 2 دن بعد خود بخود ڈیلیٹ کر دیں
+    await kv.expire(dailyVisitsKey, 60 * 60 * 24 * 2); // 2 دن
+
+  } catch (error) {
+    console.error("KV Error (trackVisit):", error.message);
+  }
+}
+// --- --- ---
+
+// --- ایڈ سیٹنگز لوڈ کرنے کا فنکشن ---
 async function getAdSettings() {
   try {
     const blob = await head('ads.json', { cache: 'no-store' });
-    
-    // --- ✅ تبدیلی یہاں ہے ---
     const response = await fetch(blob.url, {
-      cache: 'no-store' // <-- 'tags' کی جگہ 'no-store'
+      cache: 'no-store' // <-- کیش کے بغیر
     });
-    // --- --- ---
-    
     if (response.ok) {
       const text = await response.text();
       if (text) return JSON.parse(text);
@@ -70,10 +91,12 @@ async function getBlobData() {
 }
 
 export default async function HomePage() {
-  // 1. پرانا ڈیٹا لوڈ کریں
+  // --- ✅ 3. ہر پیج لوڈ پر فنکشن کو کال کریں ---
+  trackVisit(); 
+  // --- --- ---
+
+  // باقی کوڈ ویسا ہی رہے گا
   const { settings, products, logoUrl, bannerUrl } = await getBlobData();
-  
-  // 2. ایڈ سیٹنگز لوڈ کریں (اب یہ ہمیشہ تازہ ترین ہوں گی)
   const adSettings = await getAdSettings();
 
   return (
@@ -82,7 +105,7 @@ export default async function HomePage() {
       settings={settings}
       logoUrl={logoUrl}
       bannerUrl={bannerUrl}
-      adSettings={adSettings} // <-- ایڈ سیٹنگز کو کلائنٹ کو پاس کریں
+      adSettings={adSettings} 
     />
   );
 }
