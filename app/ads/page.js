@@ -1,11 +1,9 @@
-// app/ads/page.js
-
 import { head } from '@vercel/blob';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { isValidAdsPassword } from '../../lib/ads-auth.js'; 
 import AdsPanelClient from './AdsPanelClient'; 
-import { kv } from '@vercel/kv'; // <-- ✅ 1. KV کو امپورٹ کریں
+import { kv } from '@vercel/kv';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,14 +39,15 @@ function LoginPage() {
   );
 }
 
-// --- ✅ 2. ایڈ سیٹنگز اور وزٹر کاؤنٹ لوڈ کریں ---
+// --- ڈیٹا لوڈ کرنے کا فنکشن ---
 async function loadData() {
   let settings = {};
+  let withdrawals = [];
   let todayVisitors = 0;
   let totalVisitors = 0;
 
+  // 1. سیٹنگز لوڈ کریں
   try {
-    // پرانی سیٹنگز (ads.json سے)
     const blob = await head('ads.json', { cache: 'no-store' });
     const response = await fetch(blob.url, { cache: 'no-store' });
     if (response.ok) {
@@ -56,33 +55,36 @@ async function loadData() {
       if (text) settings = JSON.parse(text);
     }
   } catch (e) {}
-  
+
+  // 2. ودڈرا ریکویسٹس لوڈ کریں
   try {
-    // نئی Stats (KV سے)
-    const today = new Date().toLocaleString('sv-SE', { 
-      timeZone: 'Asia/Karachi' 
-    }).split(' ')[0];
-    
-    // 'get' کمانڈز ایک ساتھ چلائیں
+    const wBlob = await head('withdrawals.json', { cache: 'no-store' });
+    const wRes = await fetch(wBlob.url, { cache: 'no-store' });
+    if (wRes.ok) {
+      const text = await wRes.text();
+      if (text) withdrawals = JSON.parse(text);
+    }
+  } catch (e) {}
+  
+  // 3. وزٹرز لوڈ کریں
+  try {
+    const today = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Karachi' }).split(' ')[0];
     [todayVisitors, totalVisitors] = await Promise.all([
       kv.get(`visits:${today}`),
       kv.get('total_visitors')
     ]);
-
-  } catch (e) {
-    console.error("KV Error (loadData):", e.message);
-  }
+  } catch (e) {}
   
   return { 
     initialSettings: settings, 
-    todayVisitors: todayVisitors || 0, // اگر null ہو تو 0
-    totalVisitors: totalVisitors || 0  // اگر null ہو تو 0
+    withdrawals: withdrawals || [], // <-- ✅ ودڈرا لسٹ بھیجیں
+    todayVisitors: todayVisitors || 0, 
+    totalVisitors: totalVisitors || 0  
   };
 }
-// --- --- ---
 
 function AdSettingsLoading() {
-  return <div className="p-4 text-center text-gray-400">Loading ad settings...</div>;
+  return <div className="p-4 text-center text-gray-400">Loading ad panel...</div>;
 }
 
 // --- مین پیج ---
@@ -90,22 +92,20 @@ export default async function AdsPage({ searchParams }) {
   const passwordQuery = searchParams.password;
 
   if (await isValidAdsPassword(passwordQuery)) {
-    // --- پاس ورڈ ٹھیک ہے ---
-    // --- ✅ 3. نیا ڈیٹا لوڈ کریں ---
-    const { initialSettings, todayVisitors, totalVisitors } = await loadData();
+    const { initialSettings, withdrawals, todayVisitors, totalVisitors } = await loadData();
     
     return (
       <Suspense fallback={<AdSettingsLoading />}>
         <AdsPanelClient 
           initialSettings={initialSettings} 
+          initialWithdrawals={withdrawals} // <-- ✅ پاس کریں
           passwordQuery={passwordQuery}
-          todayVisitors={todayVisitors}   // <-- ✅ نیا prop
-          totalVisitors={totalVisitors} // <-- ✅ نیا prop
+          todayVisitors={todayVisitors}
+          totalVisitors={totalVisitors}
         />
       </Suspense>
     );
   } else {
-    // --- پاس ورڈ غلط ہے ---
     return <LoginPage />;
   }
 }
