@@ -1,29 +1,19 @@
-// app/page.js
-
 import { head } from "@vercel/blob";
 import HomePageClient from "./HomePageClient";
-// --- ✅ 1. KV کو یہاں سے ہٹا دیا گیا ہے ---
-// import { kv } from '@vercel/kv'; 
+import { Suspense } from "react"; // --- ✅ سسپنس امپورٹ کریں ---
 
-// --- ✅ 2. trackVisit فنکشن کو یہاں سے ہٹا دیا گیا ہے ---
-// (وہ اب api/track-visit/route.js میں ہے)
-
-// --- ایڈ سیٹنگز لوڈ کرنے کا فنکشن ---
 async function getAdSettings() {
   try {
     const blob = await head('ads.json', { cache: 'no-store' });
-    const response = await fetch(blob.url, {
-      cache: 'no-store' 
-    });
+    const response = await fetch(blob.url, { cache: 'no-store' });
     if (response.ok) {
       const text = await response.text();
       if (text) return JSON.parse(text);
     }
   } catch (e) {}
-  return { masterAdsEnabled: false }; // ڈیفالٹ
+  return { masterAdsEnabled: false };
 }
 
-// --- پرانا فنکشن (ویسا ہی) ---
 async function getBlobData() {
   const defaultSettings = { websiteTitle: "Ilyas Mobile Mall" };
   let settings = defaultSettings;
@@ -31,35 +21,29 @@ async function getBlobData() {
   let logoUrl = "/placeholder-logo.png";
   let bannerUrl = "";
 
-  // 3. سیٹنگز سب سے پہلے حاصل کریں
   try {
-    const settingsBlob = await head("settings.json", { cache: 'no-store' });
-    const response = await fetch(settingsBlob.url, { 
-      next: { tags: ['settings'] } 
-    });
+    const settingsBlob = await head("settings.json", { cache: "no-store" });
+    const response = await fetch(settingsBlob.url, { next: { tags: ['settings'] } });
     if (response.ok) {
       const text = await response.text();
       if (text) settings = JSON.parse(text);
     }
   } catch {}
 
-  // 1. لوگو چیک کریں
   try {
-    const logoBlob = await head("logo.png", { cache: 'no-store' });
+    const logoBlob = await head("logo.png", { cache: "no-store" });
     const logoTimestamp = settings.logoLastUpdated || Date.now();
     logoUrl = `${logoBlob.url}?v=${logoTimestamp}`; 
   } catch {}
 
-  // 2. بینر چیک کریں
   try {
-    const bannerBlob = await head("background.png", { cache: 'no-store' });
+    const bannerBlob = await head("background.png", { cache: "no-store" });
     const bannerTimestamp = settings.bannerLastUpdated || Date.now();
     bannerUrl = `${bannerBlob.url}?v=${bannerTimestamp}`;
   } catch {}
 
-  // 4. پروڈکٹس حاصل کریں
   try {
-    const dataBlob = await head("data.json", { cache: 'no-store' });
+    const dataBlob = await head("data.json", { cache: "no-store" });
     const response = await fetch(dataBlob.url, { cache: "no-store" });
     if (response.ok) {
       const text = await response.text();
@@ -70,20 +54,25 @@ async function getBlobData() {
   return { settings, products, logoUrl, bannerUrl };
 }
 
+// --- لوڈنگ fallback ---
+function HomeLoader() {
+  return <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">Loading...</div>;
+}
+
 export default async function HomePage() {
-  // --- ✅ 3. trackVisit() کال کو یہاں سے ہٹا دیا گیا ہے ---
-  
-  // باقی کوڈ ویسا ہی رہے گا
   const { settings, products, logoUrl, bannerUrl } = await getBlobData();
   const adSettings = await getAdSettings();
 
   return (
-    <HomePageClient
-      initialProducts={products}
-      settings={settings}
-      logoUrl={logoUrl}
-      bannerUrl={bannerUrl}
-      adSettings={adSettings} 
-    />
+    // --- ✅ فکس 2: سسپنس باؤنڈری شامل کی گئی ---
+    <Suspense fallback={<HomeLoader />}>
+      <HomePageClient
+        initialProducts={products}
+        settings={settings}
+        logoUrl={logoUrl}
+        bannerUrl={bannerUrl}
+        adSettings={adSettings} 
+      />
+    </Suspense>
   );
 }
