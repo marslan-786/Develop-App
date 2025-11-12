@@ -1,6 +1,6 @@
 "use client";
 
-// --- ✅ تبدیلی: 'useEffect' اور 'Fragment' امپورٹ کیے گئے ---
+// --- ✅ 'useEffect' اور 'Fragment' امپورٹ کیے گئے ---
 import { useState, useMemo, useEffect, Fragment } from "react"; 
 import Image from "next/image";
 import Link from "next/link";
@@ -336,21 +336,46 @@ export default function HomePageClient({
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [quickFilter, setQuickFilter] = useState("all");
   
-  // --- ✅ پوپ اپ ایڈ کے لیے اسٹیٹ ---
   const [showPopup, setShowPopup] = useState(false);
 
-  // --- ✅ پوپ اپ ایڈ دکھانے کا لاجک ---
+  // --- ✅✅✅ یہ ہے وزٹر کاؤنٹ کا نیا لاجک ---
   useEffect(() => {
-    // اگر ماسٹر ایڈ اور پوپ ایڈ آن ہیں
+    // 6 گھنٹے کا وقت (ملی سیکنڈز میں)
+    const SIX_HOURS_IN_MS = 6 * 60 * 60 * 1000;
+    const storageKey = 'visitor_counted_timestamp';
+    
+    // براؤزر کی لوکل اسٹوریج سے پرانا ٹائم اسٹیمپ حاصل کریں
+    const lastVisit = localStorage.getItem(storageKey);
+    const now = Date.now();
+
+    // چیک کریں: اگر ٹائم اسٹیمپ موجود نہیں ہے، یا 6 گھنٹے سے پرانا ہے
+    if (!lastVisit || (now - parseInt(lastVisit) > SIX_HOURS_IN_MS)) {
+      
+      // 1. نئے وزٹ کو گننے کے لیے API کو کال کریں
+      // (ہمیں جواب کا انتظار نہیں کرنا، بس سگنل بھیجنا ہے)
+      fetch('/api/track-visit', { method: 'POST' });
+      
+      // 2. براؤزر میں نیا ٹائم اسٹیمپ سیو کریں
+      localStorage.setItem(storageKey, now.toString());
+      console.log('New visit counted.');
+      
+    } else {
+      // 6 گھنٹے ابھی پورے نہیں ہوئے، گنتی نہ کرو
+      console.log('Returning visitor. Not counting.');
+    }
+  }, []); // <-- یہ صرف ایک بار (پیج لوڈ پر) چلے گا
+  // --- ✅✅✅ لاجک ختم ---
+
+
+  // --- ✅ یہ پوپ اپ ایڈ کا لاجک ہے (پہلے سے موجود) ---
+  useEffect(() => {
     if (adSettings?.masterAdsEnabled && adSettings?.showHomepagePopupAd) {
-      // 5 سیکنڈ بعد پوپ اپ دکھاؤ
       const timer = setTimeout(() => {
         setShowPopup(true);
-      }, 5000); // 5 سیکنڈ
-      
+      }, 5000); 
       return () => clearTimeout(timer);
     }
-  }, [adSettings]);
+  }, [adSettings]); // <-- اس useEffect کو الگ رکھیں
 
 
   const brands = useMemo(() => {
