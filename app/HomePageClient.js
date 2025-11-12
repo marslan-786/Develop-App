@@ -1,6 +1,5 @@
 "use client";
 
-// --- ✅ 'useEffect' اور 'Fragment' امپورٹ کیے گئے ---
 import { useState, useMemo, useEffect, Fragment } from "react"; 
 import Image from "next/image";
 import Link from "next/link";
@@ -17,27 +16,27 @@ function IconWhatsApp() {
 }
 function IconMenu() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+    <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
       <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
     </svg>
   );
 }
 function IconSearch() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+    <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
       <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
     </svg>
   );
 }
 function IconClose() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+    <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
     </svg>
   );
 }
 
-// --- 'Time Ago' فنکشن (ویسا ہی) ---
+// --- 'Time Ago' فنکشن ---
 function formatTimeAgo(dateString) {
   if (!dateString) return null;
   const isoDateString = dateString.replace(' ', 'T');
@@ -63,10 +62,10 @@ function formatTimeAgo(dateString) {
   });
 }
 
-// --- Header (ویسا ہی) ---
+// --- Header ---
 function AppHeader({ title, logoUrl, whatsappNumber, onMenuClick, onSearchClick }) {
   const cacheBustedLogoSrc = logoUrl;
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+  const whatsappUrl = `[https://wa.me/$](https://wa.me/$){whatsappNumber}?text=${encodeURIComponent(
     "Hello, I am interested in your products."
   )}`;
   return (
@@ -94,7 +93,7 @@ function AppHeader({ title, logoUrl, whatsappNumber, onMenuClick, onSearchClick 
   );
 }
 
-// --- Hero Banner (ویسا ہی) ---
+// --- Hero Banner ---
 function HeroBanner({ bannerUrl }) {
   if (!bannerUrl) return null;
   const cacheUrl = bannerUrl;
@@ -113,7 +112,7 @@ function HeroBanner({ bannerUrl }) {
   );
 }
 
-// --- Filters (ویسا ہی) ---
+// --- Filters ---
 function FilterBubbles({ activeFilter, onFilterChange }) {
   const filters = [
     { id: "low-range", label: "Low Range" },
@@ -141,7 +140,7 @@ function FilterBubbles({ activeFilter, onFilterChange }) {
   );
 }
 
-// --- Product Card (ویسا ہی) ---
+// --- Product Card ---
 function ProductCard({ product, index, style, animationVariant }) {
   const img = product.imageUrl || "/placeholder-image.png";
   const shortDetail = product.detail 
@@ -186,7 +185,7 @@ function ProductCard({ product, index, style, animationVariant }) {
   );
 }
 
-// --- Sidebar (ویسا ہی) ---
+// --- Sidebar ---
 function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
   return (
     <>
@@ -228,7 +227,7 @@ function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
   );
 }
 
-// --- SearchBar (ویسا ہی) ---
+// --- SearchBar ---
 function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
   if (!isSearchOpen) return null;
   return (
@@ -253,10 +252,10 @@ function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
   );
 }
 
-// --- Floating WhatsApp (ویسا ہی) ---
+// --- Floating WhatsApp ---
 function FloatingWhatsAppButton({ whatsappNumber }) {
   if (!whatsappNumber) return null;
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+  const whatsappUrl = `[https://wa.me/$](https://wa.me/$){whatsappNumber}?text=${encodeURIComponent(
     "Hello, I am interested in your products."
   )}`;
   return (
@@ -272,8 +271,7 @@ function FloatingWhatsAppButton({ whatsappNumber }) {
 }
 
 
-// --- ✅ اپ ڈیٹ شدہ AdComponent ---
-// یہ اب بالکل شفاف (transparent) ہے اور جگہ نہیں گھیرے گا
+// --- AdComponent ---
 function AdComponent({ adClientId, adSlotId }) {
   // اگر IDs نہیں ہیں تو کچھ بھی رینڈر نہ کریں (0 height)
   if (!adClientId || !adSlotId) {
@@ -288,8 +286,6 @@ function AdComponent({ adClientId, adSlotId }) {
     }
   }, [adSlotId]);
   
-  // تمام بیک گراؤنڈ اور پیڈنگ ہٹا دی گئی ہے
-  // min-h کو بھی ہٹا دیا گیا ہے تاکہ اگر ایڈ لوڈ نہ ہو تو جگہ نہ بنے
   return (
     <div className="w-full flex justify-center items-center overflow-hidden my-4">
       <ins className="adsbygoogle"
@@ -302,7 +298,7 @@ function AdComponent({ adClientId, adSlotId }) {
   );
 }
 
-// --- PopupAd (ویسا ہی) ---
+// --- PopupAd ---
 function PopupAd({ adClientId, adSlotId, onClose }) {
   return (
     <div className="fixed top-4 right-4 z-[999] w-72 bg-gray-800 shadow-2xl border border-gray-700 rounded-lg">
@@ -338,26 +334,22 @@ export default function HomePageClient({
   
   const searchParams = useSearchParams();
 
-  // --- وزٹر کاؤنٹ ---
+  // --- ✅✅✅ ٹریکنگ کا نیا لاجک ---
   useEffect(() => {
+    // 1. ایڈمن چیک
     const adminPassword = searchParams.get('password');
     if (adminPassword) {
-      console.log('Admin visit. Not counting.');
+      // اگر ایڈمن ہے تو کچھ نہ کریں، اور نہ ہی کنسول میں کچھ لکھیں
       return;
     }
 
-    const SIX_HOURS_IN_MS = 6 * 60 * 60 * 1000;
-    const storageKey = 'visitor_counted_timestamp';
-    
-    const lastVisit = localStorage.getItem(storageKey);
-    const now = Date.now();
+    // 2. API کو 'پِنگ' (Ping) کریں
+    // (ہم localStorage چیک نہیں کر رہے، سیدھا سرور کو بتا رہے ہیں)
+    // (سرور IP چیک کرے گا اور فیصلہ کرے گا)
+    fetch('/api/track-visit', { method: 'POST' });
 
-    // IP ٹریکنگ API کو کال کریں
-    if (!lastVisit || (now - parseInt(lastVisit) > SIX_HOURS_IN_MS)) {
-      fetch('/api/track-visit', { method: 'POST' });
-      localStorage.setItem(storageKey, now.toString());
-    }
   }, [searchParams]);
+  // --- --- ---
 
 
   // --- پوپ اپ ایڈ لاجک ---
@@ -443,7 +435,7 @@ export default function HomePageClient({
       
       <HeroBanner bannerUrl={bannerUrl} />
       
-      {/* --- 1. بینر ایڈ (شفاف) --- */}
+      {/* --- 1. بینر ایڈ --- */}
       {showBannerAd && (
         <AdComponent 
           adClientId={clientId}
@@ -482,7 +474,7 @@ export default function HomePageClient({
                   animationVariant={anim[i % anim.length]}
                 />
                 
-                {/* --- 2. ان-فیڈ ایڈ (شفاف) --- */}
+                {/* --- 2. ان-فیڈ ایڈ --- */}
                 {showInFeedAds && (i % 2 === 1) && (
                   <div className="col-span-2 md:col-span-3 lg:col-span-4" key={`ad-${i}`}>
                     <AdComponent 
