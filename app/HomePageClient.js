@@ -1,10 +1,11 @@
 "use client";
 
-// --- ✅ 'useEffect' اور 'Fragment' امپورٹ کیے گئے ---
+// --- 'useEffect' اور 'Fragment' امپورٹ کیے گئے ---
 import { useState, useMemo, useEffect, Fragment } from "react"; 
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+// --- ✅ useSearchParams کو یہاں سے ہٹا دیا گیا ہے ---
 
 // --- Icons ---
 function IconWhatsApp() {
@@ -338,31 +339,13 @@ export default function HomePageClient({
   
   const [showPopup, setShowPopup] = useState(false);
 
-  // --- ✅✅✅ یہ ہے وزٹر کاؤنٹ کا نیا لاجک ---
+  // --- ✅✅✅ یہ ہے وزٹر کاؤنٹ کا نیا اور بہتر لاجک ---
   useEffect(() => {
-    // 6 گھنٹے کا وقت (ملی سیکنڈز میں)
-    const SIX_HOURS_IN_MS = 6 * 60 * 60 * 1000;
-    const storageKey = 'visitor_counted_timestamp';
+    // ایڈمن چیک (localStorage) اور 6-گھنٹے کے لاجک کو ہٹا دیا گیا ہے
+    // اب صرف ایک 'فائر-اینڈ-فرگیٹ' (fire-and-forget) ریکویسٹ بھیجیں
+    // سرور (API) خود IP ایڈریس کی بنیاد پر 6 گھنٹے کا فیصلہ کرے گا
+    fetch('/api/track-visit', { method: 'POST' });
     
-    // براؤزر کی لوکل اسٹوریج سے پرانا ٹائم اسٹیمپ حاصل کریں
-    const lastVisit = localStorage.getItem(storageKey);
-    const now = Date.now();
-
-    // چیک کریں: اگر ٹائم اسٹیمپ موجود نہیں ہے، یا 6 گھنٹے سے پرانا ہے
-    if (!lastVisit || (now - parseInt(lastVisit) > SIX_HOURS_IN_MS)) {
-      
-      // 1. نئے وزٹ کو گننے کے لیے API کو کال کریں
-      // (ہمیں جواب کا انتظار نہیں کرنا، بس سگنل بھیجنا ہے)
-      fetch('/api/track-visit', { method: 'POST' });
-      
-      // 2. براؤزر میں نیا ٹائم اسٹیمپ سیو کریں
-      localStorage.setItem(storageKey, now.toString());
-      console.log('New visit counted.');
-      
-    } else {
-      // 6 گھنٹے ابھی پورے نہیں ہوئے، گنتی نہ کرو
-      console.log('Returning visitor. Not counting.');
-    }
   }, []); // <-- یہ صرف ایک بار (پیج لوڈ پر) چلے گا
   // --- ✅✅✅ لاجک ختم ---
 
