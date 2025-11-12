@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react';
 
-// ایک کسٹم ٹوگل سوئچ کمپوننٹ
+// --- ٹوگل سوئچ ---
 function ToggleSwitch({ label, isEnabled, onToggle }) {
   return (
     <label className="flex items-center justify-between cursor-pointer p-4 bg-white rounded-lg shadow-sm border">
@@ -25,7 +25,7 @@ function ToggleSwitch({ label, isEnabled, onToggle }) {
   );
 }
 
-// --- ✅ نیا: سلاٹ ID کے لیے ان پٹ فیلڈ ---
+// --- سلاٹ ID ان پٹ ---
 function AdSlotInput({ label, value, onChange }) {
   return (
     <div className="pl-4 pr-4 pb-3 -mt-2 bg-white rounded-b-lg border-b border-l border-r">
@@ -41,78 +41,79 @@ function AdSlotInput({ label, value, onChange }) {
   );
 }
 
+// --- ✅ 1. نیا وزٹر Stats کمپوننٹ ---
+function VisitorStats({ today, total }) {
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg shadow-sm text-center">
+        <div className="text-sm font-medium text-blue-600">Today's Visitors</div>
+        <div className="text-3xl font-bold text-blue-900">{today}</div>
+      </div>
+      <div className="p-4 bg-green-50 border border-green-200 rounded-lg shadow-sm text-center">
+        <div className="text-sm font-medium text-green-600">Total Visitors</div>
+        <div className="text-3xl font-bold text-green-900">{total}</div>
+      </div>
+    </div>
+  );
+}
 
-export default function AdsPanelClient({ initialSettings, passwordQuery }) {
+
+export default function AdsPanelClient({ 
+  initialSettings, 
+  passwordQuery,
+  todayVisitors,  // <-- ✅ 2. نئے props وصول کریں
+  totalVisitors   // <-- ✅ 2. نئے props وصول کریں
+}) {
   
-  // تمام فیلڈز کے لیے اسٹیٹ
+  // (آپ کی تمام پرانی اسٹیٹ ... 'googleSiteVerification', 'adsenseClientId' ... ویسے ہی رہیں گی)
   const [googleSiteVerification, setGoogleSiteVerification] = useState('');
   const [adsenseClientId, setAdsenseClientId] = useState('');
   const [masterAdsEnabled, setMasterAdsEnabled] = useState(false);
-  
   const [showHomepageBannerAd, setShowHomepageBannerAd] = useState(false);
-  const [homepageBannerSlotId, setHomepageBannerSlotId] = useState(''); // <-- ✅ نیا
-
+  const [homepageBannerSlotId, setHomepageBannerSlotId] = useState(''); 
   const [showHomepageInFeedAds, setShowHomepageInFeedAds] = useState(false);
-  const [homepageInFeedSlotId, setHomepageInFeedSlotId] = useState(''); // <-- ✅ نیا
-  
+  const [homepageInFeedSlotId, setHomepageInFeedSlotId] = useState(''); 
   const [showHomepagePopupAd, setShowHomepagePopupAd] = useState(false);
-  const [homepagePopupSlotId, setHomepagePopupSlotId] = useState(''); // <-- ✅ نیا
-
+  const [homepagePopupSlotId, setHomepagePopupSlotId] = useState(''); 
   const [showProductInterstitialAd, setShowProductInterstitialAd] = useState(false);
-  const [productInterstitialSlotId, setProductInterstitialSlotId] = useState(''); // <-- ✅ نیا
-  
+  const [productInterstitialSlotId, setProductInterstitialSlotId] = useState(''); 
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  // سرور سے آئی سیٹنگز کو اسٹیٹ میں ڈالنا
+  // (useEffect ... ویسا ہی رہے گا)
   useEffect(() => {
     setGoogleSiteVerification(initialSettings.googleSiteVerification || '');
     setAdsenseClientId(initialSettings.adsenseClientId || '');
     setMasterAdsEnabled(initialSettings.masterAdsEnabled || false);
-    
     setShowHomepageBannerAd(initialSettings.showHomepageBannerAd || false);
-    setHomepageBannerSlotId(initialSettings.homepageBannerSlotId || ''); // <-- ✅ نیا
-
+    setHomepageBannerSlotId(initialSettings.homepageBannerSlotId || '');
     setShowHomepageInFeedAds(initialSettings.showHomepageInFeedAds || false);
-    setHomepageInFeedSlotId(initialSettings.homepageInFeedSlotId || ''); // <-- ✅ نیا
-    
+    setHomepageInFeedSlotId(initialSettings.homepageInFeedSlotId || '');
     setShowHomepagePopupAd(initialSettings.showHomepagePopupAd || false);
-    setHomepagePopupSlotId(initialSettings.homepagePopupSlotId || ''); // <-- ✅ نیا
-
+    setHomepagePopupSlotId(initialSettings.homepagePopupSlotId || '');
     setShowProductInterstitialAd(initialSettings.showProductInterstitialAd || false);
-    setProductInterstitialSlotId(initialSettings.productInterstitialSlotId || ''); // <-- ✅ نیا
-    
+    setProductInterstitialSlotId(initialSettings.productInterstitialSlotId || '');
   }, [initialSettings]);
 
-  // سیو کرنے کا فنکشن
+  // (handleSubmit ... ویسا ہی رہے گا)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setMessage('Saving...');
-
     const settingsToSave = {
-      googleSiteVerification,
-      adsenseClientId,
-      masterAdsEnabled,
-      showHomepageBannerAd,
-      homepageBannerSlotId, // <-- ✅ نیا
-      showHomepageInFeedAds,
-      homepageInFeedSlotId, // <-- ✅ نیا
-      showHomepagePopupAd,
-      homepagePopupSlotId, // <-- ✅ نیا
-      showProductInterstitialAd,
-      productInterstitialSlotId // <-- ✅ نیا
+      googleSiteVerification, adsenseClientId, masterAdsEnabled,
+      showHomepageBannerAd, homepageBannerSlotId,
+      showHomepageInFeedAds, homepageInFeedSlotId,
+      showHomepagePopupAd, homepagePopupSlotId,
+      showProductInterstitialAd, productInterstitialSlotId
     };
-
     try {
       const res = await fetch(`/api/ads?password=${passwordQuery}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settingsToSave),
       });
-
       if (!res.ok) throw new Error('Failed to save settings.');
-      
       setMessage('Ads settings saved successfully!');
     } catch (error) {
       setMessage(`Error: ${error.message}`);
@@ -128,6 +129,10 @@ export default function AdsPanelClient({ initialSettings, passwordQuery }) {
          <h1 className="text-xl font-bold text-center">Manage Website Ads</h1>
       </header>
       
+      {/* --- ✅ 3. نیا Stats سیکشن --- */}
+      <VisitorStats today={todayVisitors} total={totalVisitors} />
+      {/* --- --- --- */}
+
       {/* --- سیکشن 1: گوگل اسنیپ کوڈز --- */}
       <div className="p-4 bg-white rounded-lg shadow-sm border">
         <h2 className="text-lg font-semibold mb-3">Google Snippets</h2>
