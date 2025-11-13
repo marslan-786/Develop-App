@@ -90,8 +90,6 @@ function AppHeader({ title, logoUrl, whatsappNumber, onMenuClick, onSearchClick 
   );
 }
 
-// --- وہ جامد (static) ایڈز ٹیرا کوڈ جو یہاں تھا اسے ہٹا دیا گیا ہے ---
-            
 function HeroBanner({ bannerUrl }) {
   if (!bannerUrl) return null;
   const cacheUrl = bannerUrl;
@@ -263,65 +261,77 @@ function FloatingWhatsAppButton({ whatsappNumber }) {
   );
 }
 
-// --- ✅✅✅ نیا ایڈز ٹیرا کمپوننٹ ---
-function AdsterraAdComponent({ adKey }) {
+// --- ❌❌❌ پرانا AdsterraAdComponent یہاں سے ہٹا دیا گیا ہے ❌❌❌ ---
+
+
+// --- ❌❌❌ پرانا PopupAd کمپوننٹ یہاں سے ہٹا دیا گیا ہے ❌❌❌ ---
+
+
+// --- ✅✅✅ نیا نیٹو بینر کمپوننٹ (Native Banner Component) ---
+// (اس میں 'invokeKey' آپ کی ہدایت کے مطابق ہارڈ کوڈ کر دی گئی ہے)
+function AdsterraNativeBanner({ adKey }) {
   const adContainerRef = useRef(null);
+  
+  // یہ وہ 'id' ہے جسے ایڈز ٹیرا کا اسکرپٹ تلاش کرتا ہے
+  // یہ آپ کے 'adKey' (جو ads.json سے آئے گا) کی بنیاد پر بنے گا
+  const containerId = `container-${adKey}`; 
+  
+  // --- ⚠️ اہم: یہ 'invokeKey' آپ کے اسکرپٹ کے مطابق ہارڈ کوڈڈ ہے ---
+  // (src="//pl28044693.effectivegatecpm.com/...")
+  const invokeKey = "pl28044693"; 
 
   useEffect(() => {
-    // اگر 'adKey' (یعنی Slot ID) موجود نہیں ہے، تو کچھ نہ کریں
+    // اگر 'adKey' (جو ads.json سے آئے گا) موجود نہیں ہے، تو کچھ نہ کریں
     if (!adKey || !adContainerRef.current) {
       return;
     }
-
-    // پچھلا اشتہار صاف کریں (اگر کوئی ہو)
+    
+    // پچھلا اشتہار (اگر کوئی ہو) صاف کریں
     adContainerRef.current.innerHTML = '';
 
-    // 1. کنفگ اسکرپٹ بنائیں
-    const configScript = document.createElement('script');
-    configScript.type = 'text/javascript';
-    // نوٹ: ایڈز ٹیرا کے کچھ ایڈ فارمیٹس (جیسے پاپ انڈر) کو 'format', 'height', 'width' کی ضرورت نہیں ہوتی،
-    // لیکن بینر کے لیے یہ بہتر ہے۔ ایڈز ٹیرا خود ہی اسے ایڈجسٹ کر لیتا ہے۔
-    configScript.innerHTML = `
-      atOptions = {
-        'key' : '${adKey}',
-        'format' : 'iframe',
-        'height' : 60,
-        'width' : 468,
-        'params' : {}
-      };
-    `;
+    // 1. وہ اسکرپٹ بنائیں جو ایڈز ٹیرا نے دیا ہے
+    const script = document.createElement('script');
+    script.async = true;
+    script.setAttribute('data-cfasync', 'false');
+    // اسکرپٹ کا 'src' URL آپ کی ہارڈ کوڈڈ 'invokeKey' اور 'adKey' کو ملا کر بنتا ہے
+    script.src = `//${invokeKey}.effectivegatecpm.com/${adKey}/invoke.js`;
+    
+    // 2. وہ 'div' بنائیں جسے اسکرپٹ تلاش کرے گا
+    const adDiv = document.createElement('div');
+    adDiv.id = containerId; // 'id' کو 'adKey' کے مطابق سیٹ کریں
 
-    // 2. لوڈر اسکرپٹ بنائیں
-    const loaderScript = document.createElement('script');
-    loaderScript.type = 'text/javascript';
-    loaderScript.src = `//www.highperformanceformat.com/${adKey}/invoke.js`;
-    loaderScript.async = true;
+    // 3. دونوں کو پیج میں شامل کریں
+    try {
+      adContainerRef.current.appendChild(script);
+      adContainerRef.current.appendChild(adDiv);
+    } catch (e) {
+      console.error("Ad script injection failed", e);
+    }
 
-    // 3. دونوں اسکرپٹس کو کنٹینر میں ڈالیں
-    adContainerRef.current.appendChild(configScript);
-    adContainerRef.current.appendChild(loaderScript);
-
-    // 4. کلین اپ فنکشن: جب کمپوننٹ ان ماؤنٹ ہو تو اسکرپٹس ہٹا دیں
+    // 4. کلین اپ فنکشن (جب کمپوننٹ ہٹے تو ایڈ بھی ہٹ جائے)
     return () => {
       if (adContainerRef.current) {
         adContainerRef.current.innerHTML = '';
       }
     };
-  }, [adKey]); // یہ useEffect تب چلے گا جب adKey تبدیل ہوگا
+    
+    // یہ 'useEffect' تب چلے گا جب 'adKey' تبدیل ہوگی
+  }, [adKey, containerId, invokeKey]);
 
-  // یہ وہ 'div' ہے جس کے اندر ایڈز ٹیرا کا اشتہار لوڈ ہوگا
+  // یہ وہ 'div' ہے جس کے اندر ہمارا ایڈ لوڈ ہوگا
   return (
     <div 
       ref={adContainerRef} 
       className="w-full flex justify-center items-center overflow-hidden my-4"
     >
-      {/* Adsterra Ad will load here */}
+      {/* Adsterra Native Banner (4:1) will load here */}
     </div>
   );
 }
 
 
-// --- ✅✅✅ پاپ اپ کمپوننٹ کو بھی اپ ڈیٹ کر دیا گیا ہے ---
+// --- ✅✅✅ نیا پاپ اپ کمپوننٹ ---
+// یہ بھی نئے 'AdsterraNativeBanner' کمپوننٹ کو استعمال کر رہا ہے
 function PopupAd({ adKey, onClose }) {
   return (
     <div className="fixed top-4 right-4 z-[999] w-72 bg-gray-800 shadow-2xl border border-gray-700 rounded-lg">
@@ -332,8 +342,10 @@ function PopupAd({ adKey, onClose }) {
         <IconClose />
       </button>
       <div className="p-2">
-        {/* یہ اب نئے کمپوننٹ کو کال کر رہا ہے */}
-        <AdsterraAdComponent adKey={adKey} />
+        {/* یہ اب نئے 'نیٹو بینر' کمپوننٹ کو کال کر رہا ہے */}
+        <AdsterraNativeBanner 
+          adKey={adKey} 
+        />
       </div>
     </div>
   );
@@ -442,9 +454,6 @@ export default function HomePageClient({
   const showBannerAd = showAds && adSettings?.showHomepageBannerAd;
   const showInFeedAds = showAds && adSettings?.showHomepageInFeedAds;
   
-  // 'clientId' کی اب ضرورت نہیں، لیکن اسے چھوڑ دیتے ہیں تاکہ کوئی ایرر نہ آئے۔
-  // const clientId = adSettings?.adsenseClientId; 
-
   return (
     <main>
       <AppHeader
@@ -458,9 +467,10 @@ export default function HomePageClient({
       <HeroBanner bannerUrl={bannerUrl} />
       
       {showBannerAd && (
-        // --- ✅✅✅ کال اپ ڈیٹ ہو گئی ---
-        <AdsterraAdComponent 
-          adKey={adSettings.homepageBannerSlotId} 
+        // --- ✅✅✅ بینر ایڈ کال (اپ ڈیٹ شدہ) ---
+        // یہ اب 'adKey' کو 'ads.json' سے لے گا
+        <AdsterraNativeBanner 
+          adKey={adSettings.homepageBannerAdKey} 
         />
       )}
 
@@ -495,11 +505,14 @@ export default function HomePageClient({
                   animationVariant={anim[i % anim.length]}
                 />
                 
+                {/* --- ✅✅✅ اِن-فیڈ ایڈ لاجک ---
+                   یہ لاجک (i % 2 === 1) بالکل ٹھیک ہے اور ہر 2 پروڈکٹس (یعنی ہر لائن) کے بعد ایڈ دکھائے گا۔
+                   اگر ایڈ نظر نہیں آرہا تو اس کی وجہ 'Fill Rate' ہے، کوڈ کی غلطی نہیں ہے۔ */}
                 {showInFeedAds && (i % 2 === 1) && (
-                  <div className="col-span-2 md:col-span-3 lg:col-span-4" key={`ad-${i}`}>
-                    {/* --- ✅✅✅ کال اپ ڈیٹ ہو گئی --- */}
-                    <AdsterraAdComponent 
-                      adKey={adSettings.homepageInFeedSlotId} 
+                  <div className="col-span-2 md:grid-cols-3 lg:grid-cols-4" key={`ad-${i}`}>
+                    {/* --- ✅✅✅ اِن-فیڈ ایڈ کال (اپ ڈیٹ شدہ) --- */}
+                    <AdsterraNativeBanner 
+                      adKey={adSettings.homepageInFeedAdKey} 
                     />
                   </div>
                 )}
@@ -513,9 +526,9 @@ export default function HomePageClient({
       </div>
       
       {showPopup && (
-        // --- ✅✅✅ کال اپ ڈیٹ ہو گئی ---
+        // --- ✅✅✅ پاپ اپ ایڈ کال (اپ ڈیٹ شدہ) ---
         <PopupAd 
-          adKey={adSettings.homepagePopupSlotId}
+          adKey={adSettings.homepagePopupAdKey}
           onClose={() => setShowPopup(false)} 
         />
       )}
@@ -524,4 +537,3 @@ export default function HomePageClient({
     </main>
   );
 }
-
