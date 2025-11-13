@@ -52,12 +52,10 @@ function VisitorStats({ today, total }) {
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg shadow-sm text-center">
-        {/* ✅ English Label */}
         <div className="text-sm font-medium text-blue-600">Today's Visitors</div>
         <div className="text-3xl font-bold text-blue-900">{today}</div>
       </div>
       <div className="p-4 bg-green-50 border border-green-200 rounded-lg shadow-sm text-center">
-        {/* ✅ English Label */}
         <div className="text-sm font-medium text-green-600">Total Visitors</div>
         <div className="text-3xl font-bold text-green-900">{total}</div>
       </div>
@@ -71,14 +69,12 @@ function WithdrawalsModal({ requests, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden max-h-[80vh] flex flex-col">
         <div className="p-4 border-b flex justify-between items-center bg-gray-50">
-          {/* ✅ English Label */}
           <h2 className="font-bold text-lg text-gray-800">Withdrawal Requests</h2>
           <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded-full"><IconClose /></button>
         </div>
         
         <div className="overflow-y-auto p-4 space-y-3">
           {requests.length === 0 ? (
-            // ✅ English Label
             <p className="text-center text-gray-500 py-10">No pending requests.</p>
           ) : (
             requests.map((req) => (
@@ -88,7 +84,6 @@ function WithdrawalsModal({ requests, onClose }) {
                   <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">{req.status}</span>
                 </div>
                 <div className="text-sm space-y-1 text-gray-700">
-                  {/* ✅ English Labels */}
                   <p><strong>Method:</strong> {req.method}</p>
                   <p><strong>Account:</strong> {req.accountNumber}</p>
                   <p><strong>Title:</strong> {req.accountTitle}</p>
@@ -188,7 +183,6 @@ export default function AdsPanelClient({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    // ✅ English Message
     setMessage('Saving settings...');
     
     const settingsToSave = {
@@ -207,12 +201,9 @@ export default function AdsPanelClient({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settingsToSave),
       });
-      // ✅ English Message
       if (!res.ok) throw new Error('Failed to save settings.');
-      // ✅ English Message
       setMessage('Ad settings saved successfully!');
     } catch (error) {
-      // ✅ English Message
       setMessage(`Error: ${error.message}`);
     } finally {
       setIsLoading(false);
@@ -224,7 +215,6 @@ export default function AdsPanelClient({
       
       {/* --- Header with Bell Icon --- */}
       <header className="flex items-center justify-between p-4 bg-white border-b -mx-4 -mt-4 shadow-sm sticky top-0 z-10">
-         {/* ✅ English Label */}
          <h1 className="text-xl font-bold text-gray-800">Ads Manager</h1>
          
          <button 
@@ -249,7 +239,6 @@ export default function AdsPanelClient({
 
       {/* --- 2. Fund Transfer (Earning Input) --- */}
       <div className="p-5 bg-gradient-to-r from-green-50 to-white border border-green-200 rounded-xl shadow-sm">
-        {/* ✅ English Labels */}
         <h2 className="text-lg font-bold text-green-800 mb-2">Admin Funds</h2>
         <div>
           <label className="block text-sm font-medium text-green-700 mb-1">Send Fund to Admin Panel ($)</label>
@@ -267,7 +256,6 @@ export default function AdsPanelClient({
 
       {/* --- 3. Google Config --- */}
       <div className="p-4 bg-white rounded-lg shadow-sm border">
-        {/* ✅ English Labels */}
         <h2 className="text-lg font-semibold mb-3">Google Config</h2>
         <div className="space-y-4">
           <div>
@@ -285,7 +273,6 @@ export default function AdsPanelClient({
 
       {/* --- 4. Ad Units Control --- */}
       <div className="space-y-3">
-        {/* ✅ English Labels */}
         <h2 className="text-lg font-semibold mb-2">Ad Units Control</h2>
         
         <ToggleSwitch 
@@ -316,7 +303,6 @@ export default function AdsPanelClient({
                 type="text" 
                 value={key} 
                 onChange={(e) => handleInFeedKeyChange(index, e.target.value)} 
-                // ✅ English Placeholder
                 placeholder={`Ad Key #${index + 1}`}
                 className="mt-1 block w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md shadow-sm" 
               />
@@ -335,7 +321,6 @@ export default function AdsPanelClient({
             className="mt-2 flex items-center space-x-1 px-3 py-1.5 text-sm text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100"
           >
             <IconPlus />
-            {/* ✅ English Label */}
             <span>Add New Key</span>
           </button>
         </div>
@@ -364,7 +349,6 @@ export default function AdsPanelClient({
           disabled={isLoading}
           className="w-full py-3.5 px-4 border border-transparent rounded-xl shadow-md text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 transition-all"
         >
-          {/* ✅ English Labels */}
           {isLoading ? 'Saving Changes...' : 'Save All Settings'}
         </button>
         {message && (
