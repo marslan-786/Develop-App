@@ -1,31 +1,12 @@
 "use client";
 
-// 'useRef' کو یہاں شامل کیا گیا ہے
-import { useState, useMemo, useEffect, Fragment, useRef } from "react"; 
-import Image from "next/image";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
-// --- Icons (ویسے ہی) ---
-function IconWhatsApp() {
-  return (
-    <svg viewBox="0 0 448 512" fill="currentColor" className="w-8 h-8">
-      <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zM223.9 439.6c-33.8 0-66.7-9.3-95.3-26.3l-6.7-4-70.8 18.6L77.6 363l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5c0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
-    </svg>
-  );
-}
-function IconMenu() {
+// --- Icons ---
+function IconBell() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-    </svg>
-  );
-}
-function IconSearch() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-      <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
     </svg>
   );
 }
@@ -36,504 +17,371 @@ function IconClose() {
     </svg>
   );
 }
-
-function formatTimeAgo(dateString) {
-  if (!dateString) return null;
-  const isoDateString = dateString.replace(' ', 'T');
-  const date = new Date(isoDateString);
-  if (isNaN(date.getTime())) return null;
-  const now = new Date();
-  const seconds = Math.round((now.getTime() - date.getTime()) / 1000);
-  if (seconds < 0) return "just now";
-  if (seconds < 60) return `${seconds} sec ago`;
-  const minutes = Math.round(seconds / 60);
-  if (minutes < 60) return `${minutes} min ago`;
-  const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours} hr ago`;
-  const days = Math.round(hours / 24);
-  if (days === 1) return "Yesterday";
-  if (days < 7) return `${days} days ago`;
-  return date.toLocaleDateString('en-PK', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  });
-}
-
-function AppHeader({ title, logoUrl, whatsappNumber, onMenuClick, onSearchClick }) {
-  const cacheBustedLogoSrc = logoUrl;
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-    "Hello, I am interested in your products."
-  )}`;
+function IconPlus() {
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between p-4 bg-gray-900 border-b border-gray-700">
-      <div className="flex items-center gap-4">
-        <button onClick={onMenuClick} className="p-2 rounded-full text-gray-300 hover:bg-gray-700">
-          <IconMenu />
-        </button>
-        <span className="text-xl font-bold text-white animated-gradient-text">{title}</span>
-      </div>
-      <div className="flex items-center gap-4">
-        <button onClick={onSearchClick} className="p-2 rounded-full text-gray-300 hover:bg-gray-700">
-          <IconSearch />
-        </button>
-        <a
-          href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-600 flex-shrink-0 hover:scale-110 transition-transform"
-        >
-          <Image src={cacheBustedLogoSrc} alt="Logo" width={40} height={40} unoptimized priority />
-        </a>
-      </div>
-    </header>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    </svg>
   );
 }
 
-function HeroBanner({ bannerUrl }) {
-  if (!bannerUrl) return null;
-  const cacheUrl = bannerUrl;
+
+// --- Toggle and Input Components ---
+function ToggleSwitch({ label, isEnabled, onToggle }) {
   return (
-    <div className="w-full">
-      <Image
-        src={cacheUrl}
-        width={1200}
-        height={400}
-        alt="Banner"
-        className="w-full object-cover"
-        unoptimized
-        priority
-      />
+    <label className="flex items-center justify-between cursor-pointer p-4 bg-white rounded-lg shadow-sm border">
+      <span className="font-medium text-gray-700">{label}</span>
+      <div className={`relative w-11 h-6 rounded-full transition-colors ${isEnabled ? 'bg-blue-600' : 'bg-gray-200'}`}>
+        <span className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform ${isEnabled ? 'transform translate-x-5' : ''}`}></span>
+      </div>
+      <input type="checkbox" className="sr-only" checked={isEnabled} onChange={onToggle} />
+    </label>
+  );
+}
+
+function AdSlotInput({ label, value, onChange }) {
+  return (
+    <div className="pl-4 pr-4 pb-3 -mt-2 bg-white rounded-b-lg border-b border-l border-r">
+      <label className="block text-xs font-medium text-gray-500">{label}</label>
+      <input type="text" value={value} onChange={onChange} placeholder="e.g., 4c0336286f80f3898e1d34f70c813597" className="mt-1 block w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md shadow-sm" />
     </div>
   );
 }
 
-function FilterBubbles({ activeFilter, onFilterChange }) {
-  const filters = [
-    { id: "low-range", label: "Low Range" },
-    { id: "pta", label: "PTA Approved" },
-    { id: "gaming", label: "Gaming" },
-  ];
+function VisitorStats({ today, total }) {
   return (
-    <div className="sticky top-[73px] z-10 p-4 bg-gray-900/80 border-b border-gray-700">
-      <div className="flex items-center justify-center gap-3">
-        {filters.map((f) => (
-          <button
-            key={f.id}
-            onClick={() => onFilterChange(f.id)}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-              activeFilter === f.id
-                ? "bg-blue-600 text-white shadow-lg"
-                : "bg-gray-700 text-gray-200 hover:bg-gray-600"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
+    <div className="grid grid-cols-2 gap-4">
+      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg shadow-sm text-center">
+        {/* ✅ English Label */}
+        <div className="text-sm font-medium text-blue-600">Today's Visitors</div>
+        <div className="text-3xl font-bold text-blue-900">{today}</div>
+      </div>
+      <div className="p-4 bg-green-50 border border-green-200 rounded-lg shadow-sm text-center">
+        {/* ✅ English Label */}
+        <div className="text-sm font-medium text-green-600">Total Visitors</div>
+        <div className="text-3xl font-bold text-green-900">{total}</div>
       </div>
     </div>
   );
 }
 
-function ProductCard({ product, index, style, animationVariant }) {
-  const img = product.imageUrl || "/placeholder-image.png";
-  const shortDetail = product.detail 
-    ? product.detail.substring(0, 50) + (product.detail.length > 50 ? "..." : "")
-    : "";
-  const timeAgo = formatTimeAgo(product.uploadTime);
+// --- WithdrawalsModal Component ---
+function WithdrawalsModal({ requests, onClose }) {
   return (
-    <motion.div
-      className={`rounded-lg overflow-hidden shadow-lg flex flex-col ${style.bg}`}
-      variants={animationVariant}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.8, delay: (index % 2) * 0.1 }}
-    >
-      <div className="w-full h-48 md:h-56 relative">
-        <Image src={img} alt={product.name} fill className="object-cover" unoptimized />
-      </div>
-      <div className={`p-4 flex flex-col flex-grow ${style.text}`}>
-        <h3 className="text-xl font-semibold mb-2 h-14 overflow-hidden">
-          {product.name}
-        </h3>
-        {shortDetail && (
-          <p className="text-sm opacity-80 mb-3 h-10 overflow-hidden">
-            {shortDetail}
-          </p>
-        )}
-        <p className="font-bold text-lg mb-1">PKR {product.price}</p>
-        {timeAgo && (
-          <p className="text-xs opacity-70 mb-4">{timeAgo}</p>
-        )}
-        <div className="mt-auto">
-          <Link
-            href={`/product/${product.id}`}
-            className={`block w-full text-center px-3 py-2 rounded-md text-sm font-medium ${style.button}`}
-          >
-            View Product
-          </Link>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden max-h-[80vh] flex flex-col">
+        <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+          {/* ✅ English Label */}
+          <h2 className="font-bold text-lg text-gray-800">Withdrawal Requests</h2>
+          <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded-full"><IconClose /></button>
+        </div>
+        
+        <div className="overflow-y-auto p-4 space-y-3">
+          {requests.length === 0 ? (
+            // ✅ English Label
+            <p className="text-center text-gray-500 py-10">No pending requests.</p>
+          ) : (
+            requests.map((req) => (
+              <div key={req.id} className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <div className="flex justify-between mb-2">
+                  <span className="font-bold text-lg text-blue-600">${req.amount}</span>
+                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">{req.status}</span>
+                </div>
+                <div className="text-sm space-y-1 text-gray-700">
+                  {/* ✅ English Labels */}
+                  <p><strong>Method:</strong> {req.method}</p>
+                  <p><strong>Account:</strong> {req.accountNumber}</p>
+                  <p><strong>Title:</strong> {req.accountTitle}</p>
+                  <p className="text-xs text-gray-400 mt-2">{req.date}</p>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
-    </motion.div>
-  );
-}
-
-function Sidebar({ isOpen, onClose, brands, selectedBrand, onSelectBrand }) {
-  return (
-    <>
-      {isOpen && <div className="fixed inset-0 z-30 bg-black/50" onClick={onClose}></div>}
-      <div
-        className={`fixed top-0 left-0 z-40 w-64 h-full bg-gray-800 transition-transform ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="flex justify-between p-4 border-b border-gray-700">
-          <h2 className="font-bold text-white">Filter by Brand</h2>
-          <button onClick={onClose} className="p-2 text-gray-300 hover:bg-gray-700 rounded-full">
-            <IconClose />
-          </button>
-        </div>
-        <nav className="p-4">
-          <button
-            onClick={() => onSelectBrand(null)}
-            className={`w-full text-left p-2 rounded-lg mb-1 ${
-              !selectedBrand ? "bg-blue-600 text-white" : "text-gray-300 hover:bg-gray-700"
-            }`}
-          >
-            All Brands
-          </button>
-          {brands.map((brand) => (
-            <button
-              key={brand}
-              onClick={() => onSelectBrand(brand)}
-              className={`w-full text-left p-2 rounded-lg mb-1 ${
-                selectedBrand === brand ? "bg-blue-600 text-white" : "text-gray-300 hover:bg-gray-700"
-              }`}
-            >
-              {brand}
-            </button>
-          ))}
-        </nav>
-      </div>
-    </>
-  );
-}
-
-function SearchBar({ isSearchOpen, onClose, searchTerm, onSearchChange }) {
-  if (!isSearchOpen) return null;
-  return (
-    <div className="sticky top-[141px] z-10 p-4 bg-gray-800 border-b border-gray-700">
-      <div className="relative">
-        <input
-          type="text"
-          placeholder="Search products..."
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full p-2 pr-10 bg-gray-700 text-white border border-gray-600 rounded-lg"
-          autoFocus
-        />
-        <button
-          onClick={onClose}
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
-        >
-          <IconClose />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function FloatingWhatsAppButton({ whatsappNumber }) {
-  if (!whatsappNumber) return null;
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-    "Hello, I am interested in your products."
-  )}`;
-  return (
-    <a
-      href={whatsappUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-50 p-4 bg-green-500 text-white rounded-full shadow-lg hover:scale-110 transition-transform whatsapp-float"
-    >
-      <IconWhatsApp />
-    </a>
-  );
-}
-
-// --- ❌❌❌ پرانا AdsterraAdComponent یہاں سے ہٹا دیا گیا ہے ❌❌❌ ---
-
-
-// --- ❌❌❌ پرانا PopupAd کمپوننٹ یہاں سے ہٹا دیا گیا ہے ❌❌❌ ---
-
-
-// --- ✅✅✅ نیا نیٹو بینر کمپوننٹ (Native Banner Component) ---
-// (اس میں 'invokeKey' آپ کی ہدایت کے مطابق ہارڈ کوڈ کر دی گئی ہے)
-function AdsterraNativeBanner({ adKey }) {
-  const adContainerRef = useRef(null);
-  
-  // یہ وہ 'id' ہے جسے ایڈز ٹیرا کا اسکرپٹ تلاش کرتا ہے
-  // یہ آپ کے 'adKey' (جو ads.json سے آئے گا) کی بنیاد پر بنے گا
-  const containerId = `container-${adKey}`; 
-  
-  // --- ⚠️ اہم: یہ 'invokeKey' آپ کے اسکرپٹ کے مطابق ہارڈ کوڈڈ ہے ---
-  // (src="//pl28044693.effectivegatecpm.com/...")
-  const invokeKey = "pl28044693"; 
-
-  useEffect(() => {
-    // اگر 'adKey' (جو ads.json سے آئے گا) موجود نہیں ہے، تو کچھ نہ کریں
-    if (!adKey || !adContainerRef.current) {
-      return;
-    }
-    
-    // پچھلا اشتہار (اگر کوئی ہو) صاف کریں
-    adContainerRef.current.innerHTML = '';
-
-    // 1. وہ اسکرپٹ بنائیں جو ایڈز ٹیرا نے دیا ہے
-    const script = document.createElement('script');
-    script.async = true;
-    script.setAttribute('data-cfasync', 'false');
-    // اسکرپٹ کا 'src' URL آپ کی ہارڈ کوڈڈ 'invokeKey' اور 'adKey' کو ملا کر بنتا ہے
-    script.src = `//${invokeKey}.effectivegatecpm.com/${adKey}/invoke.js`;
-    
-    // 2. وہ 'div' بنائیں جسے اسکرپٹ تلاش کرے گا
-    const adDiv = document.createElement('div');
-    adDiv.id = containerId; // 'id' کو 'adKey' کے مطابق سیٹ کریں
-
-    // 3. دونوں کو پیج میں شامل کریں
-    try {
-      adContainerRef.current.appendChild(script);
-      adContainerRef.current.appendChild(adDiv);
-    } catch (e) {
-      console.error("Ad script injection failed", e);
-    }
-
-    // 4. کلین اپ فنکشن (جب کمپوننٹ ہٹے تو ایڈ بھی ہٹ جائے)
-    return () => {
-      if (adContainerRef.current) {
-        adContainerRef.current.innerHTML = '';
-      }
-    };
-    
-    // یہ 'useEffect' تب چلے گا جب 'adKey' تبدیل ہوگی
-  }, [adKey, containerId, invokeKey]);
-
-  // یہ وہ 'div' ہے جس کے اندر ہمارا ایڈ لوڈ ہوگا
-  return (
-    <div 
-      ref={adContainerRef} 
-      className="w-full flex justify-center items-center overflow-hidden my-4"
-    >
-      {/* Adsterra Native Banner (4:1) will load here */}
     </div>
   );
 }
 
 
-// --- ✅✅✅ نیا پاپ اپ کمپوننٹ ---
-// یہ بھی نئے 'AdsterraNativeBanner' کمپوننٹ کو استعمال کر رہا ہے
-function PopupAd({ adKey, onClose }) {
-  return (
-    <div className="fixed top-4 right-4 z-[999] w-72 bg-gray-800 shadow-2xl border border-gray-700 rounded-lg">
-      <button 
-        onClick={onClose} 
-        className="absolute -top-2 -right-2 p-1 bg-gray-900 text-white rounded-full shadow-lg"
-      >
-        <IconClose />
-      </button>
-      <div className="p-2">
-        {/* یہ اب نئے 'نیٹو بینر' کمپوننٹ کو کال کر رہا ہے */}
-        <AdsterraNativeBanner 
-          adKey={adKey} 
-        />
-      </div>
-    </div>
-  );
-}
-
-
-// --- Main Client Component (اپ ڈیٹ شدہ) ---
-export default function HomePageClient({ 
-  initialProducts, 
-  settings, 
-  logoUrl, 
-  bannerUrl, 
-  adSettings
+export default function AdsPanelClient({ 
+  initialSettings, 
+  initialWithdrawals,
+  passwordQuery,
+  todayVisitors,  
+  totalVisitors   
 }) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedBrand, setSelectedBrand] = useState(null);
-  const [quickFilter, setQuickFilter] = useState("all");
   
-  const [showPopup, setShowPopup] = useState(false);
+  // --- States ---
+  const [adsenseClientId, setAdsenseClientId] = useState('');
+  const [masterAdsEnabled, setMasterAdsEnabled] = useState(false);
+  const [earning, setEarning] = useState('');
+
+  const [showHomepageBannerAd, setShowHomepageBannerAd] = useState(false);
+  const [homepageBannerAdKey, setHomepageBannerAdKey] = useState(''); 
   
-  const searchParams = useSearchParams();
+  const [showHomepagePopupAd, setShowHomepagePopupAd] = useState(false);
+  const [homepagePopupAdKey, setHomepagePopupAdKey] = useState(''); 
+  
+  const [showProductInterstitialAd, setShowProductInterstitialAd] = useState(false);
+  const [productInterstitialAdKey, setProductInterstitialAdKey] = useState(''); 
+  
+  const [showHomepageInFeedAds, setShowHomepageInFeedAds] = useState(false);
+  const [homepageInFeedAdKeys, setHomepageInFeedAdKeys] = useState(['']); // Start with one empty input
 
-  // --- ٹریکنگ کا فکسڈ لاجک (Session Lock) ---
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  
+  const [showWithdrawals, setShowWithdrawals] = useState(false); // Modal State
+
+  // --- Effects ---
   useEffect(() => {
-    const adminPassword = searchParams.get('password');
-    if (adminPassword) return;
-    const sessionKey = 'session_visit_tracked';
-    if (sessionStorage.getItem(sessionKey)) {
-      console.log("Visit already tracked for this session.");
-      return;
-    }
-    fetch('/api/track-visit', { method: 'POST' });
-    sessionStorage.setItem(sessionKey, 'true');
-  }, [searchParams]);
-  // --- --- ---
+    setAdsenseClientId(initialSettings.adsenseClientId || '');
+    setMasterAdsEnabled(initialSettings.masterAdsEnabled || false);
+    setEarning(initialSettings.earning || ''); 
 
+    setShowHomepageBannerAd(initialSettings.showHomepageBannerAd || false);
+    setHomepageBannerAdKey(initialSettings.homepageBannerAdKey || '');
+    
+    setShowHomepagePopupAd(initialSettings.showHomepagePopupAd || false);
+    setHomepagePopupAdKey(initialSettings.homepagePopupAdKey || '');
+    
+    setShowProductInterstitialAd(initialSettings.showProductInterstitialAd || false);
+    setProductInterstitialAdKey(initialSettings.productInterstitialAdKey || '');
 
-  useEffect(() => {
-    if (adSettings?.masterAdsEnabled && adSettings?.showHomepagePopupAd) {
-      const timer = setTimeout(() => {
-        setShowPopup(true);
-      }, 5000); 
-      return () => clearTimeout(timer);
-    }
-  }, [adSettings]);
+    setShowHomepageInFeedAds(initialSettings.showHomepageInFeedAds || false);
+    setHomepageInFeedAdKeys(
+      initialSettings.homepageInFeedAdKeys?.length > 0 
+        ? initialSettings.homepageInFeedAdKeys 
+        : [''] // If empty, show one input
+    );
+    
+  }, [initialSettings]);
 
+  // --- Count pending requests ---
+  const pendingRequestsCount = initialWithdrawals.filter(req => req.status === 'Pending').length;
 
-  const brands = useMemo(() => {
-    const all = initialProducts.map((p) => p.brand).filter(Boolean);
-    return [...new Set(all)];
-  }, [initialProducts]);
-
-  const handleFilterChange = (id) => {
-    setQuickFilter((prev) => (prev === id ? "all" : id));
+  // --- Helper functions for In-Feed Keys ---
+  
+  // To change a key in the array
+  const handleInFeedKeyChange = (index, value) => {
+    const newKeys = [...homepageInFeedAdKeys];
+    newKeys[index] = value;
+    setHomepageInFeedAdKeys(newKeys);
   };
 
-  const filtered = useMemo(() => {
-    return initialProducts
-      .sort((a, b) => {
-        const timeA = a.uploadTime || '';
-        const timeB = b.uploadTime || '';
-        return timeB.localeCompare(timeA);
-      })
-      .filter((p) => {
-        const matchBrand = selectedBrand ? p.brand === selectedBrand : true;
-        const matchSearch =
-          !searchTerm ||
-          p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          p.brand?.toLowerCase().includes(searchTerm.toLowerCase());
-        
-        let matchesQuickFilter = true;
-        if (quickFilter !== 'all') {
-          if (quickFilter === 'low-range') {
-            const price = parseFloat(String(p.price).replace(/,/g, ''));
-            matchesQuickFilter = price < 20000;
-          } else if (quickFilter === 'pta') {
-            matchesQuickFilter = 
-              p.name?.toLowerCase().includes('pta') ||
-              p.detail?.toLowerCase().includes('pta') ||
-              p.condition?.toLowerCase().includes('pta');
-          } else if (quickFilter === 'gaming') {
-            matchesQuickFilter = 
-              p.name?.toLowerCase().includes('gaming') ||
-              p.detail?.toLowerCase().includes('gaming');
-          }
-        }
-        return matchBrand && matchSearch && matchesQuickFilter;
+  // To add a new input
+  const addInFeedKey = () => {
+    setHomepageInFeedAdKeys([...homepageInFeedAdKeys, '']);
+  };
+
+  // To remove an input
+  const removeInFeedKey = (indexToRemove) => {
+    if (homepageInFeedAdKeys.length > 1) {
+      setHomepageInFeedAdKeys(homepageInFeedAdKeys.filter((_, index) => index !== indexToRemove));
+    } else {
+      setHomepageInFeedAdKeys(['']); // Just clear the last one
+    }
+  };
+
+  // --- Save Function ---
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    // ✅ English Message
+    setMessage('Saving settings...');
+    
+    const settingsToSave = {
+      adsenseClientId, masterAdsEnabled, earning, 
+      showHomepageBannerAd, homepageBannerAdKey,
+      showHomepagePopupAd, homepagePopupAdKey,
+      showProductInterstitialAd, productInterstitialAdKey,
+      showHomepageInFeedAds,
+      // Filter out empty keys before saving
+      homepageInFeedAdKeys: homepageInFeedAdKeys.filter(key => key.trim() !== ''),
+    };
+
+    try {
+      const res = await fetch(`/api/ads?password=${passwordQuery}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settingsToSave),
       });
-  }, [initialProducts, selectedBrand, searchTerm, quickFilter]);
+      // ✅ English Message
+      if (!res.ok) throw new Error('Failed to save settings.');
+      // ✅ English Message
+      setMessage('Ad settings saved successfully!');
+    } catch (error) {
+      // ✅ English Message
+      setMessage(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const styles = [
-    { bg: "bg-blue-600", text: "text-white", button: "bg-white/90 text-blue-600 hover:bg-white" },
-    { bg: "bg-pink-600", text: "text-white", button: "bg-white/90 text-pink-600 hover:bg-white" },
-    { bg: "bg-lime-500", text: "text-gray-900", button: "bg-gray-900/90 text-lime-500 hover:bg-black" },
-  ];
-
-  const anim = [
-    { hidden: { opacity: 0, x: -100 }, visible: { opacity: 1, x: 0 } },
-    { hidden: { opacity: 0, y: 100 }, visible: { opacity: 1, y: 0 } },
-    { hidden: { opacity: 0, x: 100 }, visible: { opacity: 1, x: 0 } },
-  ];
-
-  const showAds = adSettings?.masterAdsEnabled;
-  const showBannerAd = showAds && adSettings?.showHomepageBannerAd;
-  const showInFeedAds = showAds && adSettings?.showHomepageInFeedAds;
-  
   return (
-    <main>
-      <AppHeader
-        title={settings.websiteTitle}
-        logoUrl={logoUrl}
-        whatsappNumber={settings.whatsappNumber}
-        onMenuClick={() => setIsMenuOpen(true)}
-        onSearchClick={() => setIsSearchOpen((v) => !v)}
-      />
+    <form onSubmit={handleSubmit} className="p-4 space-y-6">
       
-      <HeroBanner bannerUrl={bannerUrl} />
+      {/* --- Header with Bell Icon --- */}
+      <header className="flex items-center justify-between p-4 bg-white border-b -mx-4 -mt-4 shadow-sm sticky top-0 z-10">
+         {/* ✅ English Label */}
+         <h1 className="text-xl font-bold text-gray-800">Ads Manager</h1>
+         
+         <button 
+           type="button"
+           onClick={() => setShowWithdrawals(true)}
+           className="relative p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+         >
+           <IconBell />
+           {pendingRequestsCount > 0 && (
+             <span className="absolute top-0 right-0 flex h-4 w-4">
+               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+               <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] text-white justify-center items-center">
+                 {pendingRequestsCount}
+               </span>
+             </span>
+           )}
+         </button>
+      </header>
       
-      {showBannerAd && (
-        // --- ✅✅✅ بینر ایڈ کال (اپ ڈیٹ شدہ) ---
-        // یہ اب 'adKey' کو 'ads.json' سے لے گا
-        <AdsterraNativeBanner 
-          adKey={adSettings.homepageBannerAdKey} 
-        />
-      )}
+      {/* --- 1. Visitor Stats --- */}
+      <VisitorStats today={todayVisitors} total={totalVisitors} />
 
-      <Sidebar
-        isOpen={isMenuOpen}
-        onClose={() => setIsMenuOpen(false)}
-        brands={brands}
-        selectedBrand={selectedBrand}
-        onSelectBrand={(b) => {
-          setSelectedBrand(b);
-          setIsMenuOpen(false);
-        }}
-      />
-      <FilterBubbles activeFilter={quickFilter} onFilterChange={handleFilterChange} />
-      <SearchBar
-        isSearchOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-      />
+      {/* --- 2. Fund Transfer (Earning Input) --- */}
+      <div className="p-5 bg-gradient-to-r from-green-50 to-white border border-green-200 rounded-xl shadow-sm">
+        {/* ✅ English Labels */}
+        <h2 className="text-lg font-bold text-green-800 mb-2">Admin Funds</h2>
+        <div>
+          <label className="block text-sm font-medium text-green-700 mb-1">Send Fund to Admin Panel ($)</label>
+          <input
+            type="number"
+            step="0.01"
+            value={earning}
+            onChange={(e) => setEarning(e.target.value)}
+            placeholder="0.00"
+            className="w-full px-4 py-2 text-lg font-bold text-green-800 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500"
+          />
+          <p className="text-xs text-green-600 mt-1">This amount will appear on the Admin Panel header.</p>
+        </div>
+      </div>
 
-      <div className="p-4 md:p-8">
-        {filtered.length ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            
-            {filtered.map((p, i) => (
-              <Fragment key={p.id || p.name}>
-                <ProductCard
-                  product={p}
-                  index={i}
-                  style={styles[i % styles.length]}
-                  animationVariant={anim[i % anim.length]}
-                />
-                
-                {/* --- ✅✅✅ اِن-فیڈ ایڈ لاجک ---
-                   یہ لاجک (i % 2 === 1) بالکل ٹھیک ہے اور ہر 2 پروڈکٹس (یعنی ہر لائن) کے بعد ایڈ دکھائے گا۔
-                   اگر ایڈ نظر نہیں آرہا تو اس کی وجہ 'Fill Rate' ہے، کوڈ کی غلطی نہیں ہے۔ */}
-                {showInFeedAds && (i % 2 === 1) && (
-                  <div className="col-span-2 md:grid-cols-3 lg:grid-cols-4" key={`ad-${i}`}>
-                    {/* --- ✅✅✅ اِن-فیڈ ایڈ کال (اپ ڈیٹ شدہ) --- */}
-                    <AdsterraNativeBanner 
-                      adKey={adSettings.homepageInFeedAdKey} 
-                    />
-                  </div>
-                )}
-              </Fragment>
-            ))}
-
+      {/* --- 3. Google Config --- */}
+      <div className="p-4 bg-white rounded-lg shadow-sm border">
+        {/* ✅ English Labels */}
+        <h2 className="text-lg font-semibold mb-3">Google Config</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">AdSense Client ID</label>
+            <input
+              type="text"
+              value={adsenseClientId}
+              onChange={(e) => setAdsenseClientId(e.target.value)}
+              placeholder="ca-pub-xxxxxxxxxxxxxxxx"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+            />
           </div>
-        ) : (
-          <div className="text-center text-gray-400 mt-20">No products found.</div>
+        </div>
+      </div>
+
+      {/* --- 4. Ad Units Control --- */}
+      <div className="space-y-3">
+        {/* ✅ English Labels */}
+        <h2 className="text-lg font-semibold mb-2">Ad Units Control</h2>
+        
+        <ToggleSwitch 
+          label="Master: Enable All Ads"
+          isEnabled={masterAdsEnabled}
+          onToggle={() => setMasterAdsEnabled(!masterAdsEnabled)}
+        />
+        <hr className="border-gray-200"/>
+        
+        <ToggleSwitch 
+          label="Home: Banner Ad"
+          isEnabled={showHomepageBannerAd}
+          onToggle={() => setShowHomepageBannerAd(!showHomepageBannerAd)}
+        />
+        <AdSlotInput label="Ad Key:" value={homepageBannerAdKey} onChange={(e) => setHomepageBannerAdKey(e.target.value)} />
+        
+        
+        {/* --- In-Feed Ads Section --- */}
+        <ToggleSwitch 
+          label="Home: In-Feed Ads"
+          isEnabled={showHomepageInFeedAds}
+          onToggle={() => setShowHomepageInFeedAds(!showHomepageInFeedAds)}
+        />
+        <div className="pl-4 pr-4 pb-3 -mt-2 bg-white rounded-b-lg border-b border-l border-r space-y-2">
+          {homepageInFeedAdKeys.map((key, index) => (
+            <div key={index} className="flex items-center space-x-2">
+              <input 
+                type="text" 
+                value={key} 
+                onChange={(e) => handleInFeedKeyChange(index, e.target.value)} 
+                // ✅ English Placeholder
+                placeholder={`Ad Key #${index + 1}`}
+                className="mt-1 block w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md shadow-sm" 
+              />
+              <button
+                type="button"
+                onClick={() => removeInFeedKey(index)}
+                className="p-1.5 text-red-500 hover:bg-red-100 rounded-full"
+              >
+                <IconClose />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addInFeedKey}
+            className="mt-2 flex items-center space-x-1 px-3 py-1.5 text-sm text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100"
+          >
+            <IconPlus />
+            {/* ✅ English Label */}
+            <span>Add New Key</span>
+          </button>
+        </div>
+        {/* --- End --- */}
+        
+
+        <ToggleSwitch 
+          label="Home: Popup Ad"
+          isEnabled={showHomepagePopupAd}
+          onToggle={() => setShowHomepagePopupAd(!showHomepagePopupAd)}
+        />
+        <AdSlotInput label="Ad Key:" value={homepagePopupAdKey} onChange={(e) => setHomepagePopupAdKey(e.target.value)} />
+
+        <ToggleSwitch 
+          label="Product: Interstitial Ad"
+          isEnabled={showProductInterstitialAd}
+          onToggle={() => setShowProductInterstitialAd(!showProductInterstitialAd)}
+        />
+        <AdSlotInput label="Ad Key:" value={productInterstitialAdKey} onChange={(e) => setProductInterstitialAdKey(e.target.value)} />
+      </div>
+
+      {/* --- Save Button --- */}
+      <div className="pt-4">
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full py-3.5 px-4 border border-transparent rounded-xl shadow-md text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 transition-all"
+        >
+          {/* ✅ English Labels */}
+          {isLoading ? 'Saving Changes...' : 'Save All Settings'}
+        </button>
+        {message && (
+          <div className={`mt-4 p-3 rounded-lg text-center text-sm font-medium ${message.startsWith('Error') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+            {message}
+          </div>
         )}
       </div>
-      
-      {showPopup && (
-        // --- ✅✅✅ پاپ اپ ایڈ کال (اپ ڈیٹ شدہ) ---
-        <PopupAd 
-          adKey={adSettings.homepagePopupAdKey}
-          onClose={() => setShowPopup(false)} 
+
+      {/* --- Withdrawals Modal --- */}
+      {showWithdrawals && (
+        <WithdrawalsModal 
+          requests={initialWithdrawals} 
+          onClose={() => setShowWithdrawals(false)} 
         />
       )}
-      
-      <FloatingWhatsAppButton whatsappNumber={settings.whatsappNumber} />
-    </main>
+
+    </form>
   );
 }
