@@ -17,7 +17,6 @@ async function getAdSettings() {
   return { googleSiteVerification: null, adsenseClientId: null, masterAdsEnabled: false };
 }
 
-// --- ✅ فکس 1: Viewport کو الگ export کریں ---
 export const viewport = {
   width: "device-width",
   initialScale: 1,
@@ -49,7 +48,6 @@ export async function generateMetadata() {
       icon: logoUrl,
       apple: logoUrl,
     },
-    // ❌ یہاں سے viewport ہٹا دیا گیا ہے
   };
 }
 
@@ -59,6 +57,7 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
+        {/* --- گوگل ویریفکیشن اور ایڈسینس --- */}
         {adSettings.googleSiteVerification && (
           <meta name="google-site-verification" content={adSettings.googleSiteVerification} />
         )}
@@ -73,15 +72,20 @@ export default async function RootLayout({ children }) {
             strategy="lazyOnload" 
           />
         )}
+        
+        {/* ✅✅✅ فکس: ایڈز ٹیرا پوپ-اپ اسکرپٹ (Adsterra Pop-up Script) یہاں لگا دیا گیا ہے ✅✅✅ */}
+        <script type='text/javascript' src='//pl28044650.effectivegatecpm.com/b1/4a/fe/b14afe5c615682a7b27ab739f826ed4e.js'></script>
+      
       </head>
       <body className={`${inter.className} bg-gray-900`}>
         <div className="max-w-full mx-auto bg-gray-800 min-h-screen">
           {children}
         </div>
       </body>
-              <script type='text/javascript' src='//pl28044650.effectivegatecpm.com/b1/4a/fe/b14afe5c615682a7b27ab739f826ed4e.js'></script>
-              <script async="async" data-cfasync="false" src="//pl28044693.effectivegatecpm.com/4c0336286f80f3898e1d34f70c813597/invoke.js"></script>
-                <div id="container-4c0336286f80f3898e1d34f70c813597"></div>
+      
+      {/* ❌❌❌ یہاں سے بینر ایڈ اسکرپٹ اور اس کا div ہٹا دیا گیا ہے ❌❌❌ */}
+      {/* (کیونکہ یہ اب HomePageClient.js سے لوڈ ہوگا) */}
+    
     </html>
   );
 }
