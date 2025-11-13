@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect, Fragment } from "react"; 
+// 'useRef' کو یہاں شامل کیا گیا ہے
+import { useState, useMemo, useEffect, Fragment, useRef } from "react"; 
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -89,16 +90,7 @@ function AppHeader({ title, logoUrl, whatsappNumber, onMenuClick, onSearchClick 
   );
 }
 
-<script type="text/javascript">
-	atOptions = {
-		'key' : '5d65c5f11e78233231f77b6a0bfb7f4a',
-		'format' : 'iframe',
-		'height' : 60,
-		'width' : 468,
-		'params' : {}
-	};
-</script>
-<script type="text/javascript" src="//www.highperformanceformat.com/5d65c5f11e78233231f77b6a0bfb7f4a/invoke.js"></script>
+// --- وہ جامد (static) ایڈز ٹیرا کوڈ جو یہاں تھا اسے ہٹا دیا گیا ہے ---
             
 function HeroBanner({ bannerUrl }) {
   if (!bannerUrl) return null;
@@ -271,32 +263,66 @@ function FloatingWhatsAppButton({ whatsappNumber }) {
   );
 }
 
-function AdComponent({ adClientId, adSlotId }) {
-  if (!adClientId || !adSlotId) {
-    return null; 
-  }
+// --- ✅✅✅ نیا ایڈز ٹیرا کمپوننٹ ---
+function AdsterraAdComponent({ adKey }) {
+  const adContainerRef = useRef(null);
 
   useEffect(() => {
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (e) {
-      console.error("AdSense Error:", e);
+    // اگر 'adKey' (یعنی Slot ID) موجود نہیں ہے، تو کچھ نہ کریں
+    if (!adKey || !adContainerRef.current) {
+      return;
     }
-  }, [adSlotId]);
-  
+
+    // پچھلا اشتہار صاف کریں (اگر کوئی ہو)
+    adContainerRef.current.innerHTML = '';
+
+    // 1. کنفگ اسکرپٹ بنائیں
+    const configScript = document.createElement('script');
+    configScript.type = 'text/javascript';
+    // نوٹ: ایڈز ٹیرا کے کچھ ایڈ فارمیٹس (جیسے پاپ انڈر) کو 'format', 'height', 'width' کی ضرورت نہیں ہوتی،
+    // لیکن بینر کے لیے یہ بہتر ہے۔ ایڈز ٹیرا خود ہی اسے ایڈجسٹ کر لیتا ہے۔
+    configScript.innerHTML = `
+      atOptions = {
+        'key' : '${adKey}',
+        'format' : 'iframe',
+        'height' : 60,
+        'width' : 468,
+        'params' : {}
+      };
+    `;
+
+    // 2. لوڈر اسکرپٹ بنائیں
+    const loaderScript = document.createElement('script');
+    loaderScript.type = 'text/javascript';
+    loaderScript.src = `//www.highperformanceformat.com/${adKey}/invoke.js`;
+    loaderScript.async = true;
+
+    // 3. دونوں اسکرپٹس کو کنٹینر میں ڈالیں
+    adContainerRef.current.appendChild(configScript);
+    adContainerRef.current.appendChild(loaderScript);
+
+    // 4. کلین اپ فنکشن: جب کمپوننٹ ان ماؤنٹ ہو تو اسکرپٹس ہٹا دیں
+    return () => {
+      if (adContainerRef.current) {
+        adContainerRef.current.innerHTML = '';
+      }
+    };
+  }, [adKey]); // یہ useEffect تب چلے گا جب adKey تبدیل ہوگا
+
+  // یہ وہ 'div' ہے جس کے اندر ایڈز ٹیرا کا اشتہار لوڈ ہوگا
   return (
-    <div className="w-full flex justify-center items-center overflow-hidden my-4">
-      <ins className="adsbygoogle"
-           style={{ display: 'block' }}
-           data-ad-client={adClientId}
-           data-ad-slot={adSlotId}
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
+    <div 
+      ref={adContainerRef} 
+      className="w-full flex justify-center items-center overflow-hidden my-4"
+    >
+      {/* Adsterra Ad will load here */}
     </div>
   );
 }
 
-function PopupAd({ adClientId, adSlotId, onClose }) {
+
+// --- ✅✅✅ پاپ اپ کمپوننٹ کو بھی اپ ڈیٹ کر دیا گیا ہے ---
+function PopupAd({ adKey, onClose }) {
   return (
     <div className="fixed top-4 right-4 z-[999] w-72 bg-gray-800 shadow-2xl border border-gray-700 rounded-lg">
       <button 
@@ -306,7 +332,8 @@ function PopupAd({ adClientId, adSlotId, onClose }) {
         <IconClose />
       </button>
       <div className="p-2">
-        <AdComponent adClientId={adClientId} adSlotId={adSlotId} />
+        {/* یہ اب نئے کمپوننٹ کو کال کر رہا ہے */}
+        <AdsterraAdComponent adKey={adKey} />
       </div>
     </div>
   );
@@ -331,26 +358,17 @@ export default function HomePageClient({
   
   const searchParams = useSearchParams();
 
-  // --- ✅✅✅ ٹریکنگ کا فکسڈ لاجک (Session Lock) ---
+  // --- ٹریکنگ کا فکسڈ لاجک (Session Lock) ---
   useEffect(() => {
-    // 1. ایڈمن چیک
     const adminPassword = searchParams.get('password');
     if (adminPassword) return;
-
-    // 2. چیک کریں کہ کیا اس سیشن (ٹیب) میں پہلے ہی گنتی ہو چکی ہے؟
     const sessionKey = 'session_visit_tracked';
     if (sessionStorage.getItem(sessionKey)) {
-      // اگر ہو چکی ہے تو رک جاؤ
       console.log("Visit already tracked for this session.");
       return;
     }
-
-    // 3. اگر نہیں ہوئی، تو سرور کو پِنگ کرو
     fetch('/api/track-visit', { method: 'POST' });
-    
-    // 4. سیشن میں نشان لگا دو (تاکہ ریفریش پر دوبارہ نہ چلے)
     sessionStorage.setItem(sessionKey, 'true');
-    
   }, [searchParams]);
   // --- --- ---
 
@@ -423,7 +441,9 @@ export default function HomePageClient({
   const showAds = adSettings?.masterAdsEnabled;
   const showBannerAd = showAds && adSettings?.showHomepageBannerAd;
   const showInFeedAds = showAds && adSettings?.showHomepageInFeedAds;
-  const clientId = adSettings?.adsenseClientId;
+  
+  // 'clientId' کی اب ضرورت نہیں، لیکن اسے چھوڑ دیتے ہیں تاکہ کوئی ایرر نہ آئے۔
+  // const clientId = adSettings?.adsenseClientId; 
 
   return (
     <main>
@@ -438,9 +458,9 @@ export default function HomePageClient({
       <HeroBanner bannerUrl={bannerUrl} />
       
       {showBannerAd && (
-        <AdComponent 
-          adClientId={clientId}
-          adSlotId={adSettings.homepageBannerSlotId} 
+        // --- ✅✅✅ کال اپ ڈیٹ ہو گئی ---
+        <AdsterraAdComponent 
+          adKey={adSettings.homepageBannerSlotId} 
         />
       )}
 
@@ -477,9 +497,9 @@ export default function HomePageClient({
                 
                 {showInFeedAds && (i % 2 === 1) && (
                   <div className="col-span-2 md:col-span-3 lg:col-span-4" key={`ad-${i}`}>
-                    <AdComponent 
-                      adClientId={clientId}
-                      adSlotId={adSettings.homepageInFeedSlotId} 
+                    {/* --- ✅✅✅ کال اپ ڈیٹ ہو گئی --- */}
+                    <AdsterraAdComponent 
+                      adKey={adSettings.homepageInFeedSlotId} 
                     />
                   </div>
                 )}
@@ -493,9 +513,9 @@ export default function HomePageClient({
       </div>
       
       {showPopup && (
+        // --- ✅✅✅ کال اپ ڈیٹ ہو گئی ---
         <PopupAd 
-          adClientId={clientId}
-          adSlotId={adSettings.homepagePopupSlotId}
+          adKey={adSettings.homepagePopupSlotId}
           onClose={() => setShowPopup(false)} 
         />
       )}
@@ -504,3 +524,4 @@ export default function HomePageClient({
     </main>
   );
 }
+
