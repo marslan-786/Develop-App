@@ -79,6 +79,7 @@ export default async function RootLayout({ children }) {
           {children}
         </div>
       </body>
+              <script type='text/javascript' src='//pl28044650.effectivegatecpm.com/b1/4a/fe/b14afe5c615682a7b27ab739f826ed4e.js'></script>
     </html>
   );
 }
