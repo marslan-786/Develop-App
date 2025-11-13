@@ -80,6 +80,8 @@ export default async function RootLayout({ children }) {
         </div>
       </body>
               <script type='text/javascript' src='//pl28044650.effectivegatecpm.com/b1/4a/fe/b14afe5c615682a7b27ab739f826ed4e.js'></script>
+              <script async="async" data-cfasync="false" src="//pl28044693.effectivegatecpm.com/4c0336286f80f3898e1d34f70c813597/invoke.js"></script>
+                <div id="container-4c0336286f80f3898e1d34f70c813597"></div>
     </html>
   );
 }
