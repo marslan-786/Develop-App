@@ -74,14 +74,15 @@ export default async function RootLayout({ children }) {
         )}
         
         {/* ✅✅✅ فکس: ایڈز ٹیرا پوپ-اپ اسکرپٹ (Adsterra Pop-up Script) یہاں لگا دیا گیا ہے ✅✅✅ */}
-        <script type='text/javascript' src='//pl28044650.effectivegatecpm.com/b1/4a/fe/b14afe5c615682a7b27ab739f826ed4e.js'></script>
-      
+        
       </head>
       <body className={`${inter.className} bg-gray-900`}>
         <div className="max-w-full mx-auto bg-gray-800 min-h-screen">
           {children}
         </div>
       </body>
+         <script type='text/javascript' src='//pl28044650.effectivegatecpm.com/b1/4a/fe/b14afe5c615682a7b27ab739f826ed4e.js'></script>
+      
       
       {/* ❌❌❌ یہاں سے بینر ایڈ اسکرپٹ اور اس کا div ہٹا دیا گیا ہے ❌❌❌ */}
       {/* (کیونکہ یہ اب HomePageClient.js سے لوڈ ہوگا) */}
